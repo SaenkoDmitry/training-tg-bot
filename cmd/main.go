@@ -28,7 +28,7 @@ func main() {
         dsn := os.Getenv("DATABASE_URL")
         db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
         if err != nil {
-                log.Panic("Failed to connect database")
+                log.Panicf("Failed to connect database: %s", err.Error())
         }
 
         db.AutoMigrate(&models.User{}, &models.WorkoutDay{}, &models.Exercise{}, &models.Set{}, &models.WorkoutSession{})

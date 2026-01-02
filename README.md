@@ -33,3 +33,6 @@ Uses SQLite database stored in `workout_bot.db`. Auto-migrates on startup.
 
 ## Required Secrets
 - `telegram_token`: Your Telegram Bot API token (get from @BotFather on Telegram)
+
+## PG_DSN for local
+postgresql://postgres:postgres@localhost/training-bot

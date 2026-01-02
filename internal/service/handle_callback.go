@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -86,6 +85,10 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "stats_workout_"), 10, 64)
 		s.showWorkoutStatistics(chatID, workoutID)
 
+	case strings.HasPrefix(data, "stats_"):
+		period := strings.TrimPrefix(data, "stats_")
+		s.showStatistics(chatID, period)
+
 	}
 }
 
@@ -155,7 +158,6 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 
 func (s *serviceImpl) createWorkoutDay(chatID int64, workoutType string) {
 	user := s.usersRepo.GetUserByChatID(chatID)
-	log.Println("user: %v", user)
 
 	workoutDay := models.WorkoutDay{
 		UserID:    user.ID,
@@ -168,6 +170,12 @@ func (s *serviceImpl) createWorkoutDay(chatID int64, workoutType string) {
 		workoutDay.Exercises = templates.GetLegExercises()
 	case "back":
 		workoutDay.Exercises = templates.GetBackExercises()
+	// case "chest":
+	// 	workoutDay.Exercises = getChestExercises()
+	// case "shoulders":
+	// 	workoutDay.Exercises = getShoulderExercises()
+	// case "cardio":
+	// 	workoutDay.Exercises = getCardioExercises()
 	}
 
 	s.workoutsRepo.Create(&workoutDay)
@@ -386,28 +394,12 @@ func (s *serviceImpl) completeExerciseSet(chatID int64, exerciseID int64) {
 
 	exercise, _ = s.exercisesRepo.Get(exerciseID)
 
-	text := fmt.Sprintf("✅ *Подход завершен!*\n\n"+
-		"Упражнение: %s\n"+
-		"Подход: %d/%d\n"+
-		"Повторений: %d\n"+
-		"Вес: %.0f кг\n\n"+
-		"Отдыхайте %d секунд перед следующим подходом.",
-		exercise.Name, exercise.CompletedSets(), len(exercise.Sets),
-		nextSet.Reps, nextSet.Weight, 90)
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("⏱️ Таймер %d секунд", exercise.RestInSeconds),
-				fmt.Sprintf("timer_%d_ex_%d", exercise.RestInSeconds, exerciseID)),
-			tgbotapi.NewInlineKeyboardButtonData("🔙 К упражнению",
-				fmt.Sprintf("continue_workout_%d", exercise.WorkoutDayID)),
-		),
-	)
-
+	text := fmt.Sprintf("✅ *Подход завершен!*\n\n")
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ParseMode = "Markdown"
-	msg.ReplyMarkup = keyboard
 	s.bot.Send(msg)
+
+	s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
 }
 
 func (s *serviceImpl) startRestTimerWithExercise(chatID int64, seconds int, exerciseID int64) {
@@ -440,25 +432,11 @@ func (s *serviceImpl) startRestTimerWithExercise(chatID int64, seconds int, exer
 		)
 		editMsg.ParseMode = "Markdown"
 
-		editMarkup := tgbotapi.NewEditMessageReplyMarkup(
-			chatID,
-			message.MessageID,
-			tgbotapi.NewInlineKeyboardMarkup(
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("✅ Начать подход",
-						fmt.Sprintf("complete_set_ex_%d", exerciseID)),
-				),
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("➕ Повторения",
-						fmt.Sprintf("add_reps_ex_%d", exerciseID)),
-					tgbotapi.NewInlineKeyboardButtonData("⚖️ Вес",
-						fmt.Sprintf("change_weight_ex_%d", exerciseID)),
-				),
-			),
-		)
-
 		s.bot.Send(editMsg)
-		s.bot.Send(editMarkup)
+
+		exercise, _ := s.exercisesRepo.Get(exerciseID)
+
+		s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
 	}()
 }
 
@@ -613,4 +591,39 @@ func formatDuration(d time.Duration) string {
 		return fmt.Sprintf("%dч %dмин", hours, minutes)
 	}
 	return fmt.Sprintf("%dмин %dсек", minutes, seconds)
+}
+
+func (s *serviceImpl) showStatistics(chatID int64, period string) {
+	var statsText string
+	user := s.usersRepo.GetUserByChatID(chatID)
+
+	workouts, _ := s.workoutsRepo.Find(user.ID)
+
+	completedWorkouts := 0
+	sumTime := 0
+	for _, w := range workouts {
+		if !w.Completed {
+			continue
+		}
+		switch period {
+		case "week":
+			if time.Since(w.StartedAt).Hours() > 7*24 {
+				continue
+			}
+		case "month":
+			if time.Since(w.StartedAt).Hours() > 30*24 {
+				continue
+			}
+		default:
+		}
+		completedWorkouts++
+		sumTime += int((w.EndedAt.Sub(*&w.StartedAt)).Minutes())
+	}
+	avgTime := float64(sumTime) / float64(completedWorkouts)
+
+	statsText = fmt.Sprintf("📅 *Статистика за неделю*\n\n✅ Тренировок: %d\n⏱️ Среднее время: %.0f мин", completedWorkouts, avgTime)
+
+	msg := tgbotapi.NewMessage(chatID, statsText)
+	msg.ParseMode = "Markdown"
+	s.bot.Send(msg)
 }

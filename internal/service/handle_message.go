@@ -18,14 +18,11 @@ func (s *serviceImpl) HandleMessage(message *tgbotapi.Message) {
 	case text == "/start" || text == "/menu" || text == "🔙 В меню":
 		s.sendMainMenu(chatID)
 
-	case text == "/new_workout" || text == "➕ Создать тренировку":
+	case text == "/start_workout" || text == "▶️ Начать тренировку":
 		s.showWorkoutTypeMenu(chatID)
 
-	case text == "/start_workout" || text == "▶️ Начать тренировку":
-		s.startActiveWorkout(chatID, user.ID)
-
-	// case text == "/stats" || text == "📊 Статистика":
-	// 	showStatsMenu(chatID, user.ID)
+	case text == "/stats" || text == "📊 Статистика":
+		s.showStatsMenu(chatID, user.ID)
 
 	case text == "📋 Мои тренировки" || text == "/workouts":
 		s.showMyWorkouts(chatID)
@@ -40,15 +37,11 @@ func (s *serviceImpl) sendMainMenu(chatID int64) {
 
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("➕ Создать тренировку"),
 			tgbotapi.NewKeyboardButton("▶️ Начать тренировку"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("📋 Мои тренировки"),
 			tgbotapi.NewKeyboardButton("📊 Статистика"),
-		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("⚙️ Настройки"),
 		),
 	)
 	keyboard.ResizeKeyboard = true
@@ -78,56 +71,6 @@ func (s *serviceImpl) showWorkoutTypeMenu(chatID int64) {
 	)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
-}
-
-func (s *serviceImpl) startActiveWorkout(chatID int64, userID int64) {
-	workouts, _ := s.workoutsRepo.Find(userID)
-
-	if len(workouts) == 0 {
-		msg := tgbotapi.NewMessage(chatID,
-			"У вас нет активных тренировок. Сначала создайте тренировку!")
-		keyboard := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("➕ Создать тренировку", "create_workout"),
-			),
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("📋 Мои тренировки", "my_workouts"),
-			),
-		)
-		msg.ReplyMarkup = keyboard
-		s.bot.Send(msg)
-		return
-	}
-
-	text := "▶️ *Выберите тренировку для начала:*\n\n"
-	for i, workout := range workouts {
-		text += fmt.Sprintf("%d. *%s* (создана %s)\n",
-			i+1, workout.Name, workout.StartedAt.Format("02.01"))
-	}
-
-	var rows [][]tgbotapi.InlineKeyboardButton
-	for i, workout := range workouts {
-		if i%2 == 0 {
-			rows = append(rows, []tgbotapi.InlineKeyboardButton{})
-		}
-		rowIndex := len(rows) - 1
-		buttonText := fmt.Sprintf("%s", workout.Name)
-		rows[rowIndex] = append(rows[rowIndex],
-			tgbotapi.NewInlineKeyboardButtonData(buttonText,
-				fmt.Sprintf("start_active_workout_%d", workout.ID)))
-	}
-
-	rows = append(rows, []tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardButtonData("📋 Все тренировки", "my_workouts"),
-		tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", "back_to_menu"),
-	})
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
-
-	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = keyboard
 	s.bot.Send(msg)
 }
@@ -179,6 +122,23 @@ func (s *serviceImpl) showMyWorkouts(chatID int64) {
 	})
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
+
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = "Markdown"
+	msg.ReplyMarkup = keyboard
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) showStatsMenu(chatID int64, userID int64) {
+	text := "📊 *Статистика тренировок*\n\n Выберите период:"
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("📅 За неделю", "stats_week"),
+			tgbotapi.NewInlineKeyboardButtonData("🗓️ За месяц", "stats_month"),
+			tgbotapi.NewInlineKeyboardButtonData("📈 Общая", "stats_all"),
+		),
+	)
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ParseMode = "Markdown"

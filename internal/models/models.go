@@ -23,13 +23,18 @@ type WorkoutDay struct {
 	Completed bool
 }
 
+var (
+	location, _ = time.LoadLocation("Europe/Moscow")
+)
+
 func (w *WorkoutDay) Status() string {
 	if !w.Completed {
 		return fmt.Sprintf("⏳ *%s* Активна", w.Name)
 	}
 	if w.EndedAt != nil {
-		return fmt.Sprintf("✅ *%s* Завершена в %s", w.Name, w.EndedAt.Format("15:04"))
+		return fmt.Sprintf("✅ *%s* Завершена в %s", w.Name, w.EndedAt.In(location).Format("15:04"))
 	}
+
 	return fmt.Sprintf("✅ *%s* Завершена", w.Name)
 }
 
