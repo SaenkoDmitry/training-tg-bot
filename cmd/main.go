@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -32,7 +33,8 @@ func main() {
 	var config config.Config
 	json.NewDecoder(configFile).Decode(&config)
 
-	bot, err := tgbotapi.NewBotAPI(config.TelegramToken)
+	fmt.Println("telegram_token:", os.Getenv("telegram_token"))
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("telegram_token"))
 	if err != nil {
 		log.Panic(err)
 	}
