@@ -27,3 +27,7 @@ args = "./training-tg-bot"
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[deployment]
+run = ["sh", "-c", "/nix/store/xrzqlk92h7z5mz9mlc4a9dyy91n5b68i-go-1.24.4/bin/go run $REPL_HOME"]
+deploymentTarget = "cloudrun"

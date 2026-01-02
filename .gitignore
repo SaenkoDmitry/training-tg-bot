@@ -1,4 +1,5 @@
 config.json
+cmd/workout_bot.db
 
 # Binaries
 *.exe

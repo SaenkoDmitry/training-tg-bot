@@ -222,7 +222,11 @@ func (s *serviceImpl) showWorkoutDetails(chatID int64, workoutID int64) {
 	} else {
 		keyboard = tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("🗑️ Удалить",
+					fmt.Sprintf("confirm_delete_%d", workoutID)),
 				tgbotapi.NewInlineKeyboardButtonData("Статистика", fmt.Sprintf("stats_workout_%d", workoutID)),
+			),
+			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("🔙 В меню", "back_to_menu"),
 			),
 		)

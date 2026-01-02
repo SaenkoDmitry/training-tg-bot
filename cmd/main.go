@@ -1,48 +1,33 @@
 package main
 
 import (
-        "encoding/json"
-        "fmt"
-        "log"
-        "os"
+	"fmt"
+	"log"
+	"os"
 
-        "github.com/SaenkoDmitry/training-tg-bot/internal/config"
-        "github.com/SaenkoDmitry/training-tg-bot/internal/models"
-        "github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercises"
-        "github.com/SaenkoDmitry/training-tg-bot/internal/repository/sessions"
-        "github.com/SaenkoDmitry/training-tg-bot/internal/repository/sets"
-        "github.com/SaenkoDmitry/training-tg-bot/internal/repository/users"
-        "github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
-        "github.com/SaenkoDmitry/training-tg-bot/internal/service"
-        tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-        "gorm.io/driver/sqlite"
-        "gorm.io/gorm"
-)
-
-var (
-        userStates = make(map[int64]string)
+	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercises"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/sessions"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/sets"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/users"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func main() {
-        configFile, err := os.Open("config.json")
-        if err != nil {
-                log.Fatal("Config file not found")
-        }
-        defer configFile.Close()
+	fmt.Println("telegram_token:", os.Getenv("telegram_token"))
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("telegram_token"))
+	if err != nil {
+		log.Panic(err)
+	}
 
-        var config config.Config
-        json.NewDecoder(configFile).Decode(&config)
-
-        fmt.Println("telegram_token:", os.Getenv("telegram_token"))
-        bot, err := tgbotapi.NewBotAPI(os.Getenv("telegram_token"))
-        if err != nil {
-                log.Panic(err)
-        }
-
-        db, err := gorm.Open(sqlite.Open("workout_bot.db"), &gorm.Config{})
-        if err != nil {
-                log.Panic("Failed to connect database")
-        }
+	db, err := gorm.Open(sqlite.Open("workout_bot.db"), &gorm.Config{})
+	if err != nil {
+		log.Panic("Failed to connect database")
+	}
 
         db.AutoMigrate(&models.User{}, &models.WorkoutDay{}, &models.Exercise{}, &models.Set{}, &models.WorkoutSession{})
 
