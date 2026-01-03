@@ -33,7 +33,7 @@ func main() {
 
         db.AutoMigrate(&models.User{}, &models.WorkoutDay{}, &models.Exercise{}, &models.Set{}, &models.WorkoutSession{})
 
-        log.Printf("Authorized on account %s (Version: 1.1 - Postgres)", bot.Self.UserName)
+        log.Printf("Authorized on account %s", bot.Self.UserName)
 
         usersRepo := users.NewRepo(db)
         workoutsRepo := workouts.NewRepo(db)
