@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -28,8 +30,8 @@ func (s *serviceImpl) HandleMessage(message *tgbotapi.Message) {
 	case text == "📋 Мои тренировки" || text == "/workouts":
 		s.showMyWorkouts(chatID)
 
-		// default:
-		// 	handleState(chatID, user.ID, text)
+	default:
+		s.handleState(chatID, text)
 	}
 }
 
@@ -145,4 +147,74 @@ func (s *serviceImpl) showStatsMenu(chatID int64, userID int64) {
 	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = keyboard
 	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) handleState(chatID int64, text string) {
+	state, exists := s.userStates[chatID]
+	if !exists {
+		return
+	}
+
+	switch {
+	case strings.HasPrefix(state, "awaiting_reps_"):
+		parts := strings.Split(state, "_")
+		if len(parts) >= 3 {
+			exerciseID, _ := strconv.ParseInt(parts[2], 10, 64)
+
+			reps, err := strconv.ParseInt(text, 10, 64)
+			if err != nil {
+				msg := tgbotapi.NewMessage(chatID, "❌ Неверный формат числа повторений. Введите целое число (например: 42)")
+				s.bot.Send(msg)
+				return
+			}
+
+			exercise, _ := s.exercisesRepo.Get(exerciseID)
+
+			nextSet := exercise.NextSet()
+			if nextSet.ID != 0 {
+				nextSet.Reps = int(reps)
+				s.setsRepo.Save(&nextSet)
+
+				msg := tgbotapi.NewMessage(chatID, fmt.Sprintf(
+					"✅ Количество повторений обновлено: %d раз(а) для подхода №%d",
+					reps, nextSet.Index,
+				))
+				s.bot.Send(msg)
+			}
+
+			s.userStates[chatID] = ""
+
+			s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
+		}
+	case strings.HasPrefix(state, "awaiting_weight_"):
+		parts := strings.Split(state, "_")
+		if len(parts) >= 3 {
+			exerciseID, _ := strconv.ParseInt(parts[2], 10, 64)
+
+			weight, err := strconv.ParseFloat(text, 32)
+			if err != nil {
+				msg := tgbotapi.NewMessage(chatID, "❌ Неверный формат веса. Введите число (например: 42.5)")
+				s.bot.Send(msg)
+				return
+			}
+
+			exercise, _ := s.exercisesRepo.Get(exerciseID)
+
+			nextSet := exercise.NextSet()
+			if nextSet.ID != 0 {
+				nextSet.Weight = float32(weight)
+				s.setsRepo.Save(&nextSet)
+
+				msg := tgbotapi.NewMessage(chatID, fmt.Sprintf(
+					"✅ Вес обновлен: %.1f кг для подхода №%d",
+					weight, nextSet.Index,
+				))
+				s.bot.Send(msg)
+			}
+
+			s.userStates[chatID] = ""
+
+			s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
+		}
+	}
 }

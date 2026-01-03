@@ -95,6 +95,13 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 		period := strings.TrimPrefix(data, "stats_")
 		s.showStatistics(chatID, period)
 
+	case strings.HasPrefix(data, "add_reps_ex_"):
+		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "add_reps_ex_"), 10, 64)
+		s.askForNewReps(chatID, exerciseID)
+
+	case strings.HasPrefix(data, "change_weight_ex_"):
+		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "change_weight_ex_"), 10, 64)
+		s.askForNewWeight(chatID, exerciseID)
 	}
 }
 
@@ -102,12 +109,19 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 	workoutDay, _ := s.workoutsRepo.Get(workoutID)
 
 	var text strings.Builder
-	text.WriteString(fmt.Sprintf("📊 *Прогресс тренировки: %s*\n\n", workoutDay.Name))
+	text.WriteString(fmt.Sprintf("📊 *Прогресс тренировки: %s*\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
 
 	totalExercises := len(workoutDay.Exercises)
-	completedExercises := 0
 	totalSets := 0
+	completedExercises := 0
 	completedSets := 0
+	for _, exercise := range workoutDay.Exercises {
+		totalSets += len(exercise.Sets)
+		if exercise.CompletedSets() == len(exercise.Sets) {
+			completedExercises++
+		}
+		completedSets += exercise.CompletedSets()
+	}
 
 	text.WriteString(workoutDay.String())
 
@@ -121,14 +135,14 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 	text.WriteString(fmt.Sprintf("• Подходов: %d/%d\n", completedSets, totalSets))
 	text.WriteString(fmt.Sprintf("• Прогресс: %d%%\n", progressPercent))
 
-	barLength := 10
+	barLength := 15
 	filled := (progressPercent * barLength) / 100
 	progressBar := ""
 	for i := 0; i < barLength; i++ {
 		if i < filled {
-			progressBar += "█"
+			progressBar += "🏋️‍♂️" // █
 		} else {
-			progressBar += "░"
+			progressBar += "░" // ░
 		}
 	}
 	text.WriteString(fmt.Sprintf("• [%s]\n\n", progressBar))
@@ -147,12 +161,6 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("▶️ Продолжить",
 				fmt.Sprintf("continue_workout_%d", workoutID)),
-			// tgbotapi.NewInlineKeyboardButtonData("📊 Детали",
-			// 	fmt.Sprintf("detailed_stats_%d", workoutID)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔙 К тренировке",
-				fmt.Sprintf("view_workout_%d", workoutID)),
 		),
 	)
 
@@ -261,7 +269,7 @@ func (s *serviceImpl) confirmDeleteWorkout(chatID int64, workoutID int64) {
 	text := fmt.Sprintf("🗑️ *Удаление тренировки*\n\n"+
 		"Вы уверены, что хотите удалить тренировку:\n"+
 		"*%s*?\n\n"+
-		"❌ Это действие нельзя отменить!", workoutDay.Name)
+		"❌ Это действие нельзя отменить!", utils.GetWorkoutNameByID(workoutDay.Name))
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -344,9 +352,9 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 
 	var text strings.Builder
 
-	text.WriteString(fmt.Sprintf("🏋️‍♂️ *Тренировка: %s*\n\n", workoutDay.Name))
+	text.WriteString(fmt.Sprintf("🏋️‍♂️ *Тренировка: %s*\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
 	text.WriteString(fmt.Sprintf("*Упражнение %d/%d:* %s\n\n", exerciseIndex+1, len(workoutDay.Exercises), exercise.Name))
-	text.WriteString(fmt.Sprintf("Выполнено: %d из %d подходов\n\n", exercise.CompletedSets(), len(exercise.Sets)))
+
 	for _, set := range exercise.Sets {
 		text.WriteString(fmt.Sprintf("%d повторов по %.0f кг: ", set.Reps, set.Weight))
 		if set.Completed {
@@ -370,12 +378,12 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 			tgbotapi.NewInlineKeyboardButtonData("⏸️ Таймер отдыха",
 				fmt.Sprintf("start_timer_%d_ex_%d", exercise.RestInSeconds, exercise.ID)),
 		),
-		// tgbotapi.NewInlineKeyboardRow(
-		// 	tgbotapi.NewInlineKeyboardButtonData("➕ Больше повторений",
-		// 		fmt.Sprintf("add_reps_ex_%d", exercise.ID)),
-		// 	tgbotapi.NewInlineKeyboardButtonData("⚖️ Изменить вес",
-		// 		fmt.Sprintf("change_weight_ex_%d", exercise.ID)),
-		// ),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("➕➖ Повторения",
+				fmt.Sprintf("add_reps_ex_%d", exercise.ID)),
+			tgbotapi.NewInlineKeyboardButtonData("⚖️ Изменить вес",
+				fmt.Sprintf("change_weight_ex_%d", exercise.ID)),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("⬅️ Пред. упр-е",
 				fmt.Sprintf("prev_exercise_%d", workoutID)),
@@ -399,7 +407,7 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 func (s *serviceImpl) completeExerciseSet(chatID int64, exerciseID int64) {
 	exercise, _ := s.exercisesRepo.Get(exerciseID)
 
-	nextSet := exercise.Next()
+	nextSet := exercise.NextSet()
 
 	if nextSet.ID != 0 {
 		nextSet.Completed = true
@@ -526,7 +534,7 @@ func (s *serviceImpl) confirmFinishWorkout(chatID int64, workoutDayID int64) {
 		"Вы уверены, что хотите завершить тренировку:\n"+
 		"*%s*?\n\n"+
 		"После завершения вы сможете просмотреть статистику, "+
-		"но не сможете добавлять новые подходы.", workoutDay.Name)
+		"но не сможете добавлять новые подходы.", utils.GetWorkoutNameByID(workoutDay.Name))
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -645,5 +653,17 @@ func (s *serviceImpl) showStatistics(chatID int64, period string) {
 
 	msg := tgbotapi.NewMessage(chatID, statsText)
 	msg.ParseMode = "Markdown"
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) askForNewReps(chatID int64, exerciseID int64) {
+	s.userStates[chatID] = fmt.Sprintf("awaiting_reps_%d", exerciseID)
+	msg := tgbotapi.NewMessage(chatID, "⚖️ Введите новое число повторений:")
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) askForNewWeight(chatID int64, exerciseID int64) {
+	s.userStates[chatID] = fmt.Sprintf("awaiting_weight_%d", exerciseID)
+	msg := tgbotapi.NewMessage(chatID, "⚖️ Введите новый вес (в кг):")
 	s.bot.Send(msg)
 }

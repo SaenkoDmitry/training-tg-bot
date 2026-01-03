@@ -15,12 +15,15 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	bot           *tgbotapi.BotAPI
+	bot *tgbotapi.BotAPI
+
 	usersRepo     users.Repo
 	workoutsRepo  workouts.Repo
 	exercisesRepo exercises.Repo
 	setsRepo      sets.Repo
 	sessionsRepo  sessions.Repo
+
+	userStates map[int64]string
 }
 
 func NewService(
@@ -38,5 +41,6 @@ func NewService(
 		exercisesRepo: exercisesRepo,
 		setsRepo:      setsRepo,
 		sessionsRepo:  sessionsRepo,
+		userStates:    make(map[int64]string),
 	}
 }

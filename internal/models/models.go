@@ -39,13 +39,15 @@ func (w *WorkoutDay) Status() string {
 func (w *WorkoutDay) String() string {
 	var text strings.Builder
 
-	text.WriteString(fmt.Sprintf("%s \n", utils.GetWorkoutNameByID(w.Name)))
-	text.WriteString(fmt.Sprintf("Статус: %s\n", w.Status()))
-	text.WriteString(fmt.Sprintf("Дата: %s\n\n", w.StartedAt.Add(3*time.Hour).Format("02.01.2006")))
+	text.WriteString(fmt.Sprintf("*Тренировка:* %s \n", utils.GetWorkoutNameByID(w.Name)))
+	text.WriteString(fmt.Sprintf("*Статус:* %s\n", w.Status()))
+	text.WriteString(fmt.Sprintf("*Дата:* %s\n\n", w.StartedAt.Add(3*time.Hour).Format("02.01.2006")))
 	text.WriteString("*Упражнения:*\n")
 
 	for i, exercise := range w.Exercises {
-		text.WriteString(fmt.Sprintf("%s %d. %s: %d/%d подходов\n\n", exercise.Status(), i+1, exercise.Name, exercise.CompletedSets(), len(exercise.Sets)))
+		text.WriteString(fmt.Sprintf("%s %d. %s: \n", exercise.Status(), i+1, exercise.Name))
+		lastSet := exercise.Sets[len(exercise.Sets)-1]
+		text.WriteString(fmt.Sprintf("Рабочий вес: %d \\* %.0f кг \n\n", lastSet.Reps, lastSet.Weight))
 	}
 
 	return text.String()
@@ -83,7 +85,7 @@ func (e *Exercise) CompletedSets() int {
 	return completedSets
 }
 
-func (e *Exercise) Next() Set {
+func (e *Exercise) NextSet() Set {
 	for _, set := range e.Sets {
 		if !set.Completed {
 			return set
@@ -99,6 +101,7 @@ type Set struct {
 	Weight      float32
 	Completed   bool
 	CompletedAt *time.Time
+	Index       int
 }
 
 type WorkoutSession struct {

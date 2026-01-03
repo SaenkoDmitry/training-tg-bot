@@ -1,6 +1,8 @@
 package workouts
 
 import (
+	"sort"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"gorm.io/gorm"
 )
@@ -31,6 +33,11 @@ func (u *repoImpl) Create(workoutDay *models.WorkoutDay) error {
 func (u *repoImpl) Get(workoutID int64) (models.WorkoutDay, error) {
 	var workoutDay models.WorkoutDay
 	u.db.Preload("Exercises.Sets").First(&workoutDay, workoutID)
+	for _, exercise := range workoutDay.Exercises {
+		sort.Slice(exercise.Sets, func(i, j int) bool {
+			return exercise.Sets[i].Index < exercise.Sets[j].Index
+		})
+	}
 	return workoutDay, nil
 }
 
