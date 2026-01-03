@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 
+	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -58,10 +59,10 @@ func (s *serviceImpl) showWorkoutTypeMenu(chatID int64) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("🦵 Ноги", "create_workout_legs"),
-			tgbotapi.NewInlineKeyboardButtonData("🏋️‍♂️ Спина", "create_workout_back"),
+			tgbotapi.NewInlineKeyboardButtonData("🏋️‍♂️ Спина & 💪 Руки", "create_workout_back_and_arms"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⚡️ Грудь&Плечи", "create_workout_chest_and_shoulders"),
+			tgbotapi.NewInlineKeyboardButtonData("🫀 Грудь & 🌀 Плечи", "create_workout_chest_and_shoulders"),
 		),
 		// tgbotapi.NewInlineKeyboardRow(
 		//  tgbotapi.NewInlineKeyboardButtonData("💪 Руки", "create_workout_arms"),
@@ -100,7 +101,7 @@ func (s *serviceImpl) showMyWorkouts(chatID int64) {
 		}
 		date := workout.StartedAt.Format("02.01.2006")
 		text += fmt.Sprintf("%d. *%s* - %s\n   📅 %s\n\n",
-			i+1, workout.Name, status, date)
+			i+1, utils.GetWorkoutNameByID(workout.Name), status, date)
 	}
 
 	text += "Выберите тренировку для просмотра:"
@@ -111,7 +112,7 @@ func (s *serviceImpl) showMyWorkouts(chatID int64) {
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{})
 		}
 		rowIndex := len(rows) - 1
-		buttonText := fmt.Sprintf("%s %d", workout.Name, i+1)
+		buttonText := fmt.Sprintf("%s %d", utils.GetWorkoutNameByID(workout.Name), i+1)
 		rows[rowIndex] = append(rows[rowIndex],
 			tgbotapi.NewInlineKeyboardButtonData(buttonText,
 				fmt.Sprintf("view_workout_%d", workout.ID)))

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 )
 
 type User struct {
@@ -25,18 +27,19 @@ type WorkoutDay struct {
 
 func (w *WorkoutDay) Status() string {
 	if !w.Completed {
-		return fmt.Sprintf("⏳ *%s* Активна", w.Name)
+		return fmt.Sprintf("⏳ Активна")
 	}
 	if w.EndedAt != nil {
-		return fmt.Sprintf("✅ *%s* Завершена в %s", w.Name, w.EndedAt.Add(3*time.Hour).Format("15:04"))
+		return fmt.Sprintf("✅ Завершена в %s", w.EndedAt.Add(3*time.Hour).Format("15:04"))
 	}
 
-	return fmt.Sprintf("✅ *%s* Завершена", w.Name)
+	return fmt.Sprintf("✅ Завершена")
 }
 
 func (w *WorkoutDay) String() string {
 	var text strings.Builder
 
+	text.WriteString(fmt.Sprintf("%s \n", utils.GetWorkoutNameByID(w.Name)))
 	text.WriteString(fmt.Sprintf("Статус: %s\n", w.Status()))
 	text.WriteString(fmt.Sprintf("Дата: %s\n\n", w.StartedAt.Add(3*time.Hour).Format("02.01.2006")))
 	text.WriteString("*Упражнения:*\n")
