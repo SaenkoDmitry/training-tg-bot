@@ -203,7 +203,7 @@ func (s *serviceImpl) showCreatedWorkout(chatID int64, workoutID int64) {
 	workoutDay, _ := s.workoutsRepo.Get(workoutID)
 
 	var exercisesText strings.Builder
-	exercisesText.WriteString(fmt.Sprintf("✅ *Тренировка создана: %s*\n\n", workoutDay.Name))
+	exercisesText.WriteString(fmt.Sprintf("✅ *Тренировка создана: %s*\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
 	exercisesText.WriteString(workoutDay.String())
 	exercisesText.WriteString("\n Выберите действие:")
 
