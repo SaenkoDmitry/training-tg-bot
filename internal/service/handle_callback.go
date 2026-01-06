@@ -694,13 +694,13 @@ func formatDuration(d time.Duration) string {
 }
 
 func (s *serviceImpl) showStatistics(chatID int64, period string) {
-	var statsText string
 	user := s.usersRepo.GetUserByChatID(chatID)
 
 	workouts, _ := s.workoutsRepo.Find(user.ID)
 
 	completedWorkouts := 0
 	sumTime := 0
+	cardioTime := 0
 	for _, w := range workouts {
 		if !w.Completed {
 			continue
@@ -717,13 +717,32 @@ func (s *serviceImpl) showStatistics(chatID int64, period string) {
 		default:
 		}
 		completedWorkouts++
-		sumTime += int((w.EndedAt.Sub(*&w.StartedAt)).Minutes())
+
+		// not cardio
+		if w.Name != constants.CardioID {
+			fmt.Println("not cardio count exercises:", len(w.Exercises))
+			sumTime += int((w.EndedAt.Sub(*&w.StartedAt)).Minutes())
+		} else {
+			// cardio
+			fmt.Println("cardio count exercises:", len(w.Exercises))
+			for _, e := range w.Exercises {
+				if len(e.Sets) == 0 {
+					continue
+				}
+				cardioTime += e.Sets[0].GetRealMinutes()
+				fmt.Println("cardio:Time:", e.Sets[0].GetRealMinutes())
+			}
+		}
 	}
 	avgTime := float64(sumTime) / float64(completedWorkouts)
 
-	statsText = fmt.Sprintf("📅 *Статистика за неделю*\n\n✅ Тренировок: %d\n⏱️ Среднее время: %.0f мин", completedWorkouts, avgTime)
+	var statsText strings.Builder
+	statsText.WriteString("📅 *Статистика за неделю*\n\n")
+	statsText.WriteString(fmt.Sprintf("✅ Силовых тренировок: %d\n", completedWorkouts))
+	statsText.WriteString(fmt.Sprintf("⏱️ Среднее время тренировки: %.0f мин\n", avgTime))
+	statsText.WriteString(fmt.Sprintf("🫀 Общее время кардио: %d мин\n", cardioTime))
 
-	msg := tgbotapi.NewMessage(chatID, statsText)
+	msg := tgbotapi.NewMessage(chatID, statsText.String())
 	msg.ParseMode = "Markdown"
 	s.bot.Send(msg)
 }

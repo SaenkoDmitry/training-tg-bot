@@ -46,6 +46,7 @@ func (u *repoImpl) Find(userID int64) ([]models.WorkoutDay, error) {
 	var workouts []models.WorkoutDay
 	u.db.Where("user_id = ?", userID).
 		Order("started_at DESC").
+		Preload("Exercises.Sets").
 		Find(&workouts)
 	return workouts, nil
 }
