@@ -75,7 +75,7 @@ func (e *ExerciseObj) GetHint() string {
 }
 
 func WrapYandexLink(url string) string {
-	return fmt.Sprintf("<a href=\"%s\">Видео</a>", url)
+	return fmt.Sprintf("\n<a href=\"%s\"><b>⚠️Техника выполнения:</b></a>", url)
 }
 
 var AllExercises = map[string]*ExerciseObj{

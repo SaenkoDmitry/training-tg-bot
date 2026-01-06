@@ -114,7 +114,7 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 	workoutDay, _ := s.workoutsRepo.Get(workoutID)
 
 	var text strings.Builder
-	text.WriteString(fmt.Sprintf("📊 *Прогресс тренировки: %s*\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
+	text.WriteString(fmt.Sprintf("📊 *Прогресс: %s*\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
 
 	totalExercises := len(workoutDay.Exercises)
 	totalSets := 0
@@ -386,7 +386,7 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 		return
 	}
 
-	text.WriteString(fmt.Sprintf("<b>Тренировка: %s</b>\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
+	text.WriteString(fmt.Sprintf("<b>%s</b>\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
 	text.WriteString(fmt.Sprintf("<b>Упражнение %d/%d:</b> %s\n\n", exerciseIndex+1, len(workoutDay.Exercises), exerciseObj.GetName()))
 	if exerciseObj.GetAccent() != "" {
 		text.WriteString(fmt.Sprintf("<b>Акцент:</b> %s\n\n", exerciseObj.GetAccent()))
@@ -407,17 +407,14 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 		text.WriteString("\n")
 	}
 
-	if exerciseObj.GetHint() != "" {
-		text.WriteString("\n <b>⚠️Техника выполнения:</b> ")
-		text.WriteString(fmt.Sprintf("%s", exerciseObj.GetHint()))
+	if hint := exerciseObj.GetHint(); hint != "" {
+		text.WriteString(hint)
 	}
-
-	text.WriteString("\n\n <b>Что делаем?</b>")
 
 	changeSettingsButtons := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("➕➖ Повторения",
 			fmt.Sprintf("change_reps_ex_%d", exercise.ID)),
-		tgbotapi.NewInlineKeyboardButtonData("⚖️ Изменить вес",
+		tgbotapi.NewInlineKeyboardButtonData("⚖️ Вес",
 			fmt.Sprintf("change_weight_ex_%d", exercise.ID)),
 	)
 	if len(exercise.Sets) > 0 && exercise.Sets[0].Minutes > 0 {
@@ -431,14 +428,16 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("✅ Завершить подход",
 				fmt.Sprintf("complete_set_ex_%d", exercise.ID)),
-			tgbotapi.NewInlineKeyboardButtonData("⏸️ Таймер отдыха",
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⏸️ Таймер",
 				fmt.Sprintf("start_timer_%d_ex_%d", exercise.RestInSeconds, exercise.ID)),
 		),
 		changeSettingsButtons,
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️ Пред. упр-е",
+			tgbotapi.NewInlineKeyboardButtonData("⬅️ Назад",
 				fmt.Sprintf("prev_exercise_%d", workoutID)),
-			tgbotapi.NewInlineKeyboardButtonData("➡️ След. упр-е",
+			tgbotapi.NewInlineKeyboardButtonData("➡️ Вперед",
 				fmt.Sprintf("next_exercise_%d", workoutID)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -625,8 +624,7 @@ func (s *serviceImpl) showWorkoutStatistics(chatID int64, workoutID int64) {
 	text.WriteString(fmt.Sprintf("📊 *Статистика: %s*\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
 
 	if workoutDay.EndedAt != nil {
-		duration := workoutDay.EndedAt.Sub(workoutDay.StartedAt)
-		text.WriteString(fmt.Sprintf("⏱️ *Время:* %s\n", formatDuration(duration)))
+		text.WriteString(fmt.Sprintf("⏱️ *Время:* %s\n", utils.BetweenTimes(workoutDay.StartedAt, workoutDay.EndedAt)))
 	}
 
 	text.WriteString(fmt.Sprintf("📅 *Дата:* %s\n\n", workoutDay.StartedAt.Add(3*time.Hour).Format("02.01.2006 15:04")))
@@ -682,24 +680,13 @@ func (s *serviceImpl) showWorkoutStatistics(chatID int64, workoutID int64) {
 	s.bot.Send(msg)
 }
 
-func formatDuration(d time.Duration) string {
-	hours := int(d.Hours())
-	minutes := int(d.Minutes()) % 60
-	seconds := int(d.Seconds()) % 60
-
-	if hours > 0 {
-		return fmt.Sprintf("%dч %dмин", hours, minutes)
-	}
-	return fmt.Sprintf("%dмин %dсек", minutes, seconds)
-}
-
 func (s *serviceImpl) showStatistics(chatID int64, period string) {
 	user := s.usersRepo.GetUserByChatID(chatID)
 
 	workouts, _ := s.workoutsRepo.Find(user.ID)
 
-	completedWorkouts := 0
-	sumTime := 0
+	completedStrengthWorkouts := 0
+	sumStrengthTime := time.Duration(0)
 	cardioTime := 0
 	for _, w := range workouts {
 		if !w.Completed {
@@ -716,12 +703,12 @@ func (s *serviceImpl) showStatistics(chatID int64, period string) {
 			}
 		default:
 		}
-		completedWorkouts++
 
 		// not cardio
 		if w.Name != constants.CardioID {
 			fmt.Println("not cardio count exercises:", len(w.Exercises))
-			sumTime += int((w.EndedAt.Sub(*&w.StartedAt)).Minutes())
+			completedStrengthWorkouts++
+			sumStrengthTime += w.EndedAt.Sub(*&w.StartedAt)
 		} else {
 			// cardio
 			fmt.Println("cardio count exercises:", len(w.Exercises))
@@ -729,17 +716,21 @@ func (s *serviceImpl) showStatistics(chatID int64, period string) {
 				if len(e.Sets) == 0 {
 					continue
 				}
-				cardioTime += e.Sets[0].GetRealMinutes()
-				fmt.Println("cardio:Time:", e.Sets[0].GetRealMinutes())
+				for _, s := range e.Sets {
+					if !s.Completed {
+						continue
+					}
+					cardioTime += s.GetRealMinutes()
+				}
 			}
 		}
 	}
-	avgTime := float64(sumTime) / float64(completedWorkouts)
+	avgTime := sumStrengthTime / time.Duration(completedStrengthWorkouts)
 
 	var statsText strings.Builder
 	statsText.WriteString("📅 *Статистика за неделю*\n\n")
-	statsText.WriteString(fmt.Sprintf("✅ Силовых тренировок: %d\n", completedWorkouts))
-	statsText.WriteString(fmt.Sprintf("⏱️ Среднее время тренировки: %.0f мин\n", avgTime))
+	statsText.WriteString(fmt.Sprintf("✅ Силовых тренировок: %d\n", completedStrengthWorkouts))
+	statsText.WriteString(fmt.Sprintf("⏱️ Среднее время сил. тренировки: %s\n", utils.FormatDuration(avgTime)))
 	statsText.WriteString(fmt.Sprintf("🫀 Общее время кардио: %d мин\n", cardioTime))
 
 	msg := tgbotapi.NewMessage(chatID, statsText.String())

@@ -68,11 +68,6 @@ func (s *serviceImpl) showWorkoutTypeMenu(chatID int64) {
 			tgbotapi.NewInlineKeyboardButtonData(constants.ChestAndTricepsName, "create_workout_chest_and_triceps"),
 			tgbotapi.NewInlineKeyboardButtonData(constants.CardioName, "create_workout_cardio"),
 		),
-		// tgbotapi.NewInlineKeyboardRow(
-		//  tgbotapi.NewInlineKeyboardButtonData("💪 Руки", "create_workout_arms"),
-		// 	tgbotapi.NewInlineKeyboardButtonData("🌀 Плечи", "create_workout_shoulders"),
-		// 	tgbotapi.NewInlineKeyboardButtonData("🫀 Кардио", "create_workout_cardio"),
-		// ),
 	)
 
 	msg := tgbotapi.NewMessage(chatID, text)
@@ -99,13 +94,20 @@ func (s *serviceImpl) showMyWorkouts(chatID int64) {
 
 	text := "📋 *Ваши тренировки:*\n\n"
 	for i, workout := range workouts {
-		status := "🟡 Активна"
+		status := "🟡"
 		if workout.Completed {
-			status = "✅ Завершена"
+			status = "✅"
+			if workout.EndedAt != nil {
+				status += fmt.Sprintf(" ~ %s",
+					utils.BetweenTimes(workout.StartedAt, workout.EndedAt),
+				)
+			}
 		}
-		date := workout.StartedAt.Format("02.01.2006")
-		text += fmt.Sprintf("%d. *%s* - %s\n   📅 %s\n\n",
-			i+1, utils.GetWorkoutNameByID(workout.Name), status, date)
+		date := workout.StartedAt.Format("02.01.2006 15:04")
+
+		formattedName := utils.GetWorkoutNameByID(workout.Name)
+		text += fmt.Sprintf("%d. *%s* %s\n   📅 %s\n\n",
+			i+1, formattedName, status, date)
 	}
 
 	text += "Выберите тренировку для просмотра:"

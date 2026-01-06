@@ -28,7 +28,7 @@ type WorkoutDay struct {
 
 func (w *WorkoutDay) Status() string {
 	if !w.Completed {
-		return fmt.Sprintf("⏳ Активна")
+		return fmt.Sprintf("🟡 Активна")
 	}
 	if w.EndedAt != nil {
 		return fmt.Sprintf("✅ Завершена в %s", w.EndedAt.Add(3*time.Hour).Format("15:04"))
@@ -40,7 +40,7 @@ func (w *WorkoutDay) Status() string {
 func (w *WorkoutDay) String() string {
 	var text strings.Builder
 
-	text.WriteString(fmt.Sprintf("*Тренировка:* %s \n", utils.GetWorkoutNameByID(w.Name)))
+	text.WriteString(fmt.Sprintf("*Тип:* %s \n", utils.GetWorkoutNameByID(w.Name)))
 	text.WriteString(fmt.Sprintf("*Статус:* %s\n", w.Status()))
 	text.WriteString(fmt.Sprintf("*Дата:* 📅 %s\n\n", w.StartedAt.Add(3*time.Hour).Format("02.01.2006")))
 	text.WriteString("*Упражнения:*\n")
