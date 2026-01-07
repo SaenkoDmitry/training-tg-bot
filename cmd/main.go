@@ -53,7 +53,7 @@ func main() {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "OK")
 		})
-		if err := http.ListenAndServe("0.0.0.0:5000", nil); err != nil {
+		if err := http.ListenAndServe(":5000", nil); err != nil {
 			log.Printf("Health check server failed: %s", err)
 		}
 	}()
