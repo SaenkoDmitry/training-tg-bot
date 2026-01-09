@@ -10,7 +10,8 @@ import (
 type Repo interface {
 	Get(exerciseID int64) (models.Exercise, error)
 	FindAllByWorkoutID(workoutDayID int64) ([]models.Exercise, error)
-	Delete(workoutID int64) error
+	DeleteByWorkout(workoutID int64) error
+	Delete(exerciseID int64) error
 }
 
 type repoImpl struct {
@@ -31,9 +32,19 @@ func (u *repoImpl) Get(exerciseID int64) (models.Exercise, error) {
 	return exercise, nil
 }
 
-func (u *repoImpl) Delete(workoutID int64) error {
+func (u *repoImpl) DeleteByWorkout(workoutID int64) error {
 	u.db.Where("workout_day_id = ?", workoutID).Delete(&models.Exercise{})
 	return nil
+}
+
+func (u *repoImpl) Delete(exerciseID int64) error {
+    var exercise models.Exercise
+    if err := u.db.Preload("Sets").First(&exercise, exerciseID).Error; err != nil {
+        return err
+    }
+    
+    // Удаляем с помощью Select
+    return u.db.Select("Sets").Delete(&exercise).Error
 }
 
 func (u *repoImpl) FindAllByWorkoutID(workoutDayID int64) ([]models.Exercise, error) {

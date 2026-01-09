@@ -7,7 +7,7 @@ import (
 
 type Repo interface {
 	Create(session *models.WorkoutSession) error
-	GetByWorkoutID(sessionID int64) (models.WorkoutSession, error)
+	GetByWorkoutID(workoutID int64) (models.WorkoutSession, error)
 	Save(session *models.WorkoutSession) error
 	UpdateIsActive(workoutID int64, isActive bool) error
 }

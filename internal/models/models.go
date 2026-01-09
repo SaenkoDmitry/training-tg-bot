@@ -7,6 +7,7 @@ import (
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -20,10 +21,15 @@ type WorkoutDay struct {
 	ID        int64 `gorm:"primaryKey"`
 	UserID    int64
 	Name      string
-	Exercises []Exercise `gorm:"foreignKey:WorkoutDayID"`
+	Exercises []Exercise `gorm:"foreignKey:WorkoutDayID;constraint:OnDelete:CASCADE"`
 	StartedAt time.Time
 	EndedAt   *time.Time
 	Completed bool
+}
+
+func (wd *WorkoutDay) BeforeDelete(tx *gorm.DB) (err error) {
+	// Удаляем все упражнения дня (что вызовет BeforeDelete для каждого Exercise)
+	return tx.Where("workout_day_id = ?", wd.ID).Delete(&Exercise{}).Error
 }
 
 func (w *WorkoutDay) Status() string {
@@ -65,9 +71,14 @@ type Exercise struct {
 	ID            int64 `gorm:"primaryKey"`
 	WorkoutDayID  int64
 	Name          string
-	Sets          []Set `gorm:"foreignKey:ExerciseID"`
+	Sets          []Set `gorm:"foreignKey:ExerciseID;constraint:OnDelete:CASCADE"`
 	RestInSeconds int
 	Index         int
+}
+
+func (e *Exercise) BeforeDelete(tx *gorm.DB) (err error) {
+	// Удаляем все сеты упражнения
+	return tx.Where("exercise_id = ?", e.ID).Delete(&Set{}).Error
 }
 
 func (e *Exercise) Status() string {
@@ -118,12 +129,13 @@ type Set struct {
 
 func (s *Set) String(done bool) string {
 	var text strings.Builder
-	if s.Reps > 0 {
-		text.WriteString(fmt.Sprintf("• %s повторов по %s кг: ", s.FormatReps(), s.FormatWeight()))
-	}
+
 	if s.Minutes > 0 {
 		text.WriteString(fmt.Sprintf("• %s минут: ", s.FormatMinutes()))
+	} else {
+		text.WriteString(fmt.Sprintf("• %s повторов по %s кг: ", s.FormatReps(), s.FormatWeight()))
 	}
+
 	if s.Completed {
 		text.WriteString(fmt.Sprintf("✅, %s", s.CompletedAt.Add(3*time.Hour).Format("15:04:05")))
 	} else {

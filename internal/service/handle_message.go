@@ -16,8 +16,6 @@ func (s *serviceImpl) HandleMessage(message *tgbotapi.Message) {
 
 	fmt.Println("HandleMessage:", text)
 
-	user, _ := s.usersRepo.GetUser(chatID, message.From.UserName)
-
 	switch {
 	case text == "🔙 В меню" || text == "/start" || text == "/menu":
 		s.sendMainMenu(chatID)
@@ -26,10 +24,10 @@ func (s *serviceImpl) HandleMessage(message *tgbotapi.Message) {
 		s.showWorkoutTypeMenu(chatID)
 
 	case text == "📋 Мои тренировки" || text == "/workouts":
-		s.showMyWorkouts(chatID)
+		s.showMyWorkouts(chatID, 0)
 
 	case text == "📊 Статистика" || text == "/stats":
-		s.showStatsMenu(chatID, user.ID)
+		s.showStatsMenu(chatID)
 
 	case text == "❓ Что умеет бот?" || text == "/about":
 		s.about(chatID)
@@ -81,10 +79,18 @@ func (s *serviceImpl) showWorkoutTypeMenu(chatID int64) {
 	s.bot.Send(msg)
 }
 
-func (s *serviceImpl) showMyWorkouts(chatID int64) {
+const (
+	showWorkoutsLimit = 4
+)
+
+func (s *serviceImpl) showMyWorkouts(chatID int64, offset int) {
 	user := s.usersRepo.GetUserByChatID(chatID)
 
-	workouts, _ := s.workoutsRepo.Find(user.ID)
+	count, _ := s.workoutsRepo.Count(user.ID)
+
+	limit := showWorkoutsLimit
+
+	workouts, _ := s.workoutsRepo.Find(user.ID, offset, limit)
 
 	if len(workouts) == 0 {
 		msg := tgbotapi.NewMessage(chatID, "📭 У вас пока нет созданных тренировок.\n\nСоздайте первую тренировку!")
@@ -113,7 +119,7 @@ func (s *serviceImpl) showMyWorkouts(chatID int64) {
 
 		formattedName := utils.GetWorkoutNameByID(workout.Name)
 		text += fmt.Sprintf("%d. *%s* %s\n   📅 %s\n\n",
-			i+1, formattedName, status, date)
+			i+1+offset, formattedName, status, date)
 	}
 
 	text += "Выберите тренировку для просмотра:"
@@ -123,16 +129,25 @@ func (s *serviceImpl) showMyWorkouts(chatID int64) {
 		if i%2 == 0 {
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{})
 		}
-		rowIndex := len(rows) - 1
-		buttonText := fmt.Sprintf("%s %d", utils.GetWorkoutNameByID(workout.Name), i+1)
-		rows[rowIndex] = append(rows[rowIndex],
+		buttonText := fmt.Sprintf("%s %d", utils.GetWorkoutNameByID(workout.Name), i+1+offset)
+		rows[len(rows)-1] = append(rows[len(rows)-1],
 			tgbotapi.NewInlineKeyboardButtonData(buttonText,
-				fmt.Sprintf("view_workout_%d", workout.ID)))
+				fmt.Sprintf("show_progress_%d", workout.ID)))
 	}
+	rows = append(rows, []tgbotapi.InlineKeyboardButton{})
 
-	rows = append(rows, []tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardButtonData("🔙 В меню", "back_to_menu"),
-	})
+	fmt.Println("offset", offset, "limit", limit, "count", count)
+	if offset >= limit {
+		rows[len(rows)-1] = append(rows[len(rows)-1], tgbotapi.NewInlineKeyboardButtonData("⬅️ Предыдущие",
+			fmt.Sprintf("my_workouts_%d", offset-limit)))
+	}
+	if offset+limit < int(count) {
+		rows[len(rows)-1] = append(rows[len(rows)-1], tgbotapi.NewInlineKeyboardButtonData("➡️ Следующие",
+			fmt.Sprintf("my_workouts_%d", offset+limit)))
+	} else {
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{})
+		rows[len(rows)-1] = append(rows[len(rows)-1], tgbotapi.NewInlineKeyboardButtonData("🔙 В начало", "my_workouts"))
+	}
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
 
@@ -142,7 +157,7 @@ func (s *serviceImpl) showMyWorkouts(chatID int64) {
 	s.bot.Send(msg)
 }
 
-func (s *serviceImpl) showStatsMenu(chatID int64, userID int64) {
+func (s *serviceImpl) showStatsMenu(chatID int64) {
 	text := "📊 *Статистика тренировок*\n\n Выберите период:"
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
