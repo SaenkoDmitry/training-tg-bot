@@ -41,10 +41,6 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 			s.showMyWorkouts(chatID, int(offset))
 		}
 
-	// case strings.HasPrefix(data, "view_workout_"):
-	// 	workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "view_workout_"), 10, 64)
-	// 	s.showWorkoutDetails(chatID, workoutID)
-
 	case strings.HasPrefix(data, "confirm_delete_workout_"):
 		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "confirm_delete_workout_"), 10, 64)
 		s.confirmDeleteWorkout(chatID, workoutID)
@@ -218,12 +214,12 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 	} else {
 		keyboard = tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("🗑️ Удалить",
-					fmt.Sprintf("confirm_delete_workout_%d", workoutID)),
+				tgbotapi.NewInlineKeyboardButtonData("Статистика", fmt.Sprintf("stats_workout_%d", workoutID)),
 			),
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Статистика", fmt.Sprintf("stats_workout_%d", workoutID)),
 				tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", "my_workouts"),
+				tgbotapi.NewInlineKeyboardButtonData("🗑️ Удалить",
+					fmt.Sprintf("confirm_delete_workout_%d", workoutID)),
 			),
 		)
 	}
@@ -306,51 +302,6 @@ func (s *serviceImpl) showCreatedWorkout(chatID int64, workoutID int64) {
 	)
 
 	msg := tgbotapi.NewMessage(chatID, exercisesText.String())
-	msg.ParseMode = "Html"
-	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
-}
-
-func (s *serviceImpl) showWorkoutDetails(chatID int64, workoutID int64) {
-	workoutDay, _ := s.workoutsRepo.Get(workoutID)
-	if workoutDay.ID == 0 {
-		msg := tgbotapi.NewMessage(chatID, "❌ Тренировка не найдена")
-		s.bot.Send(msg)
-		return
-	}
-
-	var text strings.Builder
-	text.WriteString(workoutDay.String())
-
-	var keyboard tgbotapi.InlineKeyboardMarkup
-
-	if !workoutDay.Completed {
-		keyboard = tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("➕ Добавить упражнение",
-					fmt.Sprintf("add_exercise_%d", workoutID)),
-			),
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("▶️ Начать",
-					fmt.Sprintf("start_active_workout_%d", workoutID)),
-				tgbotapi.NewInlineKeyboardButtonData("🗑️ Удалить",
-					fmt.Sprintf("confirm_delete_workout_%d", workoutID)),
-			),
-		)
-	} else {
-		keyboard = tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("🗑️ Удалить",
-					fmt.Sprintf("confirm_delete_workout_%d", workoutID)),
-			),
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Статистика", fmt.Sprintf("stats_workout_%d", workoutID)),
-				tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", "my_workouts"),
-			),
-		)
-	}
-
-	msg := tgbotapi.NewMessage(chatID, text.String())
 	msg.ParseMode = "Html"
 	msg.ReplyMarkup = keyboard
 	s.bot.Send(msg)
@@ -773,7 +724,7 @@ func (s *serviceImpl) addSpecificExercise(chatID int64, workoutID int64, interna
 	msg.ParseMode = "Markdown"
 	s.bot.Send(msg)
 
-	s.showWorkoutDetails(chatID, workoutID)
+	s.showWorkoutProgress(chatID, workoutID)
 }
 
 func (s *serviceImpl) confirmFinishWorkout(chatID int64, workoutDayID int64) {
