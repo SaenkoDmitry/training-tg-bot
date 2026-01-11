@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE training.exercise_group_types
+CREATE TABLE exercise_group_types
 (
     code TEXT UNIQUE,
     name TEXT
@@ -9,5 +9,5 @@ CREATE TABLE training.exercise_group_types
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE training.exercise_group_types;
+DROP TABLE .exercise_group_types;
 -- +goose StatementEnd

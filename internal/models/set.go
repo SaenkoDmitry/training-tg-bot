@@ -21,7 +21,7 @@ type Set struct {
 }
 
 func (*Set) TableName() string {
-	return "training.sets"
+	return "sets"
 }
 
 func (s *Set) String(done bool) string {

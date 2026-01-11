@@ -19,7 +19,7 @@ type WorkoutDay struct {
 }
 
 func (*WorkoutDay) TableName() string {
-	return "training.workout_days"
+	return "workout_days"
 }
 
 func (w *WorkoutDay) Status() string {

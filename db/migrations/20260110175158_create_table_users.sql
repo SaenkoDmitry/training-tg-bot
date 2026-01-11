@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE training.users
+CREATE TABLE users
 (
     id                BIGSERIAL PRIMARY KEY,
     username          TEXT,
@@ -15,5 +15,5 @@ CREATE TABLE training.users
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE training.users;
+DROP TABLE users;
 -- +goose StatementEnd

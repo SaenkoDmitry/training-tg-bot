@@ -11,5 +11,5 @@ type WorkoutProgram struct {
 }
 
 func (*WorkoutProgram) TableName() string {
-	return "training.workout_programs"
+	return "workout_programs"
 }

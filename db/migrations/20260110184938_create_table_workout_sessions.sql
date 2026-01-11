@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE training.workout_sessions
+CREATE TABLE workout_sessions
 (
     id                     BIGSERIAL PRIMARY KEY,
-    workout_day_id         BIGINT NOT NULL REFERENCES training.workout_days (id) ON DELETE CASCADE,
+    workout_day_id         BIGINT NOT NULL REFERENCES workout_days (id) ON DELETE CASCADE,
     current_exercise_index BIGINT,
     started_at             TIMESTAMP WITH TIME ZONE,
     is_active              BOOLEAN
@@ -12,5 +12,5 @@ CREATE TABLE training.workout_sessions
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE training.workout_sessions;
+DROP TABLE workout_sessions;
 -- +goose StatementEnd

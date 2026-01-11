@@ -15,7 +15,7 @@ type Exercise struct {
 }
 
 func (*Exercise) TableName() string {
-	return "training.exercises"
+	return "exercises"
 }
 
 func (e *Exercise) Status() string {

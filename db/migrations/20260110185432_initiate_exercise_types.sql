@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 
-INSERT INTO training.exercise_group_types (code, name)
+INSERT INTO exercise_group_types (code, name)
 VALUES ('legs', '🦵 Ноги'),
        ('press', '📰 Пресс'),
        ('deltas', 'δ Дельты'),
@@ -11,7 +11,7 @@ VALUES ('legs', '🦵 Ноги'),
        ('triceps', '💪🏻 Трицепс'),
        ('cardio', '🏃 Кардио');
 
-INSERT INTO training.exercise_types (id, name, url, exercise_group_type_code, rest_in_seconds, accent)
+INSERT INTO exercise_types (id, name, url, exercise_group_type_code, rest_in_seconds, accent)
 VALUES (1, 'Разгибание голени сидя', 'https://disk.yandex.ru/i/nevoPFhHbc8l8g', 'legs', 120,
         'передняя поверхность бедра'),
        (2, 'Сгибание голени сидя', 'https://disk.yandex.ru/i/PqkWBjSSNvH-Vg', 'legs', 120,
@@ -52,6 +52,6 @@ VALUES (1, 'Разгибание голени сидя', 'https://disk.yandex.ru
 
 -- +goose Down
 -- +goose StatementBegin
-TRUNCATE TABLE training.exercise_types;
-TRUNCATE TABLE training.exercise_group_types;
+TRUNCATE TABLE exercise_types;
+TRUNCATE TABLE exercise_group_types;
 -- +goose StatementEnd

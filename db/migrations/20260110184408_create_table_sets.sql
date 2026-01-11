@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE training.sets
+CREATE TABLE sets
 (
     id           BIGSERIAL PRIMARY KEY,
-    exercise_id  BIGINT NOT NULL REFERENCES training.exercises (id) ON DELETE CASCADE,
+    exercise_id  BIGINT NOT NULL REFERENCES exercises (id) ON DELETE CASCADE,
     reps         BIGINT,
     fact_reps    BIGINT,
     weight       NUMERIC,
@@ -18,5 +18,5 @@ CREATE TABLE training.sets
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE training.sets;
+DROP TABLE sets;
 -- +goose StatementEnd

@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE training.workout_day_types
+CREATE TABLE workout_day_types
 (
     id                 BIGSERIAL PRIMARY KEY,
-    workout_program_id BIGINT NOT NULL REFERENCES training.workout_programs (id),
+    workout_program_id BIGINT NOT NULL REFERENCES workout_programs (id),
     name               TEXT,
     preset             TEXT,
     created_at         TIMESTAMP WITH TIME ZONE
@@ -12,5 +12,5 @@ CREATE TABLE training.workout_day_types
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE training.workout_day_types;
+DROP TABLE workout_day_types;
 -- +goose StatementEnd

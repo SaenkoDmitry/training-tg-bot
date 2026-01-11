@@ -6,5 +6,5 @@ type ExerciseGroupType struct {
 }
 
 func (*ExerciseGroupType) TableName() string {
-	return "training.exercise_group_types"
+	return "exercise_group_types"
 }

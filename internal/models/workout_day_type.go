@@ -11,5 +11,5 @@ type WorkoutDayType struct {
 }
 
 func (*WorkoutDayType) TableName() string {
-	return "training.workout_day_types"
+	return "workout_day_types"
 }

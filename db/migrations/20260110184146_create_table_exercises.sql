@@ -1,10 +1,10 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE training.exercises
+CREATE TABLE exercises
 (
     id               BIGSERIAL PRIMARY KEY,
-    workout_day_id   BIGINT NOT NULL REFERENCES training.workout_days (id) ON DELETE CASCADE,
-    exercise_type_id BIGINT NOT NULL REFERENCES training.exercise_types (id),
+    workout_day_id   BIGINT NOT NULL REFERENCES workout_days (id) ON DELETE CASCADE,
+    exercise_type_id BIGINT NOT NULL REFERENCES exercise_types (id),
     rest_in_seconds  INT,
     index            BIGINT
 );
@@ -12,5 +12,5 @@ CREATE TABLE training.exercises
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE training.exercises;
+DROP TABLE exercises;
 -- +goose StatementEnd
