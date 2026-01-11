@@ -13,7 +13,7 @@ type Repo interface {
 	Count(userID int64) (count int64, err error)
 	FindAll(userID int64) ([]models.WorkoutDay, error)
 	Find(userID int64, offset, limit int) ([]models.WorkoutDay, error)
-	FindPreviousByType(userID int64, workoutType string) (models.WorkoutDay, error)
+	FindPreviousByType(userID int64, dayTypeID int64) (models.WorkoutDay, error)
 }
 
 type repoImpl struct {
@@ -27,7 +27,7 @@ func NewRepo(db *gorm.DB) Repo {
 }
 
 func (u *repoImpl) Create(workoutDay *models.WorkoutDay) error {
-	u.db.Create(&workoutDay)
+	u.db.Create(workoutDay)
 	return nil
 }
 
@@ -43,6 +43,9 @@ func (u *repoImpl) Save(workout *models.WorkoutDay) error {
 
 func (u *repoImpl) Get(workoutID int64) (workoutDay models.WorkoutDay, err error) {
 	u.db.
+		Preload("WorkoutDayType").
+		Preload("Exercises.WorkoutDay").
+		Preload("Exercises.ExerciseType").
 		Preload("Exercises.Sets", func(db *gorm.DB) *gorm.DB { return db.Order("sets.index ASC") }).
 		Preload("Exercises", func(db *gorm.DB) *gorm.DB { return db.Order("exercises.index ASC") }).
 		First(&workoutDay, workoutID)
@@ -73,6 +76,7 @@ func (u *repoImpl) Find(userID int64, offset, limit int) (workouts []models.Work
 	u.db.
 		Where("user_id = ?", userID).
 		Order("started_at DESC").
+		Preload("WorkoutDayType").
 		Preload("Exercises.Sets", func(db *gorm.DB) *gorm.DB { return db.Order("sets.index ASC") }).
 		Preload("Exercises", func(db *gorm.DB) *gorm.DB { return db.Order("exercises.index ASC") }).
 		Offset(offset).
@@ -82,12 +86,15 @@ func (u *repoImpl) Find(userID int64, offset, limit int) (workouts []models.Work
 	return workouts, nil
 }
 
-func (u *repoImpl) FindPreviousByType(userID int64, workoutType string) (models.WorkoutDay, error) {
+func (u *repoImpl) FindPreviousByType(userID int64, dayTypeID int64) (models.WorkoutDay, error) {
 	var workout models.WorkoutDay
-	u.db.Where("user_id = ? AND name = ? AND completed = ?", userID, workoutType, true).
+	tx := u.db.Where("user_id = ? AND workout_day_type_id = ? AND completed = ?", userID, dayTypeID, true).
 		Order("started_at DESC").
 		Preload("Exercises.Sets", func(db *gorm.DB) *gorm.DB { return db.Order("sets.index ASC") }).
 		Preload("Exercises", func(db *gorm.DB) *gorm.DB { return db.Order("exercises.index ASC") }).
 		First(&workout)
+	if tx.Error != nil {
+		return models.WorkoutDay{}, tx.Error
+	}
 	return workout, nil
 }

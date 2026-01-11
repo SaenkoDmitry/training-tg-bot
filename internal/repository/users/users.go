@@ -1,15 +1,19 @@
 package users
 
 import (
+	"errors"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"gorm.io/gorm"
 )
 
 type Repo interface {
-	GetUser(chatID int64, username string) (*models.User, error)
-	GetUserByChatID(chatID int64) *models.User
+	Save(user *models.User) error
+	Create(chatID int64, from *tgbotapi.User) (*models.User, error)
+	GetByChatID(chatID int64) (*models.User, error)
 }
 
 type repoImpl struct {
@@ -22,24 +26,38 @@ func NewRepo(db *gorm.DB) Repo {
 	}
 }
 
-func (u *repoImpl) GetUser(chatID int64, username string) (*models.User, error) {
-	var user models.User
-	result := u.db.Where("chat_id = ?", chatID).First(&user)
+func (u *repoImpl) Save(user *models.User) error {
+	u.db.Save(user)
+	return nil
+}
 
-	if result.Error != nil {
-		user = models.User{
-			ChatID:    chatID,
-			Username:  username,
-			CreatedAt: time.Now(),
-		}
-		u.db.Create(&user)
+func (u *repoImpl) Create(chatID int64, from *tgbotapi.User) (*models.User, error) {
+	user := models.User{
+		ChatID:       chatID,
+		Username:     from.UserName,
+		FirstName:    from.FirstName,
+		LastName:     from.LastName,
+		LanguageCode: from.LanguageCode,
+		CreatedAt:    time.Now(),
 	}
-
+	tx := u.db.Create(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 	return &user, nil
 }
 
-func (u *repoImpl) GetUserByChatID(chatID int64) *models.User {
+var (
+	NotFoundUserErr = errors.New("not found user")
+)
+
+func (u *repoImpl) GetByChatID(chatID int64) (*models.User, error) {
 	var user models.User
-	u.db.Where("chat_id = ?", chatID).First(&user)
-	return &user
+
+	result := u.db.Where("chat_id = ?", chatID).First(&user)
+
+	if result.Error != nil {
+		return nil, NotFoundUserErr
+	}
+	return &user, nil
 }

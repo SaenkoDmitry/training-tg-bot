@@ -38,13 +38,13 @@ func (u *repoImpl) DeleteByWorkout(workoutID int64) error {
 }
 
 func (u *repoImpl) Delete(exerciseID int64) error {
-    var exercise models.Exercise
-    if err := u.db.Preload("Sets").First(&exercise, exerciseID).Error; err != nil {
-        return err
-    }
-    
-    // Удаляем с помощью Select
-    return u.db.Select("Sets").Delete(&exercise).Error
+	var exercise models.Exercise
+	if err := u.db.Preload("Sets").First(&exercise, exerciseID).Error; err != nil {
+		return err
+	}
+
+	// Удаляем с помощью Select
+	return u.db.Select("Sets").Delete(&exercise).Error
 }
 
 func (u *repoImpl) FindAllByWorkoutID(workoutDayID int64) ([]models.Exercise, error) {

@@ -1,13 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/templates"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
@@ -21,9 +19,37 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 	fmt.Println("HandleCallback:", data)
 
 	switch {
+	case data == "back_to_menu":
+		s.sendMainMenu(chatID, callback.From)
+
+	// programs
+	case strings.HasPrefix(data, "create_program"):
+		s.createProgram(chatID)
+
+	case strings.HasPrefix(data, "edit_program_"):
+		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "edit_program_"), 10, 64)
+		s.editProgram(chatID, programID)
+
+	case strings.HasPrefix(data, "change_program_"):
+		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "change_program_"), 10, 64)
+		s.changeProgram(chatID, programID)
+
+	case strings.HasPrefix(data, "change_name_of_program_"):
+		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "change_name_of_program_"), 10, 64)
+		s.askForNewProgramName(chatID, programID)
+
+	case strings.HasPrefix(data, "confirm_delete_program_"):
+		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "confirm_delete_program_"), 10, 64)
+		s.confirmDeleteProgram(chatID, programID)
+
+	case strings.HasPrefix(data, "delete_program_"):
+		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "delete_program_"), 10, 64)
+		s.deleteProgram(chatID, programID)
+
+	// workouts
 	case strings.HasPrefix(data, "create_workout_"):
-		workoutType := strings.TrimPrefix(data, "create_workout_")
-		s.createWorkoutDay(chatID, workoutType)
+		dayTypeID, _ := strconv.ParseInt(strings.TrimPrefix(data, "create_workout_"), 10, 64)
+		s.createWorkoutDay(chatID, dayTypeID)
 
 	case strings.HasPrefix(data, "start_workout_"):
 		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "start_workout_"), 10, 64)
@@ -36,10 +62,10 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 	case strings.HasPrefix(data, "my_workouts"):
 		if data == "my_workouts" {
 			s.showMyWorkouts(chatID, 0)
-		} else {
-			offset, _ := strconv.ParseInt(strings.TrimPrefix(data, "my_workouts_"), 10, 64)
-			s.showMyWorkouts(chatID, int(offset))
+			return
 		}
+		offset, _ := strconv.ParseInt(strings.TrimPrefix(data, "my_workouts_"), 10, 64)
+		s.showMyWorkouts(chatID, int(offset))
 
 	case strings.HasPrefix(data, "confirm_delete_workout_"):
 		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "confirm_delete_workout_"), 10, 64)
@@ -49,21 +75,27 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "delete_workout_"), 10, 64)
 		s.deleteWorkout(chatID, workoutID)
 
-	case data == "back_to_menu":
-		s.sendMainMenu(chatID)
+	case strings.HasPrefix(data, "continue_workout_"):
+		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "continue_workout_"), 10, 64)
+		s.showCurrentExerciseSession(chatID, workoutDayID)
 
 	case strings.HasPrefix(data, "show_progress_"):
 		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "show_progress_"), 10, 64)
 		s.showWorkoutProgress(chatID, workoutID)
 
-	case strings.HasPrefix(data, "continue_workout_"):
-		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "continue_workout_"), 10, 64)
-		s.showCurrentExerciseSession(chatID, workoutDayID)
+	case strings.HasPrefix(data, "finish_workout_id_"):
+		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "finish_workout_id_"), 10, 64)
+		s.confirmFinishWorkout(chatID, workoutDayID)
 
-	case strings.HasPrefix(data, "complete_set_ex_"):
-		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "complete_set_ex_"), 10, 64)
-		s.completeExerciseSet(chatID, exerciseID)
+	case strings.HasPrefix(data, "do_finish_workout_"):
+		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "do_finish_workout_"), 10, 64)
+		s.finishWorkoutById(chatID, workoutDayID)
 
+	case strings.HasPrefix(data, "stats_workout_"):
+		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "stats_workout_"), 10, 64)
+		s.showWorkoutStatistics(chatID, workoutID)
+
+	// timer
 	case strings.HasPrefix(data, "start_timer_"):
 		fmt.Println("start_timer_: data: ", data)
 		parts := strings.Split(data, "_")
@@ -72,6 +104,11 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 			exerciseID, _ := strconv.ParseInt(parts[4], 10, 64)
 			s.startRestTimerWithExercise(chatID, seconds, exerciseID)
 		}
+
+	// exercises
+	case strings.HasPrefix(data, "complete_set_ex_"):
+		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "complete_set_ex_"), 10, 64)
+		s.completeExerciseSet(chatID, exerciseID)
 
 	case strings.HasPrefix(data, "prev_exercise_"):
 		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "prev_exercise_"), 10, 64)
@@ -89,9 +126,9 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 		text := strings.TrimPrefix(data, "select_exercise_")
 		if arr := strings.Split(text, "_"); len(arr) == 2 {
 			workoutDayID, _ := strconv.ParseInt(arr[0], 10, 64)
-			exerciseType := arr[1]
-			fmt.Println("workoutID:", workoutDayID, "exerciseType:", exerciseType)
-			s.selectExercise(chatID, workoutDayID, exerciseType)
+			code := arr[1]
+			fmt.Println("workoutID:", workoutDayID, "code:", code)
+			s.selectExercise(chatID, workoutDayID, code)
 		}
 
 	case strings.HasPrefix(data, "add_specific_exercise_"):
@@ -111,22 +148,7 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "delete_exercise_"), 10, 64)
 		s.deleteExercise(chatID, exerciseID)
 
-	case strings.HasPrefix(data, "finish_workout_id_"):
-		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "finish_workout_id_"), 10, 64)
-		s.confirmFinishWorkout(chatID, workoutDayID)
-
-	case strings.HasPrefix(data, "do_finish_workout_"):
-		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "do_finish_workout_"), 10, 64)
-		s.finishWorkoutById(chatID, workoutDayID)
-
-	case strings.HasPrefix(data, "stats_workout_"):
-		workoutID, _ := strconv.ParseInt(strings.TrimPrefix(data, "stats_workout_"), 10, 64)
-		s.showWorkoutStatistics(chatID, workoutID)
-
-	case strings.HasPrefix(data, "stats_"):
-		period := strings.TrimPrefix(data, "stats_")
-		s.showStatistics(chatID, period)
-
+	// settings
 	case strings.HasPrefix(data, "change_reps_ex_"):
 		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "change_reps_ex_"), 10, 64)
 		s.askForNewReps(chatID, exerciseID)
@@ -138,6 +160,34 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 	case strings.HasPrefix(data, "change_minutes_ex_"):
 		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "change_minutes_ex_"), 10, 64)
 		s.askForNewMinutes(chatID, exerciseID)
+
+	case strings.HasPrefix(data, "create_day_type_"):
+		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "create_day_type_"), 10, 64)
+		s.askForNewDayName(chatID, programID)
+
+	case strings.HasPrefix(data, "day_type_select_exercise_"):
+		text := strings.Split(strings.TrimPrefix(data, "day_type_select_exercise_"), "_")
+		if len(text) < 2 {
+			return
+		}
+		dayTypeID, _ := strconv.ParseInt(text[0], 10, 64)
+		exerciseGroupCode := text[1]
+		s.addForDaySpecificExercise(chatID, dayTypeID, exerciseGroupCode)
+
+	case strings.HasPrefix(data, "day_type_add_specific_exercise_"):
+		text := strings.Split(strings.TrimPrefix(data, "day_type_add_specific_exercise_"), "_")
+		if len(text) < 2 {
+			return
+		}
+		dayTypeID, _ := strconv.ParseInt(text[0], 10, 64)
+		exerciseTypeID, _ := strconv.ParseInt(text[1], 10, 64)
+
+		s.askForPreset(chatID, dayTypeID, exerciseTypeID)
+
+	// stats
+	case strings.HasPrefix(data, "stats_"):
+		period := strings.TrimPrefix(data, "stats_")
+		s.showStatistics(chatID, period)
 	}
 }
 
@@ -175,7 +225,7 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 	text.WriteString(fmt.Sprintf("• Подходов: %d/%d\n", completedSets, totalSets))
 	text.WriteString(fmt.Sprintf("• Прогресс: %d%%\n", progressPercent))
 
-	barLength := 15
+	barLength := 13
 	filled := (progressPercent * barLength) / 100
 	progressBar := ""
 	for i := 0; i < barLength; i++ {
@@ -230,25 +280,92 @@ func (s *serviceImpl) showWorkoutProgress(chatID, workoutID int64) {
 	s.bot.Send(msg)
 }
 
-func (s *serviceImpl) createWorkoutDay(chatID int64, workoutType string) {
-	user := s.usersRepo.GetUserByChatID(chatID)
-
-	workoutDay := models.WorkoutDay{
-		UserID:    user.ID,
-		Name:      workoutType,
-		StartedAt: time.Now(),
-		Completed: false,
+func (s *serviceImpl) createProgram(chatID int64) {
+	method := "createProgram"
+	user, err := s.usersRepo.GetByChatID(chatID)
+	if err != nil {
+		s.handleGetUserErr(chatID, method, err)
+		return
 	}
 
-	previousWorkout, _ := s.workoutsRepo.FindPreviousByType(user.ID, workoutType)
+	programs, err := s.programsRepo.FindAll(user.ID)
+	if err != nil {
+		return
+	}
 
-	if previousWorkout.ID > 0 {
+	_, err = s.programsRepo.Create(user.ID, fmt.Sprintf("#%d", len(programs)+1))
+	if err != nil {
+		return
+	}
+
+	s.settings(chatID)
+}
+
+func (s *serviceImpl) editProgram(chatID int64, programID int64) {
+	method := "editProgram"
+	_, err := s.usersRepo.GetByChatID(chatID)
+	if err != nil {
+		s.handleGetUserErr(chatID, method, err)
+		return
+	}
+
+	program, err := s.programsRepo.Get(programID)
+	if err != nil {
+		return
+	}
+
+	text := &bytes.Buffer{}
+	text.WriteString(fmt.Sprintf("*Программа: %s*\n\n", program.Name))
+	text.WriteString("Список дней:\n\n")
+	for _, dayType := range program.DayTypes {
+		if dayType.Preset != "" {
+			text.WriteString(fmt.Sprintf("• %s\n\n", dayType.Name))
+		} else {
+			text.WriteString(fmt.Sprintf("• %s (*добавьте веса/повторения*)\n\n", dayType.Name))
+		}
+	}
+
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("➕ Добавить день", fmt.Sprintf("create_day_type_%d", programID)),
+		tgbotapi.NewInlineKeyboardButtonData("🎟️ Переименовать", fmt.Sprintf("change_name_of_program_%d", programID)),
+	))
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("👑 Выбрать текущей", fmt.Sprintf("change_program_%d", programID)),
+		tgbotapi.NewInlineKeyboardButtonData("🗑 Удалить", fmt.Sprintf("delete_program_%d", programID)),
+	))
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+
+	msg := tgbotapi.NewMessage(chatID, text.String())
+	msg.ParseMode = "Markdown"
+	msg.ReplyMarkup = keyboard
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) createWorkoutDay(chatID int64, dayTypeID int64) {
+	method := "createWorkoutDay"
+	user, err := s.usersRepo.GetByChatID(chatID)
+	if err != nil {
+		s.handleGetUserErr(chatID, method, err)
+		return
+	}
+
+	workoutDay := models.WorkoutDay{
+		UserID:           user.ID,
+		WorkoutDayTypeID: dayTypeID,
+		StartedAt:        time.Now(),
+		Completed:        false,
+	}
+
+	previousWorkout, err := s.workoutsRepo.FindPreviousByType(user.ID, dayTypeID)
+	if err == nil {
 		fmt.Println("createWorkoutDay: берем настройки количества повторений и веса из последней тренировки:", previousWorkout.ID)
 		for _, exercise := range previousWorkout.Exercises {
 			newExercise := models.Exercise{
-				Name:          exercise.Name,
-				RestInSeconds: exercise.RestInSeconds,
-				Index:         exercise.Index,
+				ExerciseTypeID: exercise.ExerciseTypeID,
+				RestInSeconds:  exercise.RestInSeconds,
+				Index:          exercise.Index,
 			}
 			for _, set := range exercise.Sets {
 				newSet := models.Set{
@@ -262,19 +379,29 @@ func (s *serviceImpl) createWorkoutDay(chatID int64, workoutType string) {
 			workoutDay.Exercises = append(workoutDay.Exercises, newExercise)
 		}
 	} else {
+		var dayType models.WorkoutDayType
+		dayType, err = s.dayTypesRepo.Get(dayTypeID)
+		if err != nil {
+			return
+		}
+		_ = dayType.Name
 		fmt.Println("createWorkoutDay: берем настройки количества повторений и веса из preset-ов")
-		switch workoutType {
-		case constants.LegsAndShouldersWorkoutID:
-			workoutDay.Exercises = append(workoutDay.Exercises, templates.GetLegExercises()...)
-			workoutDay.Exercises = append(workoutDay.Exercises, templates.GetShoulderExercises()...)
-		case constants.BackAndBicepsWorkoutID:
-			workoutDay.Exercises = append(workoutDay.Exercises, templates.GetBackExercises()...)
-			workoutDay.Exercises = append(workoutDay.Exercises, templates.GetBicepsExercises()...)
-		case constants.ChestAndTricepsID:
-			workoutDay.Exercises = append(workoutDay.Exercises, templates.GetChestExercises()...)
-			workoutDay.Exercises = append(workoutDay.Exercises, templates.GetTricepsExercises()...)
-		case constants.CardioID:
-			workoutDay.Exercises = append(workoutDay.Exercises, templates.GetCardioExercises()...)
+
+		for idx, exerciseType := range utils.SplitPreset(dayType.Preset) {
+			sets := make([]models.Set, 0)
+			for idx2, set := range exerciseType.Sets {
+				sets = append(sets, models.Set{
+					Reps:   set.Reps,
+					Weight: set.Weight,
+					Index:  idx2,
+				})
+			}
+			workoutDay.Exercises = append(workoutDay.Exercises, models.Exercise{
+				WorkoutDayID:   workoutDay.ID,
+				ExerciseTypeID: exerciseType.ID,
+				Sets:           sets,
+				Index:          idx,
+			})
 		}
 	}
 
@@ -297,7 +424,7 @@ func (s *serviceImpl) showCreatedWorkout(chatID int64, workoutID int64) {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("▶️ Начать", fmt.Sprintf("start_workout_%d", workoutDay.ID)),
-			tgbotapi.NewInlineKeyboardButtonData("🗑️ Удалить", fmt.Sprintf("delete_workout_%d", workoutDay.ID)),
+			tgbotapi.NewInlineKeyboardButtonData("🗑️ Удалить", fmt.Sprintf("confirm_delete_workout_%d", workoutDay.ID)),
 		),
 	)
 
@@ -308,12 +435,20 @@ func (s *serviceImpl) showCreatedWorkout(chatID int64, workoutID int64) {
 }
 
 func (s *serviceImpl) confirmDeleteWorkout(chatID int64, workoutID int64) {
-	workoutDay, _ := s.workoutsRepo.Get(workoutID)
+	workoutDay, err := s.workoutsRepo.Get(workoutID)
+	if err != nil {
+		return
+	}
+
+	dayType, err := s.dayTypesRepo.Get(workoutDay.WorkoutDayTypeID)
+	if err != nil {
+		return
+	}
 
 	text := fmt.Sprintf("🗑️ *Удаление тренировки*\n\n"+
 		"Вы уверены, что хотите удалить тренировку:\n"+
 		"*%s*?\n\n"+
-		"❌ Это действие нельзя отменить!", utils.GetWorkoutNameByID(workoutDay.Name))
+		"❌ Это действие нельзя отменить!", dayType.Name)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -333,8 +468,8 @@ func (s *serviceImpl) confirmDeleteWorkout(chatID int64, workoutID int64) {
 func (s *serviceImpl) confirmDeleteExercise(chatID int64, exerciseID int64) {
 	exercise, _ := s.exercisesRepo.Get(exerciseID)
 
-	exerciseObj, ok := constants.AllExercises[exercise.Name]
-	if !ok {
+	exerciseObj, err := s.exerciseTypesRepo.Get(exercise.ExerciseTypeID)
+	if err != nil {
 		return
 	}
 
@@ -359,27 +494,46 @@ func (s *serviceImpl) confirmDeleteExercise(chatID int64, exerciseID int64) {
 }
 
 func (s *serviceImpl) deleteExercise(chatID int64, exerciseID int64) {
-	exercise, _ := s.exercisesRepo.Get(exerciseID)
-	s.exercisesRepo.Delete(exerciseID)
+	exercise, err := s.exercisesRepo.Get(exerciseID)
+	if err != nil {
+		return
+	}
 
+	err = s.exercisesRepo.Delete(exerciseID)
+	if err != nil {
+		return
+	}
 	// session, _ := s.sessionsRepo.GetByWorkoutID(exercise.WorkoutDayID)
-
 	// session.CurrentExerciseIndex++
-
 	// s.sessionsRepo.Save(&session)
 
 	s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
 }
 
 func (s *serviceImpl) deleteWorkout(chatID int64, workoutID int64) {
-	workoutDay, _ := s.workoutsRepo.Get(workoutID)
+	method := "deleteWorkout"
 
-	for _, exercise := range workoutDay.Exercises {
-		s.setsRepo.Delete(exercise.ID)
+	workoutDay, err := s.workoutsRepo.Get(workoutID)
+	if err != nil {
+		return
 	}
 
-	s.exercisesRepo.DeleteByWorkout(workoutID)
-	s.workoutsRepo.Delete(&workoutDay)
+	for _, exercise := range workoutDay.Exercises {
+		deleteErr := s.setsRepo.Delete(exercise.ID)
+		if deleteErr != nil {
+			return
+		}
+	}
+
+	err = s.exercisesRepo.DeleteByWorkout(workoutID)
+	if err != nil {
+		return
+	}
+
+	err = s.workoutsRepo.Delete(&workoutDay)
+	if err != nil {
+		return
+	}
 
 	msg := tgbotapi.NewMessage(chatID, "✅ Тренировка успешно удалена!")
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -389,7 +543,8 @@ func (s *serviceImpl) deleteWorkout(chatID int64, workoutID int64) {
 		),
 	)
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, err = s.bot.Send(msg)
+	handleErr(method, err)
 }
 
 func (s *serviceImpl) startSpecificWorkout(chatID int64, workoutID int64) {
@@ -437,24 +592,29 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 
 	var text strings.Builder
 
-	exerciseObj, ok := constants.AllExercises[exercise.Name]
-	if !ok {
+	exerciseObj, err := s.exerciseTypesRepo.Get(exercise.ExerciseTypeID)
+	if err != nil {
 		msg := tgbotapi.NewMessage(chatID, "❌ Упражнение не найдено.")
 		s.bot.Send(msg)
 		return
 	}
 
-	text.WriteString(fmt.Sprintf("<b>%s</b>\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
-	text.WriteString(fmt.Sprintf("<b>Упражнение %d/%d:</b> %s\n\n", exerciseIndex+1, len(workoutDay.Exercises), exerciseObj.GetName()))
-	if exerciseObj.GetAccent() != "" {
-		text.WriteString(fmt.Sprintf("<b>Акцент:</b> %s\n\n", exerciseObj.GetAccent()))
+	dayType, err := s.dayTypesRepo.Get(workoutDay.WorkoutDayTypeID)
+	if err != nil {
+		return
+	}
+
+	text.WriteString(fmt.Sprintf("<b>%s</b>\n\n", dayType.Name))
+	text.WriteString(fmt.Sprintf("<b>Упражнение %d/%d:</b> %s\n\n", exerciseIndex+1, len(workoutDay.Exercises), exerciseObj.Name))
+	if exerciseObj.Accent != "" {
+		text.WriteString(fmt.Sprintf("<b>Акцент:</b> %s\n\n", exerciseObj.Accent))
 	}
 
 	for _, set := range exercise.Sets {
 		text.WriteString(set.String(workoutDay.Completed))
 	}
 
-	if hint := exerciseObj.GetHint(); hint != "" {
+	if hint := utils.WrapYandexLink(exerciseObj.Url); hint != "" {
 		text.WriteString(hint)
 	}
 
@@ -633,45 +793,44 @@ func (s *serviceImpl) moveToNextExercise(chatID int64, workoutID int64) {
 func (s *serviceImpl) addExercise(chatID int64, workoutID int64) {
 	text := "*Выберите группу мышц:*"
 
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(constants.LegsName,
-				fmt.Sprintf("select_exercise_%d_legs", workoutID)),
-			tgbotapi.NewInlineKeyboardButtonData(constants.PressName,
-				fmt.Sprintf("select_exercise_%d_press", workoutID)),
-			tgbotapi.NewInlineKeyboardButtonData(constants.DeltasName,
-				fmt.Sprintf("select_exercise_%d_deltas", workoutID)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(constants.BackName,
-				fmt.Sprintf("select_exercise_%d_back", workoutID)),
-			tgbotapi.NewInlineKeyboardButtonData(constants.BicepsName,
-				fmt.Sprintf("select_exercise_%d_biceps", workoutID)),
-			tgbotapi.NewInlineKeyboardButtonData(constants.ChestName,
-				fmt.Sprintf("select_exercise_%d_chest", workoutID)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(constants.TricepsName,
-				fmt.Sprintf("select_exercise_%d_triceps", workoutID)),
-			tgbotapi.NewInlineKeyboardButtonData(constants.CardioName,
-				fmt.Sprintf("select_exercise_%d_cardio", workoutID)),
-		),
-	)
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+
+	groups, err := s.exerciseGroupTypesRepo.GetAll()
+	if err != nil {
+		return
+	}
+
+	for i, group := range groups {
+		if i%3 == 0 {
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardRow())
+		}
+		buttons[len(buttons)-1] = append(buttons[len(buttons)-1], tgbotapi.NewInlineKeyboardButtonData(group.Name,
+			fmt.Sprintf("select_exercise_%d_%s", workoutID, group.Code)))
+	}
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = keyboard
 	s.bot.Send(msg)
 }
 
-func (s *serviceImpl) selectExercise(chatID int64, workoutID int64, exerciseType string) {
-	text := fmt.Sprintf("*Тип: %s \n\n Выберите упражнение из списка:*", constants.Groups[exerciseType])
+func (s *serviceImpl) selectExercise(chatID int64, workoutID int64, exerciseGroupCode string) {
+	group, err := s.exerciseGroupTypesRepo.Get(exerciseGroupCode)
+	if err != nil {
+		return
+	}
+
+	text := fmt.Sprintf("*Тип: %s \n\n Выберите упражнение из списка:*", group.Name)
 
 	rows := make([][]tgbotapi.InlineKeyboardButton, 0)
 
-	for _, exercise := range constants.AllExercises {
-		if exercise.Type != exerciseType {
-			continue
-		}
+	exerciseTypes, err := s.exerciseTypesRepo.GetAllByGroup(exerciseGroupCode)
+	if err != nil {
+		return
+	}
+
+	for _, exercise := range exerciseTypes {
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				exercise.Name,
@@ -689,30 +848,27 @@ func (s *serviceImpl) selectExercise(chatID int64, workoutID int64, exerciseType
 	s.bot.Send(msg)
 }
 
-func (s *serviceImpl) addSpecificExercise(chatID int64, workoutID int64, internalExerciseID int64) {
-	fmt.Println("addSpecificExercise:", "workoutID:", workoutID, "internalExerciseID:", internalExerciseID)
+func (s *serviceImpl) addSpecificExercise(chatID int64, workoutID int64, exerciseTypeID int64) {
+	fmt.Println("addSpecificExercise:", "workoutID:", workoutID, "exerciseTypeID:", exerciseTypeID)
 
-	var name string
-	var newExercise *constants.ExerciseObj
-	for key, e := range constants.AllExercises {
-		if e.ID == int(internalExerciseID) {
-			newExercise = e
-			name = key
-		}
-	}
-	if newExercise == nil {
+	exerciseObj, err := s.exerciseTypesRepo.Get(exerciseTypeID)
+	if err != nil {
 		return
 	}
 
-	fmt.Println("newExercise:", newExercise)
+	fmt.Println("newExercise:", exerciseObj)
 
 	workout, _ := s.workoutsRepo.Get(workoutID)
-	lastExercise := workout.Exercises[len(workout.Exercises)-1]
+	idx := 0
+	if len(workout.Exercises) > 0 {
+		lastExercise := workout.Exercises[len(workout.Exercises)-1]
+		idx = lastExercise.Index + 1
+	}
 	workout.Exercises = append(workout.Exercises, models.Exercise{
-		Name:          name,
-		RestInSeconds: newExercise.RestInSeconds,
-		Index:         lastExercise.Index + 1,
-		WorkoutDayID:  workoutID,
+		ExerciseTypeID: exerciseObj.ID,
+		RestInSeconds:  exerciseObj.RestInSeconds,
+		Index:          idx,
+		WorkoutDayID:   workoutID,
 		Sets: []models.Set{
 			{Index: 1}, {Index: 2}, {Index: 3}, {Index: 4},
 		},
@@ -727,14 +883,70 @@ func (s *serviceImpl) addSpecificExercise(chatID int64, workoutID int64, interna
 	s.showWorkoutProgress(chatID, workoutID)
 }
 
+func (s *serviceImpl) addForDaySpecificExercise(chatID int64, dayTypeID int64, exerciseGroupCode string) {
+	group, err := s.exerciseGroupTypesRepo.Get(exerciseGroupCode)
+	if err != nil {
+		return
+	}
+
+	text := fmt.Sprintf("*Тип: %s \n\n Выберите упражнение из списка:*", group.Name)
+
+	rows := make([][]tgbotapi.InlineKeyboardButton, 0)
+
+	exerciseTypes, err := s.exerciseTypesRepo.GetAllByGroup(exerciseGroupCode)
+	if err != nil {
+		return
+	}
+
+	for _, exercise := range exerciseTypes {
+		rows = append(rows, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				exercise.Name,
+				fmt.Sprintf("day_type_add_specific_exercise_%d_%d", dayTypeID, exercise.ID),
+			),
+		))
+	}
+	fmt.Println("rows", len(rows), rows)
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
+
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = "Markdown"
+	msg.ReplyMarkup = keyboard
+	s.bot.Send(msg)
+
+	//msg := tgbotapi.NewMessage(chatID, "Упражнение добавлено! ✅")
+	//msg.ParseMode = "Markdown"
+	//_, err = s.bot.Send(msg)
+	//handleErr(method, err)
+}
+
+func (s *serviceImpl) addForDayExerciseWithPreset(chatID int64, dayTypeID int64, exerciseGroupCode string) {
+
+	//msg := tgbotapi.NewMessage(chatID, "Упражнение добавлено! ✅")
+	//msg.ParseMode = "Markdown"
+	//_, err = s.bot.Send(msg)
+	//handleErr(method, err)
+}
+
 func (s *serviceImpl) confirmFinishWorkout(chatID int64, workoutDayID int64) {
-	workoutDay, _ := s.workoutsRepo.Get(workoutDayID)
+	method := "confirmFinishWorkout"
+
+	workoutDay, err := s.workoutsRepo.Get(workoutDayID)
+	if err != nil {
+		return
+	}
+
+	dayType, err := s.dayTypesRepo.Get(workoutDay.WorkoutDayTypeID)
+	if err != nil {
+		return
+	}
 
 	text := fmt.Sprintf("🏁 *Завершение тренировки*\n\n"+
 		"Вы уверены, что хотите завершить тренировку:\n"+
 		"*%s*?\n\n"+
 		"После завершения вы сможете просмотреть статистику, "+
-		"но не сможете добавлять новые подходы.", utils.GetWorkoutNameByID(workoutDay.Name))
+		"но не сможете добавлять новые подходы.", dayType.Name)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -748,7 +960,8 @@ func (s *serviceImpl) confirmFinishWorkout(chatID int64, workoutDayID int64) {
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ParseMode = "Markdown"
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, err = s.bot.Send(msg)
+	handleErr(method, err)
 }
 
 func (s *serviceImpl) finishWorkoutById(chatID int64, workoutID int64) {
@@ -757,21 +970,35 @@ func (s *serviceImpl) finishWorkoutById(chatID int64, workoutID int64) {
 	now := time.Now()
 	workoutDay.Completed = true
 	workoutDay.EndedAt = &now
-	s.workoutsRepo.Save(&workoutDay)
+	err := s.workoutsRepo.Save(&workoutDay)
+	if err != nil {
+		return
+	}
 
-	s.sessionsRepo.UpdateIsActive(workoutID, false)
+	err = s.sessionsRepo.UpdateIsActive(workoutID, false)
+	if err != nil {
+		return
+	}
 	s.showWorkoutStatistics(chatID, workoutID)
 }
 
 func (s *serviceImpl) showWorkoutStatistics(chatID int64, workoutID int64) {
-	workoutDay, _ := s.workoutsRepo.Get(workoutID)
+	workoutDay, err := s.workoutsRepo.Get(workoutID)
+	if err != nil {
+		return
+	}
+
+	dayType, err := s.dayTypesRepo.Get(workoutDay.WorkoutDayTypeID)
+	if err != nil {
+		return
+	}
 
 	totalWeight := 0.0
 	completedExercises := 0
 	totalTime := 0
 
 	var text strings.Builder
-	text.WriteString(fmt.Sprintf("📊 *Статистика: %s*\n\n", utils.GetWorkoutNameByID(workoutDay.Name)))
+	text.WriteString(fmt.Sprintf("📊 *Статистика: %s*\n\n", dayType.Name))
 
 	if workoutDay.EndedAt != nil {
 		text.WriteString(fmt.Sprintf("⏱️ *Время:* %s\n", utils.BetweenTimes(workoutDay.StartedAt, workoutDay.EndedAt)))
@@ -784,8 +1011,8 @@ func (s *serviceImpl) showWorkoutStatistics(chatID int64, workoutID int64) {
 			continue
 		}
 
-		exerciseObj, ok := constants.AllExercises[exercise.Name]
-		if !ok {
+		exerciseObj, getErr := s.exerciseTypesRepo.Get(exercise.ExerciseTypeID)
+		if getErr != nil {
 			continue
 		}
 
@@ -806,7 +1033,7 @@ func (s *serviceImpl) showWorkoutStatistics(chatID int64, workoutID int64) {
 		totalTime += exerciseTime
 
 		lastSet := exercise.Sets[len(exercise.Sets)-1]
-		text.WriteString(fmt.Sprintf("• *%s:* \n", exerciseObj.GetName()))
+		text.WriteString(fmt.Sprintf("• *%s:* \n", exerciseObj.Name))
 		if lastSet.GetRealReps() > 0 {
 			text.WriteString(fmt.Sprintf("  • Выполнено: %d из %d повторений\n", exercise.CompletedSets(), len(exercise.Sets)))
 			text.WriteString(fmt.Sprintf("  • Рабочий вес: %d \\* %.0f кг \n", lastSet.GetRealReps(), lastSet.GetRealWeight()))
@@ -831,12 +1058,17 @@ func (s *serviceImpl) showWorkoutStatistics(chatID int64, workoutID int64) {
 }
 
 func (s *serviceImpl) showStatistics(chatID int64, period string) {
-	user := s.usersRepo.GetUserByChatID(chatID)
+	method := "showStatistics"
+	user, err := s.usersRepo.GetByChatID(chatID)
+	if err != nil {
+		s.handleGetUserErr(chatID, method, err)
+		return
+	}
 
 	workouts, _ := s.workoutsRepo.FindAll(user.ID)
 
-	completedStrengthWorkouts := 0
-	sumStrengthTime := time.Duration(0)
+	completedWorkouts := 0
+	sumTime := time.Duration(0)
 	cardioTime := 0
 	for _, w := range workouts {
 		if !w.Completed {
@@ -854,38 +1086,34 @@ func (s *serviceImpl) showStatistics(chatID int64, period string) {
 		default:
 		}
 
-		// not cardio
-		if w.Name != constants.CardioID {
-			fmt.Println("not cardio count exercises:", len(w.Exercises))
-			completedStrengthWorkouts++
-			sumStrengthTime += w.EndedAt.Sub(*&w.StartedAt)
-		} else {
-			// cardio
-			fmt.Println("cardio count exercises:", len(w.Exercises))
-			for _, e := range w.Exercises {
-				if len(e.Sets) == 0 {
+		completedWorkouts++
+		sumTime += w.EndedAt.Sub(*&w.StartedAt)
+		for _, e := range w.Exercises {
+			if len(e.Sets) == 0 {
+				continue
+			}
+			for _, s := range e.Sets {
+				if !s.Completed {
 					continue
 				}
-				for _, s := range e.Sets {
-					if !s.Completed {
-						continue
-					}
+				if s.GetRealMinutes() > 0 {
 					cardioTime += s.GetRealMinutes()
 				}
 			}
 		}
 	}
-	avgTime := sumStrengthTime / time.Duration(completedStrengthWorkouts)
+	avgTime := sumTime / time.Duration(completedWorkouts)
 
 	var statsText strings.Builder
 	statsText.WriteString("📅 *Статистика за неделю*\n\n")
-	statsText.WriteString(fmt.Sprintf("✅ Силовых тренировок: %d\n", completedStrengthWorkouts))
+	statsText.WriteString(fmt.Sprintf("✅ Завершено тренировок: %d\n", completedWorkouts))
 	statsText.WriteString(fmt.Sprintf("⏱️ Среднее время тренировки: %s\n", utils.FormatDuration(avgTime)))
 	statsText.WriteString(fmt.Sprintf("🫀 Общее время кардио: %d мин\n", cardioTime))
 
 	msg := tgbotapi.NewMessage(chatID, statsText.String())
 	msg.ParseMode = "Markdown"
-	s.bot.Send(msg)
+	_, err = s.bot.Send(msg)
+	handleErr(method, err)
 }
 
 func (s *serviceImpl) askForNewReps(chatID int64, exerciseID int64) {
@@ -903,5 +1131,52 @@ func (s *serviceImpl) askForNewWeight(chatID int64, exerciseID int64) {
 func (s *serviceImpl) askForNewMinutes(chatID int64, exerciseID int64) {
 	s.userStates[chatID] = fmt.Sprintf("awaiting_minutes_%d", exerciseID)
 	msg := tgbotapi.NewMessage(chatID, "⌛ Введите новое время (мин):")
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) askForNewDayName(chatID, programID int64) {
+	s.userStates[chatID] = fmt.Sprintf("awaiting_day_name_for_program_%d", programID)
+	msg := tgbotapi.NewMessage(chatID, "*Введите имя тренировочного дня:*")
+	msg.ParseMode = "Markdown"
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) askForNewProgramName(chatID, programID int64) {
+	s.userStates[chatID] = fmt.Sprintf("awaiting_program_name_%d", programID)
+	msg := tgbotapi.NewMessage(chatID, "*Введите новое имя программы:*")
+	msg.ParseMode = "Markdown"
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) askForPreset(chatID, dayTypeID, exerciseTypeID int64) {
+	s.userStates[chatID] = fmt.Sprintf("awaiting_day_preset_%d_%d", dayTypeID, exerciseTypeID)
+	msg := tgbotapi.NewMessage(chatID, "<b>Введите пресет в формате: <i><u>17*100,15*160,12*200</u></i> (17 повторений по 100 кг, ...)</b>")
+	msg.ParseMode = "Html"
+	s.bot.Send(msg)
+}
+
+func (s *serviceImpl) addNewDayTypeExercise(chatID, dayTypeID int64) {
+	text := "*Выберите группу мышц:*"
+
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+
+	groups, err := s.exerciseGroupTypesRepo.GetAll()
+	if err != nil {
+		return
+	}
+
+	for i, group := range groups {
+		if i%3 == 0 {
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardRow())
+		}
+		buttons[len(buttons)-1] = append(buttons[len(buttons)-1],
+			tgbotapi.NewInlineKeyboardButtonData(group.Name, fmt.Sprintf("day_type_select_exercise_%d_%s", dayTypeID, group.Code)),
+		)
+	}
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = "Markdown"
+	msg.ReplyMarkup = keyboard
 	s.bot.Send(msg)
 }

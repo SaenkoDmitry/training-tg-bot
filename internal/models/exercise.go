@@ -1,0 +1,51 @@
+package models
+
+type Exercise struct {
+	ID int64 `gorm:"primaryKey"`
+
+	WorkoutDayID int64
+	WorkoutDay   *WorkoutDay `gorm:"foreignKey:WorkoutDayID;references:ID"` // join
+
+	ExerciseTypeID int64
+	ExerciseType   *ExerciseType `gorm:"foreignKey:ExerciseTypeID;references:ID"` // join
+
+	Sets          []Set `gorm:"foreignKey:ExerciseID;constraint:OnDelete:CASCADE"`
+	RestInSeconds int
+	Index         int
+}
+
+func (*Exercise) TableName() string {
+	return "training.exercises"
+}
+
+func (e *Exercise) Status() string {
+	completedExerciseSets := e.CompletedSets()
+	allSets := len(e.Sets)
+
+	status := "🔴"
+	if completedExerciseSets >= allSets {
+		status = "🟢"
+	} else if completedExerciseSets > 0 {
+		status = "🟡"
+	}
+	return status
+}
+
+func (e *Exercise) CompletedSets() int {
+	completedSets := 0
+	for _, set := range e.Sets {
+		if set.Completed {
+			completedSets++
+		}
+	}
+	return completedSets
+}
+
+func (e *Exercise) NextSet() Set {
+	for _, set := range e.Sets {
+		if !set.Completed {
+			return set
+		}
+	}
+	return Set{}
+}
