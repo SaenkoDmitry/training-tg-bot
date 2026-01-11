@@ -66,12 +66,18 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "10000"
+	}
+	fmt.Println("port:", port)
+
 	go func() {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "OK")
 		})
-		if err := http.ListenAndServe(":5000", nil); err != nil {
+		if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 			log.Printf("Health check server failed: %s", err)
 		}
 	}()
