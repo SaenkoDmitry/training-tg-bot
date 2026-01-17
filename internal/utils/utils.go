@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -91,4 +93,35 @@ func IsValidPreset(preset string) bool {
 
 func WrapYandexLink(url string) string {
 	return fmt.Sprintf("\n<a href=\"%s\"><b>👀</b></a>", url)
+}
+
+func SplitUnits(units string) ([]string, bool) {
+	m := make(map[string]struct{})
+	for _, unit := range strings.Split(units, ",") {
+		if strings.EqualFold(unit, constants.RepsUnit) ||
+			strings.EqualFold(unit, constants.WeightUnit) ||
+			strings.EqualFold(unit, constants.MinutesUnit) ||
+			strings.EqualFold(unit, constants.MetersUnit) {
+			m[unit] = struct{}{}
+			continue
+		}
+		return []string{}, false
+	}
+	arr := make([]string, 0, len(m))
+	for k := range m {
+		arr = append(arr, k)
+	}
+	return arr, true
+}
+
+func EqualArrays(arr1, arr2 []string) bool {
+	m1 := make(map[string]struct{})
+	m2 := make(map[string]struct{})
+	for _, e := range arr1 {
+		m1[e] = struct{}{}
+	}
+	for _, e := range arr2 {
+		m2[e] = struct{}{}
+	}
+	return reflect.DeepEqual(m1, m2)
 }

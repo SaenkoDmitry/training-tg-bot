@@ -48,3 +48,10 @@ func (e *Exercise) NextSet() Set {
 	}
 	return Set{}
 }
+
+func (e *Exercise) LastSet() Set {
+	if len(e.Sets) == 0 {
+		return Set{}
+	}
+	return e.Sets[len(e.Sets)-1]
+}

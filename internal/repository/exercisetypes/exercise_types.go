@@ -22,8 +22,8 @@ func NewRepo(db *gorm.DB) Repo {
 }
 
 func (u *repoImpl) Get(exerciseTypeID int64) (exerciseType models.ExerciseType, err error) {
-	u.db.First(&exerciseType, exerciseTypeID)
-	return exerciseType, nil
+	err = u.db.First(&exerciseType, exerciseTypeID).Error
+	return exerciseType, err
 }
 
 func (u *repoImpl) GetAll() (exerciseTypes []models.ExerciseType, err error) {

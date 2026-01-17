@@ -28,12 +28,11 @@ func (u *repoImpl) Create(session *models.WorkoutSession) error {
 	})
 }
 
-func (u *repoImpl) GetByWorkoutID(workoutID int64) (models.WorkoutSession, error) {
-	var session models.WorkoutSession
-	u.db.Where("workout_day_id = ? AND is_active = ?", workoutID, true).
+func (u *repoImpl) GetByWorkoutID(workoutID int64) (session models.WorkoutSession, err error) {
+	err = u.db.Where("workout_day_id = ? AND is_active = ?", workoutID, true).
 		Order("started_at DESC").
-		First(&session)
-	return session, nil
+		First(&session).Error
+	return session, err
 }
 
 func (u *repoImpl) Save(session *models.WorkoutSession) error {

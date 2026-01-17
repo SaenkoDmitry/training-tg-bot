@@ -15,7 +15,7 @@ import (
 
 type Service interface {
 	ShowWorkoutStatistics(workoutID int64) string
-	ShowStatistics(userID int64, period string) string
+	ShowPeriodStatistics(userID int64, period string) string
 }
 
 type serviceImpl struct {
@@ -119,7 +119,7 @@ const (
 	month = "month"
 )
 
-func (s *serviceImpl) ShowStatistics(userID int64, period string) string {
+func (s *serviceImpl) ShowPeriodStatistics(userID int64, period string) string {
 	workoutObjs, _ := s.workoutsRepo.FindAll(userID)
 
 	completedWorkouts := 0
@@ -157,7 +157,11 @@ func (s *serviceImpl) ShowStatistics(userID int64, period string) string {
 			}
 		}
 	}
-	avgTime := sumTime / time.Duration(completedWorkouts)
+
+	avgTime := time.Duration(0)
+	if completedWorkouts != 0 {
+		avgTime = sumTime / time.Duration(completedWorkouts)
+	}
 
 	var statsText strings.Builder
 	switch period {

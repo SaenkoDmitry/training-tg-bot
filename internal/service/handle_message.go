@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
 	"strconv"
 	"strings"
 	"time"
@@ -131,14 +132,10 @@ func (s *serviceImpl) showWorkoutTypeMenu(chatID int64) {
 			buttons = append(buttons, []tgbotapi.InlineKeyboardButton{})
 		}
 		buttons[len(buttons)-1] = append(buttons[len(buttons)-1],
-			tgbotapi.NewInlineKeyboardButtonData(day.Name, fmt.Sprintf("create_workout_%d", day.ID)),
+			tgbotapi.NewInlineKeyboardButtonData(day.Name, fmt.Sprintf("workout_create_%d", day.ID)),
 		)
 	}
 	buttons = append(buttons, []tgbotapi.InlineKeyboardButton{})
-
-	//buttons[len(buttons)-1] = append(buttons[len(buttons)-1],
-	//	tgbotapi.NewInlineKeyboardButtonData("➕ Добавить новый день", "create_day_type"),
-	//)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 
@@ -219,7 +216,7 @@ func (s *serviceImpl) showMyWorkouts(chatID int64, offset int) {
 		}
 		rows[len(rows)-1] = append(rows[len(rows)-1],
 			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s %d", dayType.Name, i+1+offset),
-				fmt.Sprintf("show_progress_%d", workout.ID)))
+				fmt.Sprintf("workout_show_progress_%d", workout.ID)))
 	}
 
 	text += "Выберите тренировку для просмотра:"
@@ -228,14 +225,14 @@ func (s *serviceImpl) showMyWorkouts(chatID int64, offset int) {
 	fmt.Println("offset", offset, "limit", limit, "count", count)
 	if offset >= limit {
 		rows[len(rows)-1] = append(rows[len(rows)-1], tgbotapi.NewInlineKeyboardButtonData("⬅️ Предыдущие",
-			fmt.Sprintf("my_workouts_%d", offset-limit)))
+			fmt.Sprintf("workout_show_my_%d", offset-limit)))
 	}
 	if offset+limit < int(count) {
 		rows[len(rows)-1] = append(rows[len(rows)-1], tgbotapi.NewInlineKeyboardButtonData("➡️ Следующие",
-			fmt.Sprintf("my_workouts_%d", offset+limit)))
+			fmt.Sprintf("workout_show_my_%d", offset+limit)))
 	} else {
 		rows = append(rows, []tgbotapi.InlineKeyboardButton{})
-		rows[len(rows)-1] = append(rows[len(rows)-1], tgbotapi.NewInlineKeyboardButtonData("🔙 В начало", "my_workouts"))
+		rows[len(rows)-1] = append(rows[len(rows)-1], tgbotapi.NewInlineKeyboardButtonData("🔙 В начало", "workout_show_my"))
 	}
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
@@ -266,88 +263,6 @@ func (s *serviceImpl) showStatsMenu(chatID int64) {
 	handleErr(method, err)
 }
 
-func (s *serviceImpl) changeProgram(chatID, programID int64) {
-	method := "changeProgram"
-	fmt.Sprintf("%s: programID: %d", method, programID)
-
-	user, err := s.usersRepo.GetByChatID(chatID)
-	if err != nil {
-		s.handleGetUserErr(chatID, method, err)
-		return
-	}
-
-	*user.ActiveProgramID = programID
-	err = s.usersRepo.Save(user)
-	if err != nil {
-		fmt.Printf("%s: %s\n", method, err.Error())
-	}
-
-	msg := tgbotapi.NewMessage(chatID, "✅ Успешно обновлено!")
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
-	s.settings(chatID)
-}
-
-func (s *serviceImpl) confirmDeleteProgram(chatID, programID int64) {
-	method := "confirmDeleteProgram"
-
-	program, err := s.programsRepo.Get(programID)
-	if err != nil {
-		return
-	}
-
-	text := fmt.Sprintf("🗑️ *Удаление тренировки*\n\n"+
-		"Вы уверены, что хотите удалить тренировку:\n"+
-		"*%s*?\n\n"+
-		"❌ Это действие нельзя отменить!", program.Name)
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("✅ Да, удалить",
-				fmt.Sprintf("delete_program_%d", programID)),
-			tgbotapi.NewInlineKeyboardButtonData("❌ Нет, отмена",
-				fmt.Sprintf("edit_program_%d", programID)),
-		),
-	)
-
-	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
-	msg.ReplyMarkup = keyboard
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
-}
-
-func (s *serviceImpl) deleteProgram(chatID, programID int64) {
-	method := "deleteProgram"
-
-	user, err := s.usersRepo.GetByChatID(chatID)
-	if err != nil {
-		s.handleGetUserErr(chatID, method, err)
-		return
-	}
-
-	if user.ActiveProgramID == &programID {
-		msg := tgbotapi.NewMessage(chatID, "Нельзя удалить текущую программу 😓")
-		_, err = s.bot.Send(msg)
-		return
-	}
-
-	program, err := s.programsRepo.Get(programID)
-	if err != nil {
-		return
-	}
-
-	err = s.programsRepo.Delete(&program)
-	if err != nil {
-		return
-	}
-
-	msg := tgbotapi.NewMessage(chatID, "✅ Успешно удалено!")
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
-	s.settings(chatID)
-}
-
 func (s *serviceImpl) settings(chatID int64) {
 	method := "settings"
 
@@ -362,7 +277,7 @@ func (s *serviceImpl) settings(chatID int64) {
 		return
 	}
 
-	addNewProgram := tgbotapi.NewInlineKeyboardButtonData("➕ Добавить новую", "create_program")
+	addNewProgram := tgbotapi.NewInlineKeyboardButtonData("➕ Добавить новую", "program_create")
 
 	if len(programs) == 0 {
 		msg := tgbotapi.NewMessage(chatID, "🥲 У вас нет тренировочных программ, создайте первую!")
@@ -389,7 +304,7 @@ func (s *serviceImpl) settings(chatID int64) {
 		}
 
 		rows[len(rows)-1] = append(rows[len(rows)-1],
-			tgbotapi.NewInlineKeyboardButtonData(program.Name, fmt.Sprintf("edit_program_%d", program.ID)))
+			tgbotapi.NewInlineKeyboardButtonData(program.Name, fmt.Sprintf("program_edit_%d", program.ID)))
 	}
 	rows = append(rows, tgbotapi.NewInlineKeyboardRow(addNewProgram))
 
@@ -405,13 +320,13 @@ func (s *serviceImpl) settings(chatID int64) {
 func (s *serviceImpl) about(chatID int64) {
 	method := "about"
 	msg := tgbotapi.NewMessage(chatID, `
-	*Цель бота*: помощь в учете тренировок, отслеживании весов / повторов, установка таймеров, просмотр статистики
+	<b>Цель бота</b>: помощь в учете тренировок, отслеживании весов / повторов, установка таймеров, просмотр статистики
 
-	# *Что умеет бот?*
+	<b> # Что умеет бот?</b>
 
-	*1).* В пункте меню *'▶️ Начать тренировку'* есть следующие функции:
+	<b>1).</b> В пункте меню <b>'▶️ Начать тренировку'</b> есть следующие функции:
 		
-		• ⚠️ пока в боте задана лишь *одна (!)* тренировочная программа (в дальнейшем появится возможность составлять свои)
+		• ⚠️ в рамках текущей тренировочной программы (которую можно создать и наполнить днями/упражнениями в настройках) можно выбрать день тренировки
 		
 		• ✍️ бот позволяет записывать запланированные/фактические веса и повторы
 		
@@ -421,16 +336,22 @@ func (s *serviceImpl) about(chatID int64) {
 		
 		• 🤓 бот предоставляет видео с техникой выполнения упражнения
 
-	*2).* 📖 В пункте меню *'📋 Мои тренировки'* можно посмотреть историю своих тренировок
+	<b>2).</b> 📖 В пункте меню <b>'📋 Мои тренировки'</b> можно посмотреть историю своих тренировок
 
-	*3).* 🏆 В пункте меню *'📊 Статистика'* можно посмотреть краткую сводку тренировок
+	<b>3).</b> В пункте меню <b>'📊 Статистика'</b> можно посмотреть краткую сводку тренировок
 		• кол-во за период
 		• среднее время силовых тренировок
 		• отдельно время кардио тренировок
 		• вышеперечисленное в разрезе: неделя, месяц, общая
+
+	<b>4).</b> В пункте меню <b>'⚙️ Настройки'</b> можно настроить свою программу тренировок
+		• добавить новую программу
+		• посмотреть список своих программ
+		• редактировать программу, добавив в нее дни и настроив их
+		• в рамках дня можно добавить неограниченное число упражнений разных типов
 	`)
 
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = "Html"
 	_, err := s.bot.Send(msg)
 	handleErr(method, err)
 }
@@ -539,19 +460,50 @@ func (s *serviceImpl) handleState(chatID int64, text string) {
 		s.settings(chatID)
 
 	case strings.HasPrefix(state, "awaiting_day_preset_"):
-		preset := text
-		if !utils.IsValidPreset(preset) {
-			msg := tgbotapi.NewMessage(chatID, "❌ Неверный формат. Введите снова (например: 15*100,10*150)")
-			s.bot.Send(msg)
-			fmt.Printf("%s: invalid preset: %s\n", method, preset)
-			return
-		}
+
+		text = strings.ToLower(text)
+
+		// parse dayTypeID and exerciseTypeID
 		parts := strings.Split(strings.TrimPrefix(state, "awaiting_day_preset_"), "_")
 		if len(parts) < 2 {
 			return
 		}
 		dayTypeID, _ := strconv.ParseInt(parts[0], 10, 64)
 		exerciseTypeID, _ := strconv.ParseInt(parts[1], 10, 64)
+		exerciseType, _ := s.exerciseTypesRepo.Get(exerciseTypeID)
+
+		textArr := strings.Split(text, ":")
+		if len(textArr) != 2 {
+			s.sendIncorrectPresetMsg(chatID, exerciseType.Units)
+			return
+		}
+
+		preset := textArr[1]
+
+		units, valid := utils.SplitUnits(textArr[0])
+		if !valid {
+			s.sendIncorrectPresetMsg(chatID, exerciseType.Units)
+			return
+		}
+		exUnits, _ := utils.SplitUnits(exerciseType.Units)
+
+		if !utils.EqualArrays(exUnits, units) {
+			s.sendIncorrectPresetMsg(chatID, exerciseType.Units)
+			return
+		}
+		presetSetLen := 1
+		if strings.Contains(preset, "*") {
+			presetSetLen = 2
+		}
+		if len(exUnits) != presetSetLen {
+			s.sendIncorrectPresetMsg(chatID, exerciseType.Units)
+			return
+		}
+
+		if !utils.IsValidPreset(preset) {
+			s.sendIncorrectPresetMsg(chatID, exerciseType.Units)
+			return
+		}
 
 		var dayType models.WorkoutDayType
 		dayType, err = s.dayTypesRepo.Get(dayTypeID)
@@ -561,6 +513,7 @@ func (s *serviceImpl) handleState(chatID int64, text string) {
 		if dayType.Preset != "" {
 			dayType.Preset += ";"
 		}
+
 		dayType.Preset += fmt.Sprintf("%d:[%s]", exerciseTypeID, preset)
 		err = s.dayTypesRepo.Save(&dayType)
 		if err != nil {
@@ -583,6 +536,13 @@ func (s *serviceImpl) handleState(chatID int64, text string) {
 	}
 
 	handleErr(method, err)
+}
+
+func (s *serviceImpl) sendIncorrectPresetMsg(chatID int64, expectedUnits string) {
+	msg := tgbotapi.NewMessage(chatID, "❌ Неверный формат !\n\n"+messages.EnterPreset+
+		fmt.Sprintf("\n\n<b>Подсказка:</b> для вашего упражнения следует выбрать <b>%s</b> !", expectedUnits))
+	msg.ParseMode = "Html"
+	s.bot.Send(msg)
 }
 
 func (s *serviceImpl) awaitingEnterData(
