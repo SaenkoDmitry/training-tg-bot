@@ -21,8 +21,8 @@ func NewRepo(db *gorm.DB) Repo {
 }
 
 func (u *repoImpl) Get(code string) (group models.ExerciseGroupType, err error) {
-	u.db.First(&group, code)
-	return group, nil
+	err = u.db.Where("code = ?", code).First(&group).Error
+	return group, err
 }
 
 func (u *repoImpl) GetAll() (groups []models.ExerciseGroupType, err error) {

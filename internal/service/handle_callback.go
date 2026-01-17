@@ -49,7 +49,7 @@ func (s *serviceImpl) selectExerciseForCurrentWorkout(chatID int64, workoutID in
 		return
 	}
 
-	text := fmt.Sprintf("*Тип: %s \n\n Выберите упражнение из списка:*", group.Name)
+	text := fmt.Sprintf("*Тип:* %s \n\n *Выберите упражнение из списка:*", group.Name)
 
 	rows := make([][]tgbotapi.InlineKeyboardButton, 0)
 

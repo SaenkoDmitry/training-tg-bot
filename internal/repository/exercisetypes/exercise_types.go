@@ -32,6 +32,6 @@ func (u *repoImpl) GetAll() (exerciseTypes []models.ExerciseType, err error) {
 }
 
 func (u *repoImpl) GetAllByGroup(code string) (exerciseTypes []models.ExerciseType, err error) {
-	u.db.Where("exercise_group_type_code = ?", code).Order("id ASC").Find(&exerciseTypes)
+	err = u.db.Where("exercise_group_type_code = ?", code).Order("id ASC").Find(&exerciseTypes).Error
 	return exerciseTypes, nil
 }

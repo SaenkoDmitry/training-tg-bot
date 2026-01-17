@@ -315,7 +315,7 @@ func (s *serviceImpl) showExerciseHint(chatID int64, workoutID int64) {
 }
 
 func (s *serviceImpl) addExercise(chatID int64, workoutID int64) {
-	text := "*Выберите группу мышц:*"
+	text := messages.SelectGroupOfMuscle
 
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
 
@@ -334,7 +334,7 @@ func (s *serviceImpl) addExercise(chatID int64, workoutID int64) {
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = "Html"
 	msg.ReplyMarkup = keyboard
 	s.bot.Send(msg)
 }
@@ -380,8 +380,8 @@ func (s *serviceImpl) addSpecificExerciseForCurrentWorkout(chatID int64, workout
 
 	s.workoutsRepo.Save(&workout)
 
-	msg := tgbotapi.NewMessage(chatID, "Упражнение добавлено! ✅")
-	msg.ParseMode = "Markdown"
+	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Упражнение <b>'%s'</b> добавлено! ✅", exerciseTypeObj.Name))
+	msg.ParseMode = "Html"
 	s.bot.Send(msg)
 
 	s.showWorkoutProgress(chatID, workoutID)
