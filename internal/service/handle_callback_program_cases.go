@@ -3,6 +3,8 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/tghelpers"
 	"strconv"
 	"strings"
 
@@ -12,10 +14,10 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 )
 
-func (s *serviceImpl) programCases(data string, chatID int64) {
+func (s *serviceImpl) programCases(data string, chatID, userID int64) {
 	switch {
 	case strings.HasPrefix(data, "program_create"):
-		s.createProgram(chatID)
+		s.createProgram(chatID, userID)
 
 	case strings.HasPrefix(data, "program_edit_"):
 		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "program_edit_"), 10, 64)
@@ -43,18 +45,13 @@ func (s *serviceImpl) programCases(data string, chatID int64) {
 	}
 }
 
-func (s *serviceImpl) createProgram(chatID int64) {
-	user, err := s.GetUserByChatID(chatID)
+func (s *serviceImpl) createProgram(chatID, userID int64) {
+	programs, err := s.programsRepo.FindAll(userID)
 	if err != nil {
 		return
 	}
 
-	programs, err := s.programsRepo.FindAll(user.ID)
-	if err != nil {
-		return
-	}
-
-	_, err = s.programsRepo.Create(user.ID, fmt.Sprintf("#%d", len(programs)+1))
+	_, err = s.programsRepo.Create(userID, fmt.Sprintf("#%d", len(programs)+1))
 	if err != nil {
 		return
 	}
@@ -63,21 +60,17 @@ func (s *serviceImpl) createProgram(chatID int64) {
 }
 
 func (s *serviceImpl) editProgram(chatID int64, programID int64) {
-	_, err := s.GetUserByChatID(chatID)
-	if err != nil {
-		return
-	}
-
+	method := "editProgram"
 	program, err := s.programsRepo.Get(programID)
 	if err != nil {
 		return
 	}
 
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
-
 	text := &bytes.Buffer{}
-	text.WriteString(fmt.Sprintf("*Программа: %s*\n\n", program.Name))
-	text.WriteString("*Список дней:*\n\n")
+
+	text.WriteString(fmt.Sprintf("<b>Программа: %s</b>\n\n", program.Name))
+	text.WriteString("<b>Список дней:</b>\n\n")
 	for i, dayType := range program.DayTypes {
 		if i%2 == 0 {
 			buttons = append(buttons, tgbotapi.NewInlineKeyboardRow())
@@ -86,10 +79,10 @@ func (s *serviceImpl) editProgram(chatID int64, programID int64) {
 			tgbotapi.NewInlineKeyboardButtonData(dayType.Name, fmt.Sprintf("program_day_edit_%d", dayType.ID)),
 		)
 
-		text.WriteString(fmt.Sprintf("*%d. %s*\n", i+1, dayType.Name))
+		text.WriteString(fmt.Sprintf("<b>%d. %s</b>\n", i+1, dayType.Name))
 		text.WriteString(fmt.Sprintf("%s \n\n", s.formatPreset(dayType.Preset)))
 	}
-	text.WriteString("*Выберите день, в который хотите добавить упражнения:*")
+	text.WriteString("<b>Выберите день, в который хотите добавить упражнения:</b>")
 
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("➕ Добавить день", fmt.Sprintf("change_day_name_%d", programID)),
@@ -103,9 +96,9 @@ func (s *serviceImpl) editProgram(chatID int64, programID int64) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 
 	msg := tgbotapi.NewMessage(chatID, text.String())
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) confirmDeleteProgram(chatID, programID int64) {
@@ -131,10 +124,9 @@ func (s *serviceImpl) confirmDeleteProgram(chatID, programID int64) {
 	)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	msg.ReplyMarkup = keyboard
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) deleteProgram(chatID, programID int64) {
@@ -149,7 +141,7 @@ func (s *serviceImpl) deleteProgram(chatID, programID int64) {
 
 	if *user.ActiveProgramID == programID {
 		msg := tgbotapi.NewMessage(chatID, "Нельзя удалить текущую программу 😓")
-		_, err = s.bot.Send(msg)
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -164,8 +156,7 @@ func (s *serviceImpl) deleteProgram(chatID, programID int64) {
 	}
 
 	msg := tgbotapi.NewMessage(chatID, "✅ Успешно удалено!")
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 	s.settings(chatID)
 }
 
@@ -186,8 +177,7 @@ func (s *serviceImpl) changeProgram(chatID, programID int64) {
 	}
 
 	msg := tgbotapi.NewMessage(chatID, "✅ Успешно обновлено!")
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 	s.settings(chatID)
 }
 
@@ -219,6 +209,7 @@ func (s *serviceImpl) formatPreset(preset string) string {
 }
 
 func (s *serviceImpl) addNewDayTypeExercise(chatID, dayTypeID int64) {
+	method := "addNewDayTypeExercise"
 	text := messages.SelectGroupOfMuscle
 
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
@@ -239,7 +230,7 @@ func (s *serviceImpl) addNewDayTypeExercise(chatID, dayTypeID int64) {
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Html"
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }

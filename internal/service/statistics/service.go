@@ -58,7 +58,7 @@ func (s *serviceImpl) ShowWorkoutStatistics(workoutID int64) string {
 	totalTime := 0
 
 	var text strings.Builder
-	text.WriteString(messages.Statistics + fmt.Sprintf(": %s\n\n", dayType.Name))
+	text.WriteString(messages.WorkoutStats + fmt.Sprintf(": %s\n\n", dayType.Name))
 
 	if workoutDay.EndedAt != nil {
 		text.WriteString(messages.WorkoutTime + fmt.Sprintf(": %s\n", utils.BetweenTimes(workoutDay.StartedAt, workoutDay.EndedAt)))

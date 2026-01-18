@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
 	"strconv"
 	"strings"
@@ -23,22 +24,22 @@ func (s *serviceImpl) HandleMessage(message *tgbotapi.Message) {
 	fmt.Println("HandleMessage:", text)
 
 	switch {
-	case text == "🔙 В меню" || text == "/start" || text == "/menu":
+	case text == messages.BackToMenu || text == "/start" || text == "/menu":
 		s.sendMainMenu(chatID, message.From)
 
-	case text == "▶️ Начать тренировку" || text == "/start_workout":
+	case text == messages.StartWorkout || text == "/start_workout":
 		s.showWorkoutTypeMenu(chatID)
 
-	case text == "📋 Мои тренировки" || text == "/workouts":
+	case text == messages.MyWorkouts || text == "/workouts":
 		s.showMyWorkouts(chatID, 0)
 
-	case text == "📊 Статистика" || text == "/stats":
+	case text == messages.Stats || text == "/stats":
 		s.showStatsMenu(chatID)
 
-	case text == "⚙️ Настройки" || text == "/settings":
+	case text == messages.Settings || text == "/settings":
 		s.settings(chatID)
 
-	case text == "❓ Что умеет бот?" || text == "/about":
+	case text == messages.HowToUse || text == "/about":
 		s.about(chatID)
 
 	default:
@@ -49,19 +50,19 @@ func (s *serviceImpl) HandleMessage(message *tgbotapi.Message) {
 func (s *serviceImpl) sendMainMenu(chatID int64, from *tgbotapi.User) {
 	method := "sendMainMenu"
 
-	text := "🏋️‍♂️ *Добро пожаловать в Бот для тренировок!* \n\n Выберите действие:"
+	text := messages.Hello
 
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("▶️ Начать тренировку"),
+			tgbotapi.NewKeyboardButton(messages.StartWorkout),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📋 Мои тренировки"),
-			tgbotapi.NewKeyboardButton("📊 Статистика"),
+			tgbotapi.NewKeyboardButton(messages.MyWorkouts),
+			tgbotapi.NewKeyboardButton(messages.Stats),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("⚙️ Настройки"),
-			tgbotapi.NewKeyboardButton("❓ Что умеет бот?"),
+			tgbotapi.NewKeyboardButton(messages.Settings),
+			tgbotapi.NewKeyboardButton(messages.HowToUse),
 		),
 	)
 	keyboard.ResizeKeyboard = true
@@ -69,7 +70,7 @@ func (s *serviceImpl) sendMainMenu(chatID int64, from *tgbotapi.User) {
 	s.createUserIfNotExists(chatID, from)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	msg.ReplyMarkup = keyboard
 	_, err := s.bot.Send(msg)
 	handleErr(method, err)
@@ -117,7 +118,7 @@ func (s *serviceImpl) showWorkoutTypeMenu(chatID int64) {
 
 	if len(program.DayTypes) == 0 {
 		msg := tgbotapi.NewMessage(chatID, "Добавьте тренировочные дни в программу через '⚙️ Настройки'")
-		msg.ParseMode = "Markdown"
+		msg.ParseMode = constants.MarkdownParseMode
 		_, err = s.bot.Send(msg)
 		handleErr(method, err)
 		return
@@ -141,7 +142,7 @@ func (s *serviceImpl) showWorkoutTypeMenu(chatID int64) {
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ReplyMarkup = keyboard
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	_, err = s.bot.Send(msg)
 	handleErr(method, err)
 }
@@ -182,7 +183,7 @@ func (s *serviceImpl) showMyWorkouts(chatID int64, offset int) {
 		msg := tgbotapi.NewMessage(chatID, "📭 У вас пока нет созданных тренировок.\n\nСоздайте первую тренировку!")
 		keyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("🔙 В меню", "back_to_menu"),
+				tgbotapi.NewInlineKeyboardButtonData(messages.BackToMenu, "back_to_menu"),
 			),
 		)
 		msg.ReplyMarkup = keyboard
@@ -238,7 +239,7 @@ func (s *serviceImpl) showMyWorkouts(chatID int64, offset int) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	msg.ReplyMarkup = keyboard
 	_, err = s.bot.Send(msg)
 	handleErr(method, err)
@@ -257,7 +258,7 @@ func (s *serviceImpl) showStatsMenu(chatID int64) {
 	)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	msg.ReplyMarkup = keyboard
 	_, err := s.bot.Send(msg)
 	handleErr(method, err)
@@ -281,7 +282,7 @@ func (s *serviceImpl) settings(chatID int64) {
 
 	if len(programs) == 0 {
 		msg := tgbotapi.NewMessage(chatID, "🥲 У вас нет тренировочных программ, создайте первую!")
-		msg.ParseMode = "Markdown"
+		msg.ParseMode = constants.MarkdownParseMode
 		msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(addNewProgram))
 		_, err = s.bot.Send(msg)
 		handleErr(method, err)
@@ -311,7 +312,7 @@ func (s *serviceImpl) settings(chatID int64) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
 
 	msg := tgbotapi.NewMessage(chatID, text.String())
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	msg.ReplyMarkup = keyboard
 	_, err = s.bot.Send(msg)
 	handleErr(method, err)
@@ -322,7 +323,7 @@ func (s *serviceImpl) about(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, `
 	<b>Цель бота</b>: помощь в учете тренировок, отслеживании весов / повторов, установка таймеров, просмотр статистики
 
-	<b> # Что умеет бот?</b>
+	<b> # Как пользоваться ботом?</b>
 
 	<b>1).</b> В пункте меню <b>'▶️ Начать тренировку'</b> есть следующие функции:
 		
@@ -339,19 +340,17 @@ func (s *serviceImpl) about(chatID int64) {
 	<b>2).</b> 📖 В пункте меню <b>'📋 Мои тренировки'</b> можно посмотреть историю своих тренировок
 
 	<b>3).</b> В пункте меню <b>'📊 Статистика'</b> можно посмотреть краткую сводку тренировок
-		• кол-во за период
-		• среднее время силовых тренировок
-		• отдельно время кардио тренировок
-		• вышеперечисленное в разрезе: неделя, месяц, общая
+		
+		• кол-во за период, среднее время силовых (кардио) тренировок, эти данные в разрезе: неделя, месяц, общая
 
 	<b>4).</b> В пункте меню <b>'⚙️ Настройки'</b> можно настроить свою программу тренировок
-		• добавить новую программу
-		• посмотреть список своих программ
-		• редактировать программу, добавив в нее дни и настроив их
-		• в рамках дня можно добавить неограниченное число упражнений разных типов
+		
+		• Добавить новую, посмотреть список своих программ, а также редактировать каждую из них, добавляя дни
+		
+		• В тренировочный день программы можно добавить неограниченное число упражнений разных типов
 	`)
 
-	msg.ParseMode = "Html"
+	msg.ParseMode = constants.HtmlParseMode
 	_, err := s.bot.Send(msg)
 	handleErr(method, err)
 }
@@ -541,7 +540,7 @@ func (s *serviceImpl) handleState(chatID int64, text string) {
 func (s *serviceImpl) sendIncorrectPresetMsg(chatID int64, expectedUnits string) {
 	msg := tgbotapi.NewMessage(chatID, "❌ Неверный формат !\n\n"+messages.EnterPreset+
 		fmt.Sprintf("\n\n<b>Подсказка:</b> для вашего упражнения следует выбрать <b>%s</b> !", expectedUnits))
-	msg.ParseMode = "Html"
+	msg.ParseMode = constants.HtmlParseMode
 	s.bot.Send(msg)
 }
 

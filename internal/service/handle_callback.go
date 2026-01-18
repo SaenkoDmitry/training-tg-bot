@@ -3,7 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/users"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/tghelpers"
 	"strings"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
@@ -14,6 +16,11 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 	chatID := callback.Message.Chat.ID
 	data := callback.Data
 
+	user, err := s.GetUserByChatID(chatID)
+	if err != nil {
+		return
+	}
+
 	fmt.Println("HandleCallback:", data)
 
 	switch {
@@ -21,10 +28,10 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 		s.sendMainMenu(chatID, callback.From)
 
 	case strings.HasPrefix(data, "program_"):
-		s.programCases(data, chatID)
+		s.programCases(data, chatID, user.ID)
 
 	case strings.HasPrefix(data, "workout_"):
-		s.workoutCases(data, chatID)
+		s.workoutCases(data, chatID, user.ID)
 
 	case strings.HasPrefix(data, "timer_"):
 		s.timerCases(data, chatID)
@@ -39,11 +46,12 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 		s.changeCases(data, chatID)
 
 	case strings.HasPrefix(data, "stats_"):
-		s.statsCases(data, chatID)
+		s.statsCases(data, chatID, user.ID)
 	}
 }
 
 func (s *serviceImpl) selectExerciseForCurrentWorkout(chatID int64, workoutID int64, exerciseGroupCode string) {
+	method := "selectExerciseForCurrentWorkout"
 	group, err := s.exerciseGroupTypesRepo.Get(exerciseGroupCode)
 	if err != nil {
 		return
@@ -71,34 +79,18 @@ func (s *serviceImpl) selectExerciseForCurrentWorkout(chatID int64, workoutID in
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
-}
-
-func (s *serviceImpl) showStatistics(chatID int64, period string) {
-	method := "showStatistics"
-	user, err := s.GetUserByChatID(chatID)
-	if err != nil {
-		return
-	}
-
-	text := s.statisticsService.ShowPeriodStatistics(user.ID, period)
-	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Html"
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) GetUserByChatID(chatID int64) (*models.User, error) {
+	method := "GetUserByChatID"
 	user, err := s.usersRepo.GetByChatID(chatID)
 	if err != nil {
 		if errors.Is(err, users.NotFoundUserErr) {
 			msg := tgbotapi.NewMessage(chatID, "Сначала создайте пользователя в боте, через команду /start")
-			_, err = s.bot.Send(msg)
-			if err != nil {
-				fmt.Printf("Error is: %v\n", err)
-			}
+			_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		}
 	}
 	return user, nil

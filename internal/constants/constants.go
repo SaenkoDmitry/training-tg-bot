@@ -6,3 +6,8 @@ const (
 	MinutesUnit = "minutes"
 	MetersUnit  = "meters"
 )
+
+const (
+	HtmlParseMode     = "Html"
+	MarkdownParseMode = "Markdown"
+)

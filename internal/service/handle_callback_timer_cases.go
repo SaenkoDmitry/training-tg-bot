@@ -8,7 +8,9 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/tghelpers"
 )
 
 func (s *serviceImpl) timerCases(data string, chatID int64) {
@@ -32,10 +34,11 @@ func (s *serviceImpl) unpinAndCancelTimer(chatID int64, timerID string) {
 }
 
 func (s *serviceImpl) startRestTimerWithExercise(chatID int64, seconds int, exerciseID int64) {
+	method := "startRestTimerWithExercise"
 	if seconds == 0 {
-		msg := tgbotapi.NewMessage(chatID, "У этого упражнения не предусмотрен отдых! 😐")
-		msg.ParseMode = "Html"
-		s.bot.Send(msg)
+		msg := tgbotapi.NewMessage(chatID, messages.RestNotSupported)
+		msg.ParseMode = constants.HtmlParseMode
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -43,14 +46,15 @@ func (s *serviceImpl) startRestTimerWithExercise(chatID int64, seconds int, exer
 	newTimerID := s.timerStore.NewTimer(chatID)
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Отменить", fmt.Sprintf("timer_unpin_and_cancel_%s", newTimerID)),
+			tgbotapi.NewInlineKeyboardButtonData(messages.CancelTimer, fmt.Sprintf("timer_unpin_and_cancel_%s", newTimerID)),
 		),
 	)
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
 
 	var message tgbotapi.Message
-	message, _ = s.bot.Send(msg)
-	s.pinMessage(chatID, message)
+	message, _ = tghelpers.SendMessage(s.bot, msg, method)
+	tghelpers.PinMessage(s.bot, chatID, message)
 
 	go func() {
 		remaining := seconds
@@ -59,54 +63,36 @@ func (s *serviceImpl) startRestTimerWithExercise(chatID int64, seconds int, exer
 			time.Sleep(1 * time.Second)
 			remaining--
 			if !s.timerStore.HasTimer(chatID, newTimerID) {
-				s.unpinMessage(chatID, message)
-				editMsg := tgbotapi.NewEditMessageText(chatID, message.MessageID, "Таймер отменен")
-				s.bot.Send(editMsg)
+				tghelpers.UnpinMessage(s.bot, chatID, message)
+				editMsg := tgbotapi.NewEditMessageText(chatID, message.MessageID, messages.TimerCanceled)
+				editMsg.ParseMode = constants.HtmlParseMode
+				_, _ = tghelpers.SendMessage(s.bot, editMsg, method)
 				return
 			}
 
-			var err error
 			if remaining%10 == 0 || remaining <= 20 {
 				editMsg := tgbotapi.NewEditMessageTextAndMarkup(chatID, message.MessageID,
 					fmt.Sprintf(messages.RestTimer, remaining), keyboard)
-				if message, err = s.bot.Send(editMsg); err != nil {
-					fmt.Println("cannot edit msg")
-				}
+				editMsg.ParseMode = constants.HtmlParseMode
+				message, _ = tghelpers.SendMessage(s.bot, editMsg, method)
 			}
 		}
 
 		editMsg := tgbotapi.NewEditMessageText(
 			chatID,
 			message.MessageID,
-			"🔔 *Время отдыха закончилось!*\n\n Приступайте к следующему подходу! 💪",
+			messages.RestIsEnded,
 		)
-		editMsg.ParseMode = "Markdown"
-		editMessage, _ := s.bot.Send(editMsg)
-		s.unpinMessage(chatID, editMessage)
+		editMsg.ParseMode = constants.HtmlParseMode
+
+		editMessage, err := tghelpers.SendMessage(s.bot, editMsg, method)
+		if err != nil {
+			return
+		}
+
+		tghelpers.UnpinMessage(s.bot, chatID, editMessage)
 
 		exercise, _ := s.exercisesRepo.Get(exerciseID)
-
 		s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
 	}()
-}
-
-func (s *serviceImpl) pinMessage(chatID int64, message tgbotapi.Message) {
-	pinChatMessageConfig := tgbotapi.PinChatMessageConfig{
-		ChatID:              chatID,
-		MessageID:           message.MessageID,
-		DisableNotification: false,
-	}
-	if _, err := s.bot.Request(pinChatMessageConfig); err != nil {
-		fmt.Println("cannot pin message:", message.MessageID)
-	}
-}
-
-func (s *serviceImpl) unpinMessage(chatID int64, message tgbotapi.Message) {
-	unpinChatMessageConfig := tgbotapi.UnpinChatMessageConfig{
-		ChatID:    chatID,
-		MessageID: message.MessageID,
-	}
-	if _, err := s.bot.Request(unpinChatMessageConfig); err != nil {
-		fmt.Println("cannot pin message:", message.MessageID)
-	}
 }

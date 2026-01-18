@@ -9,6 +9,7 @@ import (
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/tghelpers"
 )
 
 func (s *serviceImpl) changeCases(data string, chatID int64) {
@@ -36,48 +37,55 @@ func (s *serviceImpl) changeCases(data string, chatID int64) {
 }
 
 func (s *serviceImpl) askForNewReps(chatID int64, exerciseID int64) {
+	method := "askForNewReps"
 	s.userStatesMachine.SetValue(chatID, fmt.Sprintf("awaiting_reps_%d", exerciseID))
 	msg := tgbotapi.NewMessage(chatID, messages.EnterNewReps)
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) askForNewWeight(chatID int64, exerciseID int64) {
+	method := "askForNewWeight"
 	s.userStatesMachine.SetValue(chatID, fmt.Sprintf("awaiting_weight_%d", exerciseID))
 	msg := tgbotapi.NewMessage(chatID, messages.EnterNewWeight)
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) askForNewMinutes(chatID int64, exerciseID int64) {
+	method := "askForNewMinutes"
 	s.userStatesMachine.SetValue(chatID, fmt.Sprintf("awaiting_minutes_%d", exerciseID))
 	msg := tgbotapi.NewMessage(chatID, messages.EnterNewTime)
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) askForNewMeters(chatID int64, exerciseID int64) {
+	method := "askForNewMeters"
 	s.userStatesMachine.SetValue(chatID, fmt.Sprintf("awaiting_meters_%d", exerciseID))
 	msg := tgbotapi.NewMessage(chatID, messages.EnterNewMeters)
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) askForNewDayName(chatID, programID int64) {
+	method := "askForNewDayName"
 	s.userStatesMachine.SetValue(chatID, fmt.Sprintf("awaiting_day_name_for_program_%d", programID))
 	msg := tgbotapi.NewMessage(chatID, messages.EnterWorkoutDayName)
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) askForNewProgramName(chatID, programID int64) {
+	method := "askForNewProgramName"
 	s.userStatesMachine.SetValue(chatID, fmt.Sprintf("awaiting_program_name_%d", programID))
 	msg := tgbotapi.NewMessage(chatID, messages.EnterNewProgramName)
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) askForPreset(chatID, dayTypeID, exerciseTypeID int64) {
+	method := "askForPreset"
 	s.userStatesMachine.SetValue(chatID, fmt.Sprintf("awaiting_day_preset_%d_%d", dayTypeID, exerciseTypeID))
 
 	exerciseType, _ := s.exerciseTypesRepo.Get(exerciseTypeID)
@@ -88,6 +96,6 @@ func (s *serviceImpl) askForPreset(chatID, dayTypeID, exerciseTypeID int64) {
 	msg := tgbotapi.NewMessage(chatID, messages.EnterPreset+
 		fmt.Sprintf("\n\n<b>Подсказка:</b> для вашего упражнения следует выбрать <b>%s</b> !", exerciseTypeUnits))
 
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }

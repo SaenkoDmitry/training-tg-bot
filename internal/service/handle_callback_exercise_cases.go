@@ -2,13 +2,15 @@ package service
 
 import (
 	"fmt"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/tghelpers"
 	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 )
 
@@ -79,6 +81,7 @@ func (s *serviceImpl) exerciseCases(data string, chatID int64) {
 }
 
 func (s *serviceImpl) confirmDeleteExercise(chatID int64, exerciseID int64) {
+	method := "confirmDeleteExercise"
 	exercise, _ := s.exercisesRepo.Get(exerciseID)
 
 	exerciseObj, err := s.exerciseTypesRepo.Get(exercise.ExerciseTypeID)
@@ -86,9 +89,9 @@ func (s *serviceImpl) confirmDeleteExercise(chatID int64, exerciseID int64) {
 		return
 	}
 
-	text := fmt.Sprintf("🗑️ *Удаление упражнения из тренировочного дня*\n\n"+
+	text := fmt.Sprintf("🗑️ <b>Удаление упражнения из тренировочного дня</b>\n\n"+
 		"Вы уверены, что хотите удалить упражнение:\n"+
-		"*%s*?\n\n"+
+		"<b>%s</b>?\n\n"+
 		"❌ Это действие нельзя отменить!", exerciseObj.Name)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -101,9 +104,9 @@ func (s *serviceImpl) confirmDeleteExercise(chatID int64, exerciseID int64) {
 	)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) deleteExercise(chatID int64, exerciseID int64) {
@@ -121,11 +124,15 @@ func (s *serviceImpl) deleteExercise(chatID int64, exerciseID int64) {
 }
 
 func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) {
-	workoutDay, _ := s.workoutsRepo.Get(workoutID)
+	method := "showCurrentExerciseSession"
+	if workoutID == 0 {
+		return
+	}
 
+	workoutDay, _ := s.workoutsRepo.Get(workoutID)
 	if len(workoutDay.Exercises) == 0 {
 		msg := tgbotapi.NewMessage(chatID, "❌ В этой тренировке нет упражнений.")
-		s.bot.Send(msg)
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -143,7 +150,7 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 	exerciseObj, err := s.exerciseTypesRepo.Get(exercise.ExerciseTypeID)
 	if err != nil {
 		msg := tgbotapi.NewMessage(chatID, "❌ Упражнение не найдено.")
-		s.bot.Send(msg)
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -208,20 +215,18 @@ func (s *serviceImpl) showCurrentExerciseSession(chatID int64, workoutID int64) 
 	)
 
 	msg := tgbotapi.NewMessage(chatID, text.String())
-	msg.ParseMode = "Html"
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
-	_, err = s.bot.Send(msg)
-	if err != nil {
-		fmt.Println("showCurrentExerciseSession", err.Error())
-	}
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) moveToExercise(chatID int64, workoutID int64, next bool) {
+	method := "moveToExercise"
 	session, _ := s.sessionsRepo.GetByWorkoutID(workoutID)
 
 	if session.ID == 0 {
 		msg := tgbotapi.NewMessage(chatID, "❌ Активная сессия не найдена")
-		s.bot.Send(msg)
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -229,7 +234,7 @@ func (s *serviceImpl) moveToExercise(chatID int64, workoutID int64, next bool) {
 
 	if len(exercises) == 0 {
 		msg := tgbotapi.NewMessage(chatID, "❌ В тренировке нет упражнений")
-		s.bot.Send(msg)
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -243,8 +248,7 @@ func (s *serviceImpl) moveToExercise(chatID int64, workoutID int64, next bool) {
 		session.CurrentExerciseIndex = 0
 		msg := tgbotapi.NewMessage(chatID,
 			"Более ранних упражнений в этой тренировке нет")
-		s.bot.Send(msg)
-
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		s.showCurrentExerciseSession(chatID, workoutID)
 		return
 	}
@@ -265,7 +269,7 @@ func (s *serviceImpl) moveToExercise(chatID int64, workoutID int64, next bool) {
 		)
 
 		msg.ReplyMarkup = keyboard
-		s.bot.Send(msg)
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -282,11 +286,12 @@ func (s *serviceImpl) moveToNextExercise(chatID int64, workoutID int64) {
 }
 
 func (s *serviceImpl) showExerciseHint(chatID int64, workoutID int64) {
+	method := "showExerciseHint"
 	workoutDay, _ := s.workoutsRepo.Get(workoutID)
 
 	if len(workoutDay.Exercises) == 0 {
 		msg := tgbotapi.NewMessage(chatID, "❌ В этой тренировке нет упражнений.")
-		s.bot.Send(msg)
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -306,15 +311,13 @@ func (s *serviceImpl) showExerciseHint(chatID int64, workoutID int64) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 
 	msg := tgbotapi.NewMessage(chatID, utils.WrapYandexLink(exercise.ExerciseType.Url))
-	msg.ParseMode = "Html"
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
-	_, err := s.bot.Send(msg)
-	if err != nil {
-		fmt.Println("error:", err.Error())
-	}
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) addExercise(chatID int64, workoutID int64) {
+	method := "addExercise"
 	text := messages.SelectGroupOfMuscle
 
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
@@ -334,12 +337,13 @@ func (s *serviceImpl) addExercise(chatID int64, workoutID int64) {
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Html"
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) addSpecificExerciseForCurrentWorkout(chatID int64, workoutID int64, exerciseTypeID int64) {
+	method := "addSpecificExerciseForCurrentWorkout"
 	exerciseObj, err := s.exerciseTypesRepo.Get(exerciseTypeID)
 	if err != nil {
 		return
@@ -381,13 +385,13 @@ func (s *serviceImpl) addSpecificExerciseForCurrentWorkout(chatID int64, workout
 	s.workoutsRepo.Save(&workout)
 
 	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Упражнение <b>'%s'</b> добавлено! ✅", exerciseTypeObj.Name))
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
-
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 	s.showWorkoutProgress(chatID, workoutID)
 }
 
 func (s *serviceImpl) selectExerciseForProgramDay(chatID int64, dayTypeID int64, exerciseGroupCode string) {
+	method := "selectExerciseForProgramDay"
 	group, err := s.exerciseGroupTypesRepo.Get(exerciseGroupCode)
 	if err != nil {
 		return
@@ -415,7 +419,7 @@ func (s *serviceImpl) selectExerciseForProgramDay(chatID int64, dayTypeID int64,
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
+	msg.ParseMode = constants.MarkdownParseMode
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }

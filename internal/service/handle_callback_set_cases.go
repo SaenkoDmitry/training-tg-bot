@@ -2,6 +2,9 @@ package service
 
 import (
 	"fmt"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/tghelpers"
 	"strconv"
 	"strings"
 	"time"
@@ -28,14 +31,15 @@ func (s *serviceImpl) setCases(data string, chatID int64) {
 }
 
 func (s *serviceImpl) removeLastSet(chatID int64, exerciseID int64) {
+	method := "removeLastSet"
 	exercise, err := s.exercisesRepo.Get(exerciseID)
 	if err != nil || len(exercise.Sets) == 0 {
 		return
 	}
 	if len(exercise.Sets) == 1 {
-		msg := tgbotapi.NewMessage(chatID, "Нельзя удалить единственный подход, удалите упражнение целиком кликом на 🗑")
-		msg.ParseMode = "Html"
-		s.bot.Send(msg)
+		msg := tgbotapi.NewMessage(chatID, messages.YouCannotDeleteOneOfSet)
+		msg.ParseMode = constants.HtmlParseMode
+		_, _ = tghelpers.SendMessage(s.bot, msg, method)
 		return
 	}
 
@@ -46,18 +50,20 @@ func (s *serviceImpl) removeLastSet(chatID int64, exerciseID int64) {
 		return
 	}
 
-	msg := tgbotapi.NewMessage(chatID, "✅ <b>Подход удален!</b>")
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg := tgbotapi.NewMessage(chatID, messages.SetDeleted)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 
 	s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
 }
 
 func (s *serviceImpl) addOneMoreSet(chatID int64, exerciseID int64) {
+	method := "addOneMoreSet"
 	exercise, err := s.exercisesRepo.Get(exerciseID)
 	if err != nil || len(exercise.Sets) == 0 {
 		return
 	}
+
 	lastSet := exercise.Sets[len(exercise.Sets)-1]
 	err = s.setsRepo.Save(&models.Set{
 		ExerciseID: exercise.ID,
@@ -72,14 +78,15 @@ func (s *serviceImpl) addOneMoreSet(chatID int64, exerciseID int64) {
 		return
 	}
 
-	msg := tgbotapi.NewMessage(chatID, "✅ <b>Еще один подход добавлен!</b>")
-	msg.ParseMode = "Html"
-	s.bot.Send(msg)
+	msg := tgbotapi.NewMessage(chatID, messages.SetAdded)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 
 	s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
 }
 
 func (s *serviceImpl) completeExerciseSet(chatID int64, exerciseID int64) {
+	method := "completeExerciseSet"
 	exercise, _ := s.exercisesRepo.Get(exerciseID)
 
 	nextSet := exercise.NextSet()
@@ -94,10 +101,10 @@ func (s *serviceImpl) completeExerciseSet(chatID int64, exerciseID int64) {
 		return
 	}
 
-	text := fmt.Sprintf("✅ *Подход завершен!*\n\n")
+	text := fmt.Sprintf(messages.SetCompleted)
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "Markdown"
-	s.bot.Send(msg)
+	msg.ParseMode = constants.HtmlParseMode
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 
 	exerciseType, err := s.exerciseTypesRepo.Get(exercise.ExerciseTypeID)
 	if err != nil {

@@ -7,16 +7,15 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercisegrouptypes"
-	"github.com/pressly/goose/v3"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 	_ "github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/daytypes"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercisegrouptypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercises"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercisetypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/programs"
