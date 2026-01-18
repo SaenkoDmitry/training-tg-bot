@@ -112,7 +112,7 @@ func (s *serviceImpl) confirmDeleteProgram(chatID, programID int64) {
 	text := fmt.Sprintf("🗑️ *Удаление программы*\n\n"+
 		"Вы уверены, что хотите удалить программу:\n"+
 		"*%s*?\n\n"+
-		"❌ Это действие нельзя отменить!", program.Name)
+		"⚠️ Это действие нельзя отменить!", program.Name)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(

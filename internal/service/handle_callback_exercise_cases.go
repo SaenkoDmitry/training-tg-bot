@@ -92,7 +92,7 @@ func (s *serviceImpl) confirmDeleteExercise(chatID int64, exerciseID int64) {
 	text := fmt.Sprintf("🗑️ <b>Удаление упражнения из тренировочного дня</b>\n\n"+
 		"Вы уверены, что хотите удалить упражнение:\n"+
 		"<b>%s</b>?\n\n"+
-		"❌ Это действие нельзя отменить!", exerciseObj.Name)
+		"⚠️ Это действие нельзя отменить!", exerciseObj.Name)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
