@@ -19,8 +19,8 @@ A Telegram bot for tracking workout training sessions. Built with Go and uses SQ
 
 ## Configuration
 The bot requires:
-1. A `config.json` file in the root directory
-2. Environment variable `telegram_token` containing your Telegram Bot API token
+1. Environment variable `TELEGRAM_TOKEN` containing your Telegram Bot API token
+2. Environment variable `DATABASE_DSN` containing DSN for connection to your database
 
 ## Running
 ```bash
@@ -29,10 +29,10 @@ go build -o training-tg-bot ./cmd/main.go
 ```
 
 ## Database
-Uses SQLite database stored in `workout_bot.db`. Auto-migrates on startup.
+Uses Postgres database. Auto-migrates on startup via github.com/pressly/goose/v3.
 
 ## Required Secrets
-- `telegram_token`: Your Telegram Bot API token (get from @BotFather on Telegram)
+- `TELEGRAM_TOKEN`: Your Telegram Bot API token (get from @BotFather on Telegram)
 
-## PG_DSN for local
+## PG_DSN for local startup
 postgresql://postgres:postgres@localhost/training-bot
