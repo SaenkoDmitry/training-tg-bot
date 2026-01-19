@@ -10,6 +10,7 @@ import (
 type Repo interface {
 	Get(exerciseID int64) (models.Exercise, error)
 	FindAllByWorkoutID(workoutDayID int64) ([]models.Exercise, error)
+	FindAllByUserID(userID int64) ([]models.Exercise, error)
 	DeleteByWorkout(workoutID int64) error
 	Delete(exerciseID int64) error
 	CreateBatch(exercises []models.Exercise) error
@@ -65,4 +66,19 @@ func (u *repoImpl) FindAllByWorkoutID(workoutDayID int64) ([]models.Exercise, er
 		Order("index ASC").Find(&exercises)
 
 	return exercises, nil
+}
+
+func (u *repoImpl) FindAllByUserID(userID int64) ([]models.Exercise, error) {
+	var exercises []models.Exercise
+
+	err := u.db.
+		Joins("JOIN workout_days ON workout_days.id = exercises.workout_day_id").
+		Where("workout_days.user_id = ?", userID).
+		Preload("ExerciseType").
+		Preload("Sets", func(db *gorm.DB) *gorm.DB {
+			return db.Order("sets.index ASC")
+		}).
+		Find(&exercises).Error
+
+	return exercises, err
 }

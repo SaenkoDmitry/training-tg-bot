@@ -19,6 +19,9 @@ func (s *serviceImpl) programCases(data string, chatID, userID int64) {
 	case strings.HasPrefix(data, "program_create"):
 		s.createProgram(chatID, userID)
 
+	case strings.HasPrefix(data, "program_management"):
+		s.programManagement(chatID)
+
 	case strings.HasPrefix(data, "program_edit_"):
 		programID, _ := strconv.ParseInt(strings.TrimPrefix(data, "program_edit_"), 10, 64)
 		s.editProgram(chatID, programID)
@@ -56,7 +59,7 @@ func (s *serviceImpl) createProgram(chatID, userID int64) {
 		return
 	}
 
-	s.settings(chatID)
+	s.programManagement(chatID)
 }
 
 func (s *serviceImpl) editProgram(chatID int64, programID int64) {
@@ -157,7 +160,7 @@ func (s *serviceImpl) deleteProgram(chatID, programID int64) {
 
 	msg := tgbotapi.NewMessage(chatID, "✅ Успешно удалено!")
 	_, _ = tghelpers.SendMessage(s.bot, msg, method)
-	s.settings(chatID)
+	s.programManagement(chatID)
 }
 
 func (s *serviceImpl) changeProgram(chatID, programID int64) {
@@ -178,7 +181,7 @@ func (s *serviceImpl) changeProgram(chatID, programID int64) {
 
 	msg := tgbotapi.NewMessage(chatID, "✅ Успешно обновлено!")
 	_, _ = tghelpers.SendMessage(s.bot, msg, method)
-	s.settings(chatID)
+	s.programManagement(chatID)
 }
 
 func (s *serviceImpl) formatPreset(preset string) string {
@@ -233,4 +236,58 @@ func (s *serviceImpl) addNewDayTypeExercise(chatID, dayTypeID int64) {
 	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
 	_, _ = tghelpers.SendMessage(s.bot, msg, method)
+}
+
+func (s *serviceImpl) programManagement(chatID int64) {
+	method := "programManagement"
+
+	user, err := s.usersRepo.GetByChatID(chatID)
+	if err != nil {
+		s.handleGetUserErr(chatID, method, err)
+		return
+	}
+
+	programs, err := s.programsRepo.FindAll(user.ID)
+	if err != nil {
+		return
+	}
+
+	addNewProgram := tgbotapi.NewInlineKeyboardButtonData("➕ Добавить новую", "program_create")
+
+	if len(programs) == 0 {
+		msg := tgbotapi.NewMessage(chatID, "🥲 У вас нет тренировочных программ, создайте первую!")
+		msg.ParseMode = constants.MarkdownParseMode
+		msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(addNewProgram))
+		_, err = s.bot.Send(msg)
+		handleErr(method, err)
+		return
+	}
+
+	text := &bytes.Buffer{}
+	text.WriteString("*Ваши программы:*\n\n")
+
+	var rows [][]tgbotapi.InlineKeyboardButton
+	for i, program := range programs {
+		if i%2 == 0 {
+			rows = append(rows, []tgbotapi.InlineKeyboardButton{})
+		}
+
+		if program.ID == *user.ActiveProgramID {
+			text.WriteString(fmt.Sprintf("• 🟢 *%s* \n  📅 %s\n\n", program.Name, program.CreatedAt.Format("02.01.2006 15:04")))
+		} else {
+			text.WriteString(fmt.Sprintf("• *%s* \n 📅 %s\n\n", program.Name, program.CreatedAt.Format("02.01.2006 15:04")))
+		}
+
+		rows[len(rows)-1] = append(rows[len(rows)-1],
+			tgbotapi.NewInlineKeyboardButtonData(program.Name, fmt.Sprintf("program_edit_%d", program.ID)))
+	}
+	rows = append(rows, tgbotapi.NewInlineKeyboardRow(addNewProgram))
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
+
+	msg := tgbotapi.NewMessage(chatID, text.String())
+	msg.ParseMode = constants.MarkdownParseMode
+	msg.ReplyMarkup = keyboard
+	_, err = s.bot.Send(msg)
+	handleErr(method, err)
 }

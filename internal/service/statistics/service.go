@@ -64,7 +64,7 @@ func (s *serviceImpl) ShowWorkoutStatistics(workoutID int64) string {
 		text.WriteString(messages.WorkoutTime + fmt.Sprintf(": %s\n", utils.BetweenTimes(workoutDay.StartedAt, workoutDay.EndedAt)))
 	}
 
-	text.WriteString(fmt.Sprintf(messages.WorkoutDate+": %s\n\n", workoutDay.StartedAt.Add(3*time.Hour).Format("02.01.2006 15:04")))
+	text.WriteString(fmt.Sprintf("<b>%s</b>: %s\n\n", messages.WorkoutDate, workoutDay.StartedAt.Add(3*time.Hour).Format("02.01.2006 15:04")))
 
 	for _, exercise := range workoutDay.Exercises {
 		if exercise.CompletedSets() == 0 {

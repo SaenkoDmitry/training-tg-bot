@@ -74,7 +74,7 @@ func (s *Set) FormatMinutes() string {
 }
 
 func (s *Set) FormatMeters() string {
-	if s.FactMinutes != 0 {
+	if s.FactMeters != 0 {
 		return fmt.Sprintf("<strike>%d</strike> <b>%d</b>", s.Meters, s.FactMeters)
 	}
 	return fmt.Sprintf("%d", s.Meters)

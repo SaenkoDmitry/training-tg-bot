@@ -5,14 +5,16 @@ const (
 		"🏋️‍♂️ *Добро пожаловать в Бот для тренировок!* \n\n" +
 		"Выберите действие:"
 
-	BackToMenu   = "🔙 В меню"
-	StartWorkout = "▶️ Начать тренировку"
-	MyWorkouts   = "📋 Мои тренировки"
-	Stats        = "📊 Статистика"
-	Settings     = "⚙️ Настройки"
-	HowToUse     = "❓ Как пользоваться?"
-	Admin        = "👨🏻‍💻 Админ панель"
-	Users        = "👥 Пользователи"
+	BackToMenu        = "🔙 В меню"
+	StartWorkout      = "▶️ Начать тренировку"
+	MyWorkouts        = "📋 Мои тренировки"
+	Stats             = "📊 Статистика"
+	Settings          = "⚙️ Настройки"
+	ProgramManagement = "📱️ Управление программами"
+	HowToUse          = "❓ О боте?"
+	Export            = "📥️ Экспорт"
+	Admin             = "👨🏻‍💻 Админ панель"
+	Users             = "👥 Пользователи"
 
 	DoneSet   = "✅"
 	AddSet    = "➕"
@@ -34,7 +36,7 @@ const (
 
 	WorkoutStats = "📊 <b>Статистика</b>"
 	WorkoutTime  = "⏱️ <b>Время</b>"
-	WorkoutDate  = "📅 <b>Дата:</b>"
+	WorkoutDate  = "📅 Дата"
 	Summary      = "📈 <b>Итого</b>"
 
 	EndsWorkouts       = "✅ Завершено тренировок"

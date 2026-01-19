@@ -69,6 +69,7 @@ func (u *repoImpl) FindAll(userID int64) (workouts []models.WorkoutDay, err erro
 		return tx.Where("user_id = ?", userID).
 			Order("started_at DESC").
 			Preload("WorkoutDayType").
+			Preload("Exercises.ExerciseType").
 			Preload("Exercises.Sets", func(db *gorm.DB) *gorm.DB { return db.Order("sets.index ASC") }).
 			Preload("Exercises", func(db *gorm.DB) *gorm.DB { return db.Order("exercises.index ASC") }).
 			Find(&workouts).Error
@@ -81,6 +82,7 @@ func (u *repoImpl) Find(userID int64, offset, limit int) (workouts []models.Work
 		return tx.Where("user_id = ?", userID).
 			Order("started_at DESC").
 			Preload("WorkoutDayType").
+			Preload("Exercises.ExerciseType").
 			Preload("Exercises.Sets", func(db *gorm.DB) *gorm.DB { return db.Order("sets.index ASC") }).
 			Preload("Exercises", func(db *gorm.DB) *gorm.DB { return db.Order("exercises.index ASC") }).
 			Offset(offset).

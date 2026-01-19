@@ -49,6 +49,9 @@ func (s *serviceImpl) HandleCallback(callback *tgbotapi.CallbackQuery) {
 
 	case strings.HasPrefix(data, "stats_"):
 		s.statsCases(data, chatID, user.ID)
+
+	case strings.HasPrefix(data, "export_to_excel"):
+		s.export(chatID, user)
 	}
 }
 

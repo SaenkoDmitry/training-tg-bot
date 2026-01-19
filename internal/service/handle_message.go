@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
+	summarysvc "github.com/SaenkoDmitry/training-tg-bot/internal/service/summary"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/service/tghelpers"
 	"strconv"
 	"strings"
@@ -329,56 +330,15 @@ func (s *serviceImpl) showStatsMenu(chatID int64) {
 
 func (s *serviceImpl) settings(chatID int64) {
 	method := "settings"
-
-	user, err := s.usersRepo.GetByChatID(chatID)
-	if err != nil {
-		s.handleGetUserErr(chatID, method, err)
-		return
-	}
-
-	programs, err := s.programsRepo.FindAll(user.ID)
-	if err != nil {
-		return
-	}
-
-	addNewProgram := tgbotapi.NewInlineKeyboardButtonData("➕ Добавить новую", "program_create")
-
-	if len(programs) == 0 {
-		msg := tgbotapi.NewMessage(chatID, "🥲 У вас нет тренировочных программ, создайте первую!")
-		msg.ParseMode = constants.MarkdownParseMode
-		msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(addNewProgram))
-		_, err = s.bot.Send(msg)
-		handleErr(method, err)
-		return
-	}
-
-	text := &bytes.Buffer{}
-	text.WriteString("*Ваши программы:*\n\n")
-
-	var rows [][]tgbotapi.InlineKeyboardButton
-	for i, program := range programs {
-		if i%2 == 0 {
-			rows = append(rows, []tgbotapi.InlineKeyboardButton{})
-		}
-
-		if program.ID == *user.ActiveProgramID {
-			text.WriteString(fmt.Sprintf("• 🟢 *%s* \n  📅 %s\n\n", program.Name, program.CreatedAt.Format("02.01.2006 15:04")))
-		} else {
-			text.WriteString(fmt.Sprintf("• *%s* \n 📅 %s\n\n", program.Name, program.CreatedAt.Format("02.01.2006 15:04")))
-		}
-
-		rows[len(rows)-1] = append(rows[len(rows)-1],
-			tgbotapi.NewInlineKeyboardButtonData(program.Name, fmt.Sprintf("program_edit_%d", program.ID)))
-	}
-	rows = append(rows, tgbotapi.NewInlineKeyboardRow(addNewProgram))
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
-
-	msg := tgbotapi.NewMessage(chatID, text.String())
-	msg.ParseMode = constants.MarkdownParseMode
-	msg.ReplyMarkup = keyboard
-	_, err = s.bot.Send(msg)
-	handleErr(method, err)
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(messages.ProgramManagement, "program_management"),
+	))
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(messages.Export, "export_to_excel"),
+	))
+	msg := tghelpers.NewMessageBuilder().WithChatID(chatID).WithText("<b>Выберите действие:</b>").WithReplyMarkup(buttons).Build()
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
 
 func (s *serviceImpl) users(chatID int64, user *models.User) {
@@ -544,7 +504,7 @@ func (s *serviceImpl) handleState(chatID int64, text string) {
 				return nextSet
 			},
 			"❌ Неверный формат минут. Введите число (например: 42)",
-			"✅ Время обновлено",
+			"✅ Дистанция обновлена",
 		)
 
 	case strings.HasPrefix(state, "awaiting_program_name_"):
@@ -558,7 +518,7 @@ func (s *serviceImpl) handleState(chatID int64, text string) {
 		if err != nil {
 			return
 		}
-		s.settings(chatID)
+		s.programManagement(chatID)
 
 	case strings.HasPrefix(state, "awaiting_day_preset_"):
 
@@ -687,4 +647,41 @@ func (s *serviceImpl) awaitingEnterData(
 	s.userStatesMachine.SetValue(chatID, "")
 	s.showCurrentExerciseSession(chatID, exercise.WorkoutDayID)
 	return nil
+}
+
+func (s *serviceImpl) export(chatID int64, user *models.User) {
+	method := "export"
+
+	groupCodes, _ := s.exerciseGroupTypesRepo.GetAll()
+	groupCodesMap := make(map[string]string)
+	for _, code := range groupCodes {
+		groupCodesMap[code.Code] = code.Name
+	}
+
+	workouts, _ := s.workoutsRepo.FindAll(user.ID)
+	totalSummary := s.summaryService.BuildTotal(workouts, groupCodesMap)
+	byDateSummary := s.summaryService.BuildByDate(workouts)
+
+	exercises, err := s.exercisesRepo.FindAllByUserID(user.ID)
+	if err != nil {
+		fmt.Printf("%s: error: %v", method, err)
+		return
+	}
+
+	progresses := make(map[string]map[string]*summarysvc.Progress)
+	for _, e := range exercises {
+		progresses[e.ExerciseType.Name] = s.summaryService.BuildExerciseProgress(workouts, e.ExerciseType.Name)
+	}
+
+	file, err := s.docGeneratorService.ExportToFile(workouts, totalSummary, byDateSummary, progresses, groupCodesMap)
+	if err != nil {
+		fmt.Println("cannot export file:", err.Error())
+		return
+	}
+
+	buf, _ := file.WriteToBuffer()
+	doc := tgbotapi.FileBytes{Name: "workouts.xlsx", Bytes: buf.Bytes()}
+
+	msg := tgbotapi.NewDocument(chatID, doc)
+	_, _ = tghelpers.SendMessage(s.bot, msg, method)
 }
