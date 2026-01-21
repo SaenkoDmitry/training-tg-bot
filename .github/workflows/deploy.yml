@@ -31,6 +31,7 @@ jobs:
           source: "training-tg-bot"
           target: "/opt/training-tg-bot/"
 
+
       - name: Start app
         uses: appleboy/ssh-action@v0.1.7
         with:
