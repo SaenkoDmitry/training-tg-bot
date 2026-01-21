@@ -13,7 +13,7 @@ const (
 	ProgramManagement = "📱️ Управление программами"
 	HowToUse          = "❓ О боте?"
 	Export            = "📥️ Экспорт"
-	Admin             = "👨🏻‍💻 Админ панель"
+	Admin             = "👨🏻‍💻 Админка"
 	Users             = "👥 Пользователи"
 
 	DoneSet   = "✅"
