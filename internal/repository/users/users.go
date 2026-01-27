@@ -12,6 +12,7 @@ import (
 
 type Repo interface {
 	GetTop10() ([]models.User, error)
+	FindTopN(offset, limit int) ([]UserWithCount, error)
 	Save(user *models.User) error
 	Create(chatID int64, from *tgbotapi.User) (*models.User, error)
 	GetByID(ID int64) (*models.User, error)
@@ -79,6 +80,32 @@ func (u *repoImpl) GetTop10() ([]models.User, error) {
 	tx := u.db.Order("created_at DESC").Limit(10).Find(&users)
 	if tx.Error != nil {
 		return []models.User{}, tx.Error
+	}
+	return users, nil
+}
+
+type UserWithCount struct {
+	models.User
+	WorkoutCount int64 `gorm:"column:workout_count"`
+}
+
+func (u *repoImpl) FindTopN(offset, limit int) ([]UserWithCount, error) {
+	var users []UserWithCount
+	tx := u.db.
+		Table("users").
+		Select("users.*, COUNT(w.id) as workout_count").
+		Joins(`
+        LEFT JOIN workout_days w 
+        ON w.user_id = users.id 
+        AND w.completed = true
+    `).
+		Group("users.id").
+		Order("workout_count DESC").
+		Limit(limit).
+		Offset(offset).
+		Scan(&users)
+	if tx.Error != nil {
+		return []UserWithCount{}, tx.Error
 	}
 	return users, nil
 }

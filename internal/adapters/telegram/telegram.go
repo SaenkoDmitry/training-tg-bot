@@ -1,6 +1,11 @@
 package telegram
 
 import (
+	"fmt"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/admins"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/changes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/daytypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/exercises"
@@ -9,12 +14,9 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/sets"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/stats"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/timers"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/users"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/workouts"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/router"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
 )
 
 type App struct {
@@ -27,7 +29,7 @@ func New(token string, useCases *usecase.Container) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	fmt.Printf("Authorized on account %s\n", bot.Self.UserName)
 
 	workoutsHandler := workouts.NewHandler(
 		bot,
@@ -77,7 +79,7 @@ func New(token string, useCases *usecase.Container) (*App, error) {
 		useCases.FindAllProgramsByUserUC,
 	)
 
-	usersHandler := users.NewHandler(bot, useCases.CreateUserUC)
+	adminsHandler := admins.NewHandler(bot, useCases.FindUserUC)
 
 	dayTypesHandler := daytypes.NewHandler(bot, useCases.GetAllGroupsUC)
 
@@ -92,7 +94,7 @@ func New(token string, useCases *usecase.Container) (*App, error) {
 		bot,
 		useCases.CreateUserUC,
 		useCases.GetUserUC,
-		usersHandler,
+		adminsHandler,
 		workoutsHandler,
 		timersHandler,
 		statsHandler,

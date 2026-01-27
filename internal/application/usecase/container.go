@@ -91,6 +91,7 @@ type Container struct {
 	// users
 	CreateUserUC *userusecases.CreateUseCase
 	GetUserUC    *userusecases.GetUseCase
+	FindUserUC   *userusecases.FindUseCase
 }
 
 func NewContainer(db *gorm.DB) *Container {
@@ -171,6 +172,7 @@ func NewContainer(db *gorm.DB) *Container {
 
 		// users
 		CreateUserUC: userusecases.NewCreateUseCase(usersRepo, programsRepo),
+		FindUserUC:   userusecases.NewFindUseCase(usersRepo, programsRepo),
 		GetUserUC:    userusecases.NewGetUseCase(usersRepo),
 	}
 }

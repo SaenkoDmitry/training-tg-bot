@@ -17,7 +17,7 @@ func (r *Router) routeCallback(callbackQuery *tgbotapi.CallbackQuery) {
 		r.sendMainMenu(chatID, callbackQuery.From)
 
 	case data == "/admin/users":
-		// todo s.users(chatID, user)
+		r.adminsHandler.RouteCallback(chatID, data)
 
 	case strings.HasPrefix(data, "program_"):
 		r.programsHandler.RouteCallback(chatID, data)

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/admins"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/changes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/daytypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/exercises"
@@ -9,7 +10,6 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/sets"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/stats"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/timers"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/users"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/workouts"
 	userusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/users"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -27,7 +27,7 @@ type Router struct {
 	exercisesHandler *exercises.Handler
 	changesHandler   *changes.Handler
 	dayTypesHandler  *daytypes.Handler
-	usersHandler     *users.Handler
+	adminsHandler    *admins.Handler
 	createUserUC     *userusecases.CreateUseCase
 	getUserUC        *userusecases.GetUseCase
 }
@@ -36,7 +36,7 @@ func New(
 	bot *tgbotapi.BotAPI,
 	createUserUC *userusecases.CreateUseCase,
 	getUserUC *userusecases.GetUseCase,
-	usersHandler *users.Handler,
+	adminsHandler *admins.Handler,
 	workoutsHandler *workouts.Handler,
 	timersHandler *timers.Handler,
 	statsHandler *stats.Handler,
@@ -51,7 +51,7 @@ func New(
 		bot:              bot,
 		createUserUC:     createUserUC,
 		getUserUC:        getUserUC,
-		usersHandler:     usersHandler,
+		adminsHandler:    adminsHandler,
 		workoutsHandler:  workoutsHandler,
 		timersHandler:    timersHandler,
 		statsHandler:     statsHandler,
