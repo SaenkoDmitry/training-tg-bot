@@ -24,7 +24,7 @@ type ConfirmDeleteExercise struct {
 }
 
 type GetExercise struct {
-	Exercise models.Exercise
+	ExerciseType models.ExerciseType
 }
 
 type CreateExercise struct {

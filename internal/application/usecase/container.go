@@ -128,7 +128,7 @@ func NewContainer(db *gorm.DB) *Container {
 		FindTypesByGroupUC:      exerciseusecases.NewFindTypesByGroupUseCase(exerciseTypesRepo),
 		ConfirmDeleteExerciseUC: exerciseusecases.NewConfirmDeleteUseCase(exerciseTypesRepo, exercisesRepo),
 		DeleteExerciseUC:        exerciseusecases.NewDeleteUseCase(exercisesRepo),
-		GetExerciseUC:           exerciseusecases.NewGetUseCase(exercisesRepo),
+		GetExerciseUC:           exerciseusecases.NewGetUseCase(exercisesRepo, exerciseTypesRepo),
 		CreateExerciseUC:        exerciseusecases.NewCreateUseCase(exercisesRepo, workoutsRepo, exerciseTypesRepo),
 
 		// timers

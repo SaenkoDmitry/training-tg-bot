@@ -76,8 +76,14 @@ func (h *Handler) RouteCallback(chatID int64, data string) {
 		h.MoveToNextExercise(chatID, workoutDayID)
 
 	case strings.HasPrefix(data, "exercise_show_hint_"):
-		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "exercise_show_hint_"), 10, 64)
-		h.showExerciseHint(chatID, exerciseID)
+		parts := strings.Split(strings.TrimPrefix(data, "exercise_show_hint_"), "_")
+		workoutID, _ := strconv.ParseInt(parts[0], 10, 64)
+		exerciseTypeID, _ := strconv.ParseInt(parts[1], 10, 64)
+		h.showExerciseHint(chatID, workoutID, exerciseTypeID)
+
+	case strings.HasPrefix(data, "exercise_show_info_"):
+		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "exercise_show_info_"), 10, 64)
+		h.showExerciseHint(chatID, 0, exerciseID)
 
 	case strings.HasPrefix(data, "exercise_add_for_current_workout_"):
 		workoutDayID, _ := strconv.ParseInt(strings.TrimPrefix(data, "exercise_add_for_current_workout_"), 10, 64)
@@ -115,6 +121,13 @@ func (h *Handler) RouteCallback(chatID int64, data string) {
 	case strings.HasPrefix(data, "exercise_delete_"):
 		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(data, "exercise_delete_"), 10, 64)
 		h.deleteExercise(chatID, exerciseID)
+
+	case strings.HasPrefix(data, "exercise_show_all_groups"):
+		h.showAllGroups(chatID)
+
+	case strings.HasPrefix(data, "exercise_show_list_"):
+		groupCode := strings.TrimPrefix(data, "exercise_show_list_")
+		h.showAllExercisesByGroup(chatID, groupCode)
 	}
 }
 
@@ -202,13 +215,13 @@ func (h *Handler) moveToExercise(chatID int64, workoutID int64, next bool) {
 	h.ShowCurrentExerciseSession(chatID, workoutID)
 }
 
-func (h *Handler) showExerciseHint(chatID int64, exerciseID int64) {
+func (h *Handler) showExerciseHint(chatID int64, workoutID, exerciseID int64) {
 	res, err := h.getExerciseUC.Execute(exerciseID)
 	if err != nil {
 		h.commonPresenter.HandleInternalError(err, chatID, h.getExerciseUC.Name())
 		return
 	}
-	h.presenter.ShowHint(chatID, res)
+	h.presenter.ShowHint(chatID, res, workoutID)
 }
 
 func (h *Handler) addExercise(chatID int64, workoutID int64) {
@@ -244,4 +257,27 @@ func (h *Handler) addSpecificExerciseForCurrentWorkout(chatID int64, workoutID i
 	h.commonPresenter.SendSimpleHtmlMessage(chatID, fmt.Sprintf("Упражнение <b>'%s'</b> добавлено! ✅", res.ExerciseObj.Name))
 
 	h.workoutsHandler.ShowProgress(chatID, workoutID)
+}
+
+func (h *Handler) showAllGroups(chatID int64) {
+	groupsResult, err := h.getAllGroupsUC.Execute()
+	if err != nil {
+		h.commonPresenter.HandleInternalError(err, chatID, h.getAllGroupsUC.Name())
+		return
+	}
+	h.presenter.ShowAllGroups(chatID, groupsResult.Groups)
+}
+
+func (h *Handler) showAllExercisesByGroup(chatID int64, groupCode string) {
+	exercisesResult, err := h.findTypesByGroupUC.Execute(groupCode)
+	if err != nil {
+		h.commonPresenter.HandleInternalError(err, chatID, h.findTypesByGroupUC.Name())
+		return
+	}
+	res, err := h.getGroupUC.Execute(groupCode)
+	if err != nil {
+		h.commonPresenter.HandleInternalError(err, chatID, h.getGroupUC.Name())
+		return
+	}
+	h.presenter.ShowAllExercises(chatID, exercisesResult.ExerciseTypes, res.Name)
 }

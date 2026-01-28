@@ -16,6 +16,9 @@ func (r *Router) routeCallback(callbackQuery *tgbotapi.CallbackQuery) {
 	case data == "back_to_menu":
 		r.sendMainMenu(chatID, callbackQuery.From)
 
+	case data == "/settings":
+		r.settings(chatID)
+
 	case data == "/admin/users":
 		r.adminsHandler.RouteCallback(chatID, data)
 

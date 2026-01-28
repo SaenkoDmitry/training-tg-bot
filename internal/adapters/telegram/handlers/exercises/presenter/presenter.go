@@ -73,7 +73,7 @@ func (p *Presenter) ShowCurrentSession(chatID int64, res *dto.CurrentExerciseSes
 		),
 		changeSettingsButtons,
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(messages.Technique, fmt.Sprintf("exercise_show_hint_%d", exercise.ID)),
+			tgbotapi.NewInlineKeyboardButtonData(messages.Technique, fmt.Sprintf("exercise_show_hint_%d_%d", exercise.WorkoutDayID, exercise.ExerciseTypeID)),
 			tgbotapi.NewInlineKeyboardButtonData(messages.EndWorkout, fmt.Sprintf("workout_confirm_finish_%d", workoutID)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -102,7 +102,7 @@ func (p *Presenter) ShowNotFoundExercise(chatID int64) {
 }
 
 func (p *Presenter) ShowSelectExerciseForProgramDayDialog(chatID, dayTypeID int64, group *dto.Group, exerciseTypes []models.ExerciseType) {
-	text := fmt.Sprintf("*Тип: %s \n\n Выберите упражнение из списка:*", group.Name)
+	text := fmt.Sprintf("<b>Тип:</b> %s \n\n %s", group.Name, messages.SelectExercise)
 
 	rows := make([][]tgbotapi.InlineKeyboardButton, 0)
 
@@ -118,7 +118,7 @@ func (p *Presenter) ShowSelectExerciseForProgramDayDialog(chatID, dayTypeID int6
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = constants.MarkdownParseMode
+	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
 	p.bot.Send(msg)
 }
@@ -162,15 +162,21 @@ func (p *Presenter) CompleteAllExercises(chatID, workoutID int64) {
 	p.bot.Send(msg)
 }
 
-func (p *Presenter) ShowHint(chatID int64, res *dto.GetExercise) {
-	exercise := res.Exercise
+func (p *Presenter) ShowHint(chatID int64, res *dto.GetExercise, workoutID int64) {
+	exerciseType := res.ExerciseType
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
-	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", fmt.Sprintf("exercise_show_current_session_%d", exercise.WorkoutDayID)),
-	))
+	if workoutID == 0 {
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(messages.BackTo, fmt.Sprintf("exercise_show_list_%s", exerciseType.ExerciseGroupTypeCode)),
+		))
+	} else {
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(messages.BackTo, fmt.Sprintf("exercise_show_current_session_%d", workoutID)),
+		))
+	}
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 
-	msg := tgbotapi.NewMessage(chatID, utils.WrapYandexLink(exercise.ExerciseType.Url))
+	msg := tgbotapi.NewMessage(chatID, utils.WrapYandexLink(exerciseType.Url))
 	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
 	p.bot.Send(msg)
@@ -195,7 +201,7 @@ func (p *Presenter) AddExerciseDialog(chatID, workoutID int64, groups []models.E
 }
 
 func (p *Presenter) ShowSelectExerciseForCurrentWorkoutDialog(chatID, workoutID int64, group *dto.Group, exerciseTypes []models.ExerciseType) {
-	text := fmt.Sprintf("<b>Тип:</b> %s \n\n <b>Выберите упражнение из списка:</b>", group.Name)
+	text := fmt.Sprintf("<b>Тип:</b> %s \n\n %s", group.Name, messages.SelectExercise)
 
 	rows := make([][]tgbotapi.InlineKeyboardButton, 0)
 
@@ -213,4 +219,45 @@ func (p *Presenter) ShowSelectExerciseForCurrentWorkoutDialog(chatID, workoutID 
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(rows...)
 	_, err := p.bot.Send(msg)
 	fmt.Println("err:", err)
+}
+
+func (p *Presenter) ShowAllGroups(chatID int64, groups []models.ExerciseGroupType) {
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+	for i, group := range groups {
+		if i%3 == 0 {
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardRow())
+		}
+		buttons[len(buttons)-1] = append(buttons[len(buttons)-1],
+			tgbotapi.NewInlineKeyboardButtonData(group.Name, fmt.Sprintf("exercise_show_list_%s", group.Code)),
+		)
+	}
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(messages.BackTo, "/settings"),
+	))
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	msg := tgbotapi.NewMessage(chatID, messages.SelectGroupOfMuscle)
+	msg.ParseMode = constants.HtmlParseMode
+	msg.ReplyMarkup = keyboard
+	p.bot.Send(msg)
+}
+
+func (p *Presenter) ShowAllExercises(chatID int64, exerciseTypes []models.ExerciseType, groupName string) {
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+	for _, ex := range exerciseTypes {
+		buttons = append(buttons,
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(ex.Name, fmt.Sprintf("exercise_show_info_%d", ex.ID)),
+			),
+		)
+	}
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(messages.BackTo, "exercise_show_all_groups"),
+	))
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	text := fmt.Sprintf("<b>Тип:</b> %s \n\n %s", groupName, messages.SelectExercise)
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = constants.HtmlParseMode
+	msg.ReplyMarkup = keyboard
+	p.bot.Send(msg)
 }
