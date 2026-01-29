@@ -71,7 +71,7 @@ func (p *Presenter) ViewDayType(chatID int64, res *models.WorkoutDayType, progra
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
 
-		tgbotapi.NewInlineKeyboardButtonData("✏️️ Добавить упраж-ие", fmt.Sprintf("day_type_edit_%d", daytypeID)),
+		tgbotapi.NewInlineKeyboardButtonData("✏️️ Добавить упражнение", fmt.Sprintf("day_type_edit_%d", daytypeID)),
 		tgbotapi.NewInlineKeyboardButtonData("🗑 Удалить", fmt.Sprintf("day_type_confirm_delete_%d", daytypeID)),
 	))
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
