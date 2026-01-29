@@ -13,9 +13,6 @@ func (r *Router) routeCallback(callbackQuery *tgbotapi.CallbackQuery) {
 	fmt.Println("HandleCallback:", data)
 
 	switch {
-	case data == "back_to_menu":
-		r.sendMainMenu(chatID, callbackQuery.From)
-
 	case data == "/settings":
 		r.settings(chatID)
 

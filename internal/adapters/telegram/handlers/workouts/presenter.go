@@ -139,23 +139,11 @@ func (p *Presenter) ShowAlreadyCompleted(chatID int64) {
 
 func (p *Presenter) ShowNotFoundAll(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, "📭 У вас пока нет созданных тренировок.\n\nСоздайте первую тренировку!")
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(messages.BackToMenu, "back_to_menu"),
-		),
-	)
-	msg.ReplyMarkup = keyboard
 	p.bot.Send(msg)
 }
 
 func (p *Presenter) ShowNotFoundAllForUser(chatID int64, user *models.User) {
 	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("📭 У пользователя %s пока нет созданных тренировок.", user.ShortName()))
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(messages.BackToMenu, "back_to_menu"),
-		),
-	)
-	msg.ReplyMarkup = keyboard
 	p.bot.Send(msg)
 }
 
