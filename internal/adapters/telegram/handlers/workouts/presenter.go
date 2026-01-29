@@ -185,7 +185,6 @@ func (p *Presenter) ShowDeleteWorkout(chatID int64) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(messages.MyWorkouts, "workout_show_my"),
-			tgbotapi.NewInlineKeyboardButtonData(messages.BackToMenu, "back_to_menu"),
 		),
 	)
 	msg.ReplyMarkup = keyboard

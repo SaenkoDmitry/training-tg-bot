@@ -15,6 +15,7 @@ type Repo interface {
 	Delete(exerciseID int64) error
 	CreateBatch(exercises []models.Exercise) error
 	Save(exercise *models.Exercise) error
+	FindPreviousByType(exerciseTypeID int64) (models.Exercise, error)
 }
 
 type repoImpl struct {
@@ -88,4 +89,17 @@ func (u *repoImpl) FindAllByUserID(userID int64) ([]models.Exercise, error) {
 		Find(&exercises).Error
 
 	return exercises, err
+}
+
+func (u *repoImpl) FindPreviousByType(exerciseTypeID int64) (models.Exercise, error) {
+	var exercise models.Exercise
+	err := u.db.Joins("JOIN sets ON sets.exercise_id = exercises.id").
+		Where("exercise_type_id = ? AND sets.completed = true", exerciseTypeID).
+		Preload("ExerciseType").
+		Preload("Sets", func(db *gorm.DB) *gorm.DB {
+			return db.Order("sets.index ASC")
+		}).
+		Order("sets.completed_at DESC").
+		First(&exercise).Error
+	return exercise, err
 }

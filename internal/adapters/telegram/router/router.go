@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/admins"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/changes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/daytypes"
@@ -65,6 +66,11 @@ func New(
 }
 
 func (r *Router) HandleUpdate(update tgbotapi.Update) {
+	defer func() {
+		if recovery := recover(); recovery != nil {
+			fmt.Printf("Recovered: %v\n", recovery)
+		}
+	}()
 	switch {
 	case update.Message != nil:
 		r.routeMessage(update.Message)

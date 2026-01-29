@@ -76,22 +76,29 @@ func (uc *CreateUseCase) createExercisesFromPresets(workoutDayID, dayTypeID int6
 		return nil, err
 	}
 
-	for index, exerciseType := range utils.SplitPreset(dayType.Preset) {
+	for index, presetEx := range utils.SplitPreset(dayType.Preset) {
+
 		newExercise := models.Exercise{
 			WorkoutDayID:   workoutDayID,
-			ExerciseTypeID: exerciseType.ID,
+			ExerciseTypeID: presetEx.ID,
 			Index:          index,
 		}
-		for idx2, set := range exerciseType.Sets {
-			newSet := models.Set{Index: idx2}
-			if set.Minutes > 0 {
-				newSet.Minutes = set.Minutes
-			} else {
-				newSet.Reps = set.Reps
-				newSet.Weight = set.Weight
+
+		if prevEx, prevErr := uc.exercisesRepo.FindPreviousByType(presetEx.ID); prevErr == nil {
+			newExercise.Sets = buildSetsFrom(prevEx)
+		} else {
+			for idx2, set := range presetEx.Sets {
+				newSet := models.Set{Index: idx2}
+				if set.Minutes > 0 {
+					newSet.Minutes = set.Minutes
+				} else {
+					newSet.Reps = set.Reps
+					newSet.Weight = set.Weight
+				}
+				newExercise.Sets = append(newExercise.Sets, newSet)
 			}
-			newExercise.Sets = append(newExercise.Sets, newSet)
 		}
+
 		objs = append(objs, newExercise)
 	}
 	return objs, nil
@@ -106,23 +113,34 @@ func (uc *CreateUseCase) createExercisesFromLastWorkout(workoutDayID, previousWo
 		return nil, err
 	}
 	objs := make([]models.Exercise, 0)
-	for _, exercise := range previousExercises {
+	for _, prevWorkoutEx := range previousExercises {
 		newExercise := models.Exercise{
 			WorkoutDayID:   workoutDayID,
-			ExerciseTypeID: exercise.ExerciseTypeID,
-			Index:          exercise.Index,
+			ExerciseTypeID: prevWorkoutEx.ExerciseTypeID,
+			Index:          prevWorkoutEx.Index,
 		}
-		for _, set := range exercise.Sets {
-			newSet := models.Set{
-				Reps:    set.GetRealReps(),
-				Weight:  set.GetRealWeight(),
-				Minutes: set.GetRealMinutes(),
-				Meters:  set.GetRealMeters(),
-				Index:   set.Index,
-			}
-			newExercise.Sets = append(newExercise.Sets, newSet)
+
+		if prevEx, prevErr := uc.exercisesRepo.FindPreviousByType(prevWorkoutEx.ExerciseTypeID); prevErr == nil {
+			newExercise.Sets = buildSetsFrom(prevEx)
+		} else {
+			newExercise.Sets = buildSetsFrom(prevWorkoutEx)
 		}
 		objs = append(objs, newExercise)
 	}
 	return objs, nil
+}
+
+func buildSetsFrom(previousEx models.Exercise) []models.Set {
+	sets := make([]models.Set, 0, len(previousEx.Sets))
+	for _, set := range previousEx.Sets {
+		newSet := models.Set{
+			Reps:    set.GetRealReps(),
+			Weight:  set.GetRealWeight(),
+			Minutes: set.GetRealMinutes(),
+			Meters:  set.GetRealMeters(),
+			Index:   set.Index,
+		}
+		sets = append(sets, newSet)
+	}
+	return sets
 }
