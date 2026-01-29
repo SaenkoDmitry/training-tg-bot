@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
@@ -18,6 +19,8 @@ import (
 )
 
 func main() {
+	log.Println("DEPLOY MARK:", time.Now().UnixNano())
+
 	token := os.Getenv("TELEGRAM_TOKEN")
 	dsn := os.Getenv("DATABASE_URL")
 	fmt.Printf("TELEGRAM_TOKEN: %s, DATABASE_URL: %s\n", token, dsn)
