@@ -8,6 +8,7 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/service/docgenerator"
 	summarysvc "github.com/SaenkoDmitry/training-tg-bot/internal/service/summary"
+	"sort"
 )
 
 type ExportToExcelUseCase struct {
@@ -67,6 +68,10 @@ func (uc *ExportToExcelUseCase) Execute(chatID int64) (*bytes.Buffer, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	sort.Slice(exerciseObjs, func(i, j int) bool {
+		return exerciseObjs[i].ExerciseType.ExerciseGroupTypeCode < exerciseObjs[j].ExerciseType.ExerciseGroupTypeCode
+	})
 
 	progresses := make(map[string]map[string]*summarysvc.Progress)
 	for _, e := range exerciseObjs {
