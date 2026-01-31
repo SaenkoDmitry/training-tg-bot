@@ -7,6 +7,8 @@ import (
 	"github.com/xuri/excelize/v2"
 	"sort"
 	"strconv"
+	"strings"
+	"time"
 )
 
 func (s *serviceImpl) writeByWeekAndExTypeSummarySheet(f *excelize.File, summary map[string]map[string]*summary.WeekSummary) {
@@ -22,7 +24,8 @@ func (s *serviceImpl) writeByWeekAndExTypeSummarySheet(f *excelize.File, summary
 			exercisesMap[exName] = struct{}{}
 		}
 	}
-	sort.Strings(weeks)
+	weeksSort(weeks)
+
 	for exName := range exercisesMap {
 		exercises = append(exercises, exName)
 	}
@@ -61,4 +64,15 @@ func (s *serviceImpl) writeByWeekAndExTypeSummarySheet(f *excelize.File, summary
 		}
 		row++
 	}
+}
+
+func weeksSort(weeks []string) []string {
+	sort.Slice(weeks, func(i, j int) bool {
+		temp1 := strings.Split(weeks[i], " – ")
+		temp2 := strings.Split(weeks[j], " – ")
+		firstDate, _ := time.Parse("02.01.06", temp1[0])
+		secondDate, _ := time.Parse("02.01.06", temp2[0])
+		return firstDate.Before(secondDate)
+	})
+	return weeks
 }
