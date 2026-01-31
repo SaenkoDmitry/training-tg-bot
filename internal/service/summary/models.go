@@ -37,4 +37,19 @@ type Progress struct {
 	MinMeters int
 	MaxMeters int
 	SumMeters int
+
+	Units     string
+	GroupCode string
+}
+
+type ExerciseProgressByDates struct {
+	ExerciseName          string
+	DateWithProgress      []*DateWithProgress
+	ExerciseUnitType      string
+	ExerciseGroupTypeCode string
+}
+
+type DateWithProgress struct {
+	Date     string
+	Progress *Progress
 }

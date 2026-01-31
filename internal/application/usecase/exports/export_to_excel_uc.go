@@ -2,13 +2,13 @@ package exports
 
 import (
 	"bytes"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercisegrouptypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercises"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/users"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/service/docgenerator"
 	summarysvc "github.com/SaenkoDmitry/training-tg-bot/internal/service/summary"
-	"sort"
 )
 
 type ExportToExcelUseCase struct {
@@ -65,22 +65,9 @@ func (uc *ExportToExcelUseCase) Execute(chatID int64) (*bytes.Buffer, error) {
 	totalSummary := uc.summaryService.BuildTotal(workoutObjs, groupCodesMap)
 	byDateSummary := uc.summaryService.BuildByDate(workoutObjs)
 	weekExerciseTypeSummary := uc.summaryService.BuildByWeekAndExType(workoutObjs, groupCodesMap)
+	exerciseProgressByDates := uc.summaryService.BuildExerciseProgressByDates(workoutObjs)
 
-	exerciseObjs, err := uc.exercisesRepo.FindAllByUserID(user.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	sort.Slice(exerciseObjs, func(i, j int) bool {
-		return exerciseObjs[i].ExerciseType.ExerciseGroupTypeCode < exerciseObjs[j].ExerciseType.ExerciseGroupTypeCode
-	})
-
-	progresses := make(map[string]map[string]*summarysvc.Progress)
-	for _, e := range exerciseObjs {
-		progresses[e.ExerciseType.Name] = uc.summaryService.BuildExerciseProgress(workoutObjs, e.ExerciseType.Name)
-	}
-
-	file, err := uc.docGeneratorService.ExportToFile(workoutObjs, totalSummary, byDateSummary, progresses, groupCodesMap, weekExerciseTypeSummary)
+	file, err := uc.docGeneratorService.ExportToFile(workoutObjs, totalSummary, byDateSummary, exerciseProgressByDates, groupCodesMap, weekExerciseTypeSummary)
 	if err != nil {
 		return nil, err
 	}

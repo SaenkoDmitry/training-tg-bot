@@ -12,7 +12,7 @@ type Service interface {
 		workouts []models.WorkoutDay,
 		summary map[string]*summarysvc.ExerciseSummary,
 		byDateSummary map[string]*summarysvc.DateSummary,
-		progresses map[string]map[string]*summarysvc.Progress,
+		exerciseProgressByDates []*summarysvc.ExerciseProgressByDates,
 		groupCodesMap map[string]string,
 		typeSummary map[utils.DateRange]map[string]*summarysvc.WeekSummary,
 	) (*excelize.File, error)
@@ -42,7 +42,7 @@ func (s *serviceImpl) ExportToFile(
 	workouts []models.WorkoutDay,
 	summary map[string]*summarysvc.ExerciseSummary,
 	byDateSummary map[string]*summarysvc.DateSummary,
-	progresses map[string]map[string]*summarysvc.Progress,
+	exerciseProgressByDates []*summarysvc.ExerciseProgressByDates,
 	groupCodesMap map[string]string,
 	byWeekAndExerciseTypeSummary map[utils.DateRange]map[string]*summarysvc.WeekSummary,
 ) (*excelize.File, error) {
@@ -60,7 +60,7 @@ func (s *serviceImpl) ExportToFile(
 	s.writeTotalSummarySheet(f, summary)
 	s.writeByDateSummarySheet(f, byDateSummary)
 	s.writeByWeekAndExTypeSummarySheet(f, byWeekAndExerciseTypeSummary)
-	s.writeAllProgressCharts(f, progresses, redHeaderStyle, greedHeaderStyle, blueHeaderStyle)
+	s.writeAllProgressCharts(f, exerciseProgressByDates, redHeaderStyle, greedHeaderStyle, blueHeaderStyle)
 
 	_ = f.SetRowStyle(WorkoutSheet, 1, 1, blueHeaderStyle)
 	_ = f.SetRowStyle(TotalSummarySheet, 1, 1, redHeaderStyle)

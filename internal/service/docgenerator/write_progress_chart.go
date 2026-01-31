@@ -3,8 +3,8 @@ package docgenerator
 import (
 	"fmt"
 	"math"
-	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
@@ -16,7 +16,7 @@ import (
 
 func (s *serviceImpl) writeAllProgressCharts(
 	f *excelize.File,
-	progresses map[string]map[string]*summary.Progress,
+	exerciseProgressByDates []*summary.ExerciseProgressByDates,
 	redHeaderStyle int,
 	greenHeaderStyle int,
 	blueHeaderStyle int,
@@ -25,21 +25,8 @@ func (s *serviceImpl) writeAllProgressCharts(
 	sheet := ByExerciseSummarySheet
 	_, _ = f.NewSheet(sheet)
 
-	exercises := make([]string, 0)
-	for exercise, progress := range progresses {
-		if len(progress) == 0 {
-			continue
-		}
-		exercises = append(exercises, exercise)
-	}
-	sort.Strings(exercises)
-
 	row := 1
-	for i, e := range exercises {
-		progress, ok := progresses[e]
-		if !ok {
-			continue
-		}
+	for i, e := range exerciseProgressByDates {
 		style := blueHeaderStyle
 		switch {
 		case i%3 == 1:
@@ -47,7 +34,7 @@ func (s *serviceImpl) writeAllProgressCharts(
 		case i%3 == 2:
 			style = greenHeaderStyle
 		}
-		row = s.writeProgressChart(f, sheet, e, progress, row, style)
+		row = s.writeProgressChart(f, sheet, e.ExerciseName, e.DateWithProgress, e.ExerciseUnitType, row, style)
 	}
 }
 
@@ -55,41 +42,23 @@ func (s *serviceImpl) writeProgressChart(
 	f *excelize.File,
 	sheet string,
 	exercise string,
-	progress map[string]*summary.Progress,
+	dateWithProgresses []*summary.DateWithProgress,
+	units string,
 	firstRow int,
 	headerStyle int,
 ) int {
-	dates := make([]string, 0, len(progress))
-	for d := range progress {
-		dates = append(dates, d)
-	}
-	sort.Strings(dates)
-
-	exerciseUnitType := constants.RepsUnit
-	for _, p := range progress {
-		if p.SumMinutes > 0 {
-			exerciseUnitType = constants.MinutesUnit
-			break
-		} else if p.SumMeters > 0 {
-			exerciseUnitType = constants.MetersUnit
-			break
-		} else {
-			break
-		}
-	}
-
-	switch exerciseUnitType {
-	case constants.RepsUnit:
+	switch {
+	case strings.Contains(units, constants.RepsUnit):
 		_ = f.SetCellValue(sheet, fmt.Sprintf("A%d", firstRow), messages.WorkoutDate)
 		_ = f.SetCellValue(sheet, fmt.Sprintf("B%d", firstRow), "Макс вес (кг)")
 		_ = f.SetCellValue(sheet, fmt.Sprintf("C%d", firstRow), "Макс кол-во повторов")
 		_ = f.SetCellValue(sheet, fmt.Sprintf("D%d", firstRow), "Средний вес (кг)")
-	case constants.MinutesUnit:
+	case strings.Contains(units, constants.MinutesUnit):
 		_ = f.SetCellValue(sheet, fmt.Sprintf("A%d", firstRow), messages.WorkoutDate)
 		_ = f.SetCellValue(sheet, fmt.Sprintf("B%d", firstRow), "Макс время (минут)")
 		_ = f.SetCellValue(sheet, fmt.Sprintf("C%d", firstRow), "Мин время (минут)")
 		_ = f.SetCellValue(sheet, fmt.Sprintf("D%d", firstRow), "Всего (минут)")
-	case constants.MetersUnit:
+	case strings.Contains(units, constants.MetersUnit):
 		_ = f.SetCellValue(sheet, fmt.Sprintf("A%d", firstRow), messages.WorkoutDate)
 		_ = f.SetCellValue(sheet, fmt.Sprintf("B%d", firstRow), "Макс дистанция (метры)")
 		_ = f.SetCellValue(sheet, fmt.Sprintf("C%d", firstRow), "Мин дистанция (метры)")
@@ -97,26 +66,26 @@ func (s *serviceImpl) writeProgressChart(
 	}
 	_ = f.SetRowStyle(ByExerciseSummarySheet, firstRow, firstRow, headerStyle)
 
-	lastRow := firstRow + len(dates)
+	lastRow := firstRow + len(dateWithProgresses)
 
 	row := firstRow + 1
-	for _, d := range dates {
-		switch exerciseUnitType {
-		case constants.RepsUnit:
-			_ = f.SetCellValue(sheet, "A"+strconv.Itoa(row), d)
-			_ = f.SetCellValue(sheet, "B"+strconv.Itoa(row), float64(progress[d].MaxWeight))
-			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(progress[d].MaxReps))
-			_ = f.SetCellValue(sheet, "D"+strconv.Itoa(row), math.Round(float64(progress[d].AvgWeight)))
-		case constants.MinutesUnit:
-			_ = f.SetCellValue(sheet, "A"+strconv.Itoa(row), d)
-			_ = f.SetCellValue(sheet, "B"+strconv.Itoa(row), float64(progress[d].MaxMinutes))
-			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(progress[d].MinMinutes))
-			_ = f.SetCellValue(sheet, "D"+strconv.Itoa(row), math.Round(float64(progress[d].SumMinutes)))
-		case constants.MetersUnit:
-			_ = f.SetCellValue(sheet, "A"+strconv.Itoa(row), d)
-			_ = f.SetCellValue(sheet, "B"+strconv.Itoa(row), float64(progress[d].MaxMeters))
-			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(progress[d].MinMeters))
-			_ = f.SetCellValue(sheet, "D"+strconv.Itoa(row), math.Round(float64(progress[d].SumMeters)))
+	for _, d := range dateWithProgresses {
+		switch {
+		case strings.Contains(units, constants.RepsUnit):
+			_ = f.SetCellValue(sheet, "A"+strconv.Itoa(row), d.Date)
+			_ = f.SetCellValue(sheet, "B"+strconv.Itoa(row), float64(d.Progress.MaxWeight))
+			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(d.Progress.MaxReps))
+			_ = f.SetCellValue(sheet, "D"+strconv.Itoa(row), math.Round(float64(d.Progress.AvgWeight)))
+		case strings.Contains(units, constants.MinutesUnit):
+			_ = f.SetCellValue(sheet, "A"+strconv.Itoa(row), d.Date)
+			_ = f.SetCellValue(sheet, "B"+strconv.Itoa(row), float64(d.Progress.MaxMinutes))
+			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(d.Progress.MinMinutes))
+			_ = f.SetCellValue(sheet, "D"+strconv.Itoa(row), math.Round(float64(d.Progress.SumMinutes)))
+		case strings.Contains(units, constants.MetersUnit):
+			_ = f.SetCellValue(sheet, "A"+strconv.Itoa(row), d.Date)
+			_ = f.SetCellValue(sheet, "B"+strconv.Itoa(row), float64(d.Progress.MaxMeters))
+			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(d.Progress.MinMeters))
+			_ = f.SetCellValue(sheet, "D"+strconv.Itoa(row), math.Round(float64(d.Progress.SumMeters)))
 		}
 		row++
 	}

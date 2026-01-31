@@ -1,9 +1,11 @@
 package summary
 
 import (
-	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 	"math"
+	"sort"
 	"time"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 )
@@ -11,7 +13,7 @@ import (
 type Service interface {
 	BuildTotal(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[string]*ExerciseSummary
 	BuildByDate(workouts []models.WorkoutDay) map[string]*DateSummary
-	BuildExerciseProgress(workouts []models.WorkoutDay, exerciseName string) map[string]*Progress
+	BuildExerciseProgressByDates(workouts []models.WorkoutDay) []*ExerciseProgressByDates
 	BuildByWeekAndExType(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[utils.DateRange]map[string]*WeekSummary
 }
 
@@ -104,12 +106,8 @@ func (s *serviceImpl) BuildByDate(workouts []models.WorkoutDay) map[string]*Date
 	return result
 }
 
-func (s *serviceImpl) BuildExerciseProgress(
-	workouts []models.WorkoutDay,
-	exerciseName string,
-) map[string]*Progress {
-
-	progress := make(map[string]*Progress)
+func (s *serviceImpl) BuildExerciseProgressByDates(workouts []models.WorkoutDay) []*ExerciseProgressByDates {
+	exerciseWithProgressesMap := make(map[string]map[string]*Progress) // exName -> date -> progress
 
 	for _, w := range workouts {
 		if !w.Completed {
@@ -121,9 +119,6 @@ func (s *serviceImpl) BuildExerciseProgress(
 
 		var key string
 		for _, e := range w.Exercises {
-			if e.ExerciseType.Name != exerciseName {
-				continue
-			}
 			if e.CompletedSets() == 0 {
 				continue
 			}
@@ -137,9 +132,17 @@ func (s *serviceImpl) BuildExerciseProgress(
 			sumWeight := float32(0)
 			countOfReps := 0
 
-			if _, ok := progress[key]; !ok {
-				progress[key] = &Progress{}
+			if _, ok := exerciseWithProgressesMap[e.ExerciseType.Name]; !ok {
+				exerciseWithProgressesMap[e.ExerciseType.Name] = make(map[string]*Progress)
 			}
+			if _, ok := exerciseWithProgressesMap[e.ExerciseType.Name][key]; !ok {
+				exerciseWithProgressesMap[e.ExerciseType.Name][key] = &Progress{
+					Units:     e.ExerciseType.Units,
+					GroupCode: e.ExerciseType.ExerciseGroupTypeCode,
+				}
+			}
+
+			tempProgress := exerciseWithProgressesMap[e.ExerciseType.Name][key]
 
 			for _, set := range e.Sets {
 				if !set.Completed {
@@ -148,35 +151,69 @@ func (s *serviceImpl) BuildExerciseProgress(
 
 				countOfReps += set.GetRealReps()
 				sumWeight += set.GetRealWeight() * float32(set.GetRealReps())
-				if progress[key].MaxWeight < set.GetRealWeight() ||
-					progress[key].MaxWeight == set.GetRealWeight() && progress[key].MaxReps < set.GetRealReps() {
-					progress[key].MaxWeight = set.GetRealWeight()
-					progress[key].MaxReps = set.GetRealReps()
+				if tempProgress.MaxWeight < set.GetRealWeight() ||
+					tempProgress.MaxWeight == set.GetRealWeight() && tempProgress.MaxReps < set.GetRealReps() {
+					tempProgress.MaxWeight = set.GetRealWeight()
+					tempProgress.MaxReps = set.GetRealReps()
 				}
 
-				progress[key].SumMinutes += set.GetRealMinutes()
-				if progress[key].MinMinutes == 0 {
-					progress[key].MinMinutes = set.GetRealMinutes()
-					progress[key].MaxMinutes = set.GetRealMinutes()
+				tempProgress.SumMinutes += set.GetRealMinutes()
+				if tempProgress.MinMinutes == 0 {
+					tempProgress.MinMinutes = set.GetRealMinutes()
+					tempProgress.MaxMinutes = set.GetRealMinutes()
 				} else {
-					progress[key].MinMinutes = min(progress[key].MinMinutes, set.GetRealMinutes())
-					progress[key].MaxMinutes = max(progress[key].MaxMinutes, set.GetRealMinutes())
+					tempProgress.MinMinutes = min(tempProgress.MinMinutes, set.GetRealMinutes())
+					tempProgress.MaxMinutes = max(tempProgress.MaxMinutes, set.GetRealMinutes())
 				}
 
-				progress[key].SumMeters += set.GetRealMeters()
-				if progress[key].MinMeters == 0 {
-					progress[key].MinMeters = set.GetRealMeters()
-					progress[key].MaxMeters = set.GetRealMeters()
+				tempProgress.SumMeters += set.GetRealMeters()
+				if tempProgress.MinMeters == 0 {
+					tempProgress.MinMeters = set.GetRealMeters()
+					tempProgress.MaxMeters = set.GetRealMeters()
 				} else {
-					progress[key].MinMeters = min(progress[key].MinMeters, set.GetRealMeters())
-					progress[key].MaxMeters = max(progress[key].MaxMeters, set.GetRealMeters())
+					tempProgress.MinMeters = min(tempProgress.MinMeters, set.GetRealMeters())
+					tempProgress.MaxMeters = max(tempProgress.MaxMeters, set.GetRealMeters())
 				}
 			}
-			progress[key].AvgWeight = sumWeight / float32(countOfReps)
+			tempProgress.AvgWeight = sumWeight / float32(countOfReps)
 		}
 	}
 
-	return progress
+	result := make([]*ExerciseProgressByDates, 0, len(exerciseWithProgressesMap))
+	for exName, progressByDate := range exerciseWithProgressesMap {
+		units := ""
+		groupCode := ""
+		progressByDates := make([]*DateWithProgress, 0)
+		for date, progress := range progressByDate {
+			units = progress.Units
+			groupCode = progress.GroupCode
+			progressByDates = append(progressByDates, &DateWithProgress{
+				Date:     date,
+				Progress: progress,
+			})
+		}
+		sort.Slice(progressByDates, func(i, j int) bool {
+			return progressByDates[i].Date < progressByDates[j].Date
+		})
+		result = append(result, &ExerciseProgressByDates{
+			ExerciseName:          exName,
+			DateWithProgress:      progressByDates,
+			ExerciseUnitType:      units,
+			ExerciseGroupTypeCode: groupCode,
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].ExerciseGroupTypeCode == "cardio" {
+			return true
+		}
+		if result[j].ExerciseGroupTypeCode == "cardio" {
+			return true
+		}
+		return result[i].ExerciseGroupTypeCode < result[j].ExerciseGroupTypeCode
+	})
+
+	return result
 }
 
 func (s *serviceImpl) BuildByWeekAndExType(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[utils.DateRange]map[string]*WeekSummary {
