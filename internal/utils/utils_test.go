@@ -332,13 +332,69 @@ func TestGetThisWeek(t *testing.T) {
 			},
 			want: "26.01.26 – 01.02.26",
 		},
+		{
+			name: "29.12.25 – 04.01.26",
+			args: args{
+				dateStr: "2026-01-04 10:23:09 +00:00",
+			},
+			want: "29.12.25 – 04.01.26",
+		},
+		{
+			name: "05.01.26 – 11.01.26",
+			args: args{
+				dateStr: "2026-01-05 16:26:42 +00:00",
+			},
+			want: "05.01.26 – 11.01.26",
+		},
+		{
+			name: "05.01.26 – 11.01.26",
+			args: args{
+				dateStr: "2026-01-07 10:22:52 +00:00",
+			},
+			want: "05.01.26 – 11.01.26",
+		},
+		{
+			name: "05.01.26 – 11.01.26",
+			args: args{
+				dateStr: "2026-01-08 16:35:58 +00:00",
+			},
+			want: "05.01.26 – 11.01.26",
+		},
+		{
+			name: "05.01.26 – 11.01.26",
+			args: args{
+				dateStr: "2026-01-08 18:06:34 +00:00",
+			},
+			want: "05.01.26 – 11.01.26",
+		},
+		{
+			name: "29.12.25 – 04.01.26",
+			args: args{
+				dateStr: "2026-01-02 14:25:06 +00:00",
+			},
+			want: "29.12.25 – 04.01.26",
+		},
+		{
+			name: "29.12.25 – 04.01.26",
+			args: args{
+				dateStr: "2026-01-04 10:23:09.096293 +00:00",
+			},
+			want: "29.12.25 – 04.01.26",
+		},
+		{
+			name: "05.01.26 – 11.01.26",
+			args: args{
+				dateStr: "2026-01-05 16:26:42 +00:00",
+			},
+			want: "05.01.26 – 11.01.26",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			layout := "2006-01-02 15:04:05 -07:00"
 			date, err := time.Parse(layout, tt.args.dateStr)
 			assert.NoError(t, err)
-			if got := GetThisWeek(date); got != tt.want {
+			if got := GetThisWeekRange(date).Format(); got != tt.want {
 				t.Errorf("GetThisWeek() = %v, want %v", got, tt.want)
 			}
 		})

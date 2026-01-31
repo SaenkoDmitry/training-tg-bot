@@ -99,7 +99,6 @@ func (s *serviceImpl) writeProgressChart(
 
 	lastRow := firstRow + len(dates)
 
-	fmt.Println("len(dates):", len(dates))
 	row := firstRow + 1
 	for _, d := range dates {
 		switch exerciseUnitType {
@@ -114,7 +113,6 @@ func (s *serviceImpl) writeProgressChart(
 			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(progress[d].MinMinutes))
 			_ = f.SetCellValue(sheet, "D"+strconv.Itoa(row), math.Round(float64(progress[d].SumMinutes)))
 		case constants.MetersUnit:
-			fmt.Println("progress[d]", progress[d])
 			_ = f.SetCellValue(sheet, "A"+strconv.Itoa(row), d)
 			_ = f.SetCellValue(sheet, "B"+strconv.Itoa(row), float64(progress[d].MaxMeters))
 			_ = f.SetCellValue(sheet, "C"+strconv.Itoa(row), float64(progress[d].MinMeters))

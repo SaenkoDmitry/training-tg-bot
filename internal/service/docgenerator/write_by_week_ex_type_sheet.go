@@ -3,28 +3,29 @@ package docgenerator
 import (
 	"fmt"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/service/summary"
+	summarysvc "github.com/SaenkoDmitry/training-tg-bot/internal/service/summary"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 	"github.com/xuri/excelize/v2"
 	"sort"
 	"strconv"
-	"strings"
-	"time"
 )
 
-func (s *serviceImpl) writeByWeekAndExTypeSummarySheet(f *excelize.File, summary map[string]map[string]*summary.WeekSummary) {
+func (s *serviceImpl) writeByWeekAndExTypeSummarySheet(f *excelize.File, summary map[utils.DateRange]map[string]*summarysvc.WeekSummary) {
 	sheet := ByWeekAndExTypeSummarySheet
 	_, _ = f.NewSheet(sheet)
 
 	exercisesMap := make(map[string]struct{})
 	exercises := make([]string, 0)
-	weeks := make([]string, 0)
+	weeks := make([]utils.DateRange, 0)
 	for week, exMap := range summary {
 		weeks = append(weeks, week)
 		for exName := range exMap {
 			exercisesMap[exName] = struct{}{}
 		}
 	}
-	weeksSort(weeks)
+	sort.Slice(weeks, func(i, j int) bool {
+		return weeks[i].From.Before(weeks[j].From)
+	})
 
 	for exName := range exercisesMap {
 		exercises = append(exercises, exName)
@@ -48,7 +49,7 @@ func (s *serviceImpl) writeByWeekAndExTypeSummarySheet(f *excelize.File, summary
 	for _, week := range weeks {
 		sum := summary[week]
 
-		_ = f.SetCellValue(sheet, string('A')+strconv.Itoa(row), week)
+		_ = f.SetCellValue(sheet, string('A')+strconv.Itoa(row), week.Format())
 		for i, ex := range exercises {
 			if sum[ex] == nil {
 				continue
@@ -64,15 +65,4 @@ func (s *serviceImpl) writeByWeekAndExTypeSummarySheet(f *excelize.File, summary
 		}
 		row++
 	}
-}
-
-func weeksSort(weeks []string) []string {
-	sort.Slice(weeks, func(i, j int) bool {
-		temp1 := strings.Split(weeks[i], " – ")
-		temp2 := strings.Split(weeks[j], " – ")
-		firstDate, _ := time.Parse("02.01.06", temp1[0])
-		secondDate, _ := time.Parse("02.01.06", temp2[0])
-		return firstDate.Before(secondDate)
-	})
-	return weeks
 }

@@ -3,6 +3,7 @@ package docgenerator
 import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	summarysvc "github.com/SaenkoDmitry/training-tg-bot/internal/service/summary"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -13,7 +14,7 @@ type Service interface {
 		byDateSummary map[string]*summarysvc.DateSummary,
 		progresses map[string]map[string]*summarysvc.Progress,
 		groupCodesMap map[string]string,
-		typeSummary map[string]map[string]*summarysvc.WeekSummary,
+		typeSummary map[utils.DateRange]map[string]*summarysvc.WeekSummary,
 	) (*excelize.File, error)
 }
 
@@ -43,7 +44,7 @@ func (s *serviceImpl) ExportToFile(
 	byDateSummary map[string]*summarysvc.DateSummary,
 	progresses map[string]map[string]*summarysvc.Progress,
 	groupCodesMap map[string]string,
-	byWeekAndExerciseTypeSummary map[string]map[string]*summarysvc.WeekSummary,
+	byWeekAndExerciseTypeSummary map[utils.DateRange]map[string]*summarysvc.WeekSummary,
 ) (*excelize.File, error) {
 	f := excelize.NewFile()
 

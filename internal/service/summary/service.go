@@ -12,7 +12,7 @@ type Service interface {
 	BuildTotal(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[string]*ExerciseSummary
 	BuildByDate(workouts []models.WorkoutDay) map[string]*DateSummary
 	BuildExerciseProgress(workouts []models.WorkoutDay, exerciseName string) map[string]*Progress
-	BuildByWeekAndExType(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[string]map[string]*WeekSummary
+	BuildByWeekAndExType(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[utils.DateRange]map[string]*WeekSummary
 }
 
 type serviceImpl struct {
@@ -117,7 +117,7 @@ func (s *serviceImpl) BuildExerciseProgress(
 		}
 
 		currDate := w.StartedAt.Add(3 * time.Hour).Format("02.01.2006")
-		thisWeek := utils.GetThisWeek(w.StartedAt)
+		thisWeekRange := utils.GetThisWeekRange(w.StartedAt)
 
 		var key string
 		for _, e := range w.Exercises {
@@ -129,7 +129,7 @@ func (s *serviceImpl) BuildExerciseProgress(
 			}
 
 			if e.ExerciseType.ExerciseGroupTypeCode == "cardio" {
-				key = thisWeek
+				key = thisWeekRange.Format()
 			} else {
 				key = currDate
 			}
@@ -179,10 +179,10 @@ func (s *serviceImpl) BuildExerciseProgress(
 	return progress
 }
 
-func (s *serviceImpl) BuildByWeekAndExType(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[string]map[string]*WeekSummary {
-	result := make(map[string]map[string]*WeekSummary)
+func (s *serviceImpl) BuildByWeekAndExType(workouts []models.WorkoutDay, groupCodesMap map[string]string) map[utils.DateRange]map[string]*WeekSummary {
+	result := make(map[utils.DateRange]map[string]*WeekSummary)
 	for _, w := range workouts {
-		thisWeek := utils.GetThisWeek(w.StartedAt)
+		thisWeek := utils.GetThisWeekRange(w.StartedAt)
 		if _, ok := result[thisWeek]; !ok {
 			result[thisWeek] = map[string]*WeekSummary{}
 		}
