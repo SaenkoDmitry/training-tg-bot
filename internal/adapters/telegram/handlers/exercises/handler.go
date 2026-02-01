@@ -281,3 +281,10 @@ func (h *Handler) showAllExercisesByGroup(chatID int64, groupCode string) {
 	}
 	h.presenter.ShowAllExercises(chatID, exercisesResult.ExerciseTypes, res.Name)
 }
+
+func (h *Handler) RouteMessage(chatID int64, text string) {
+	switch {
+	case strings.HasPrefix(text, "exercise_show_all_groups"):
+		h.showAllGroups(chatID)
+	}
+}

@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
 )
@@ -13,6 +14,9 @@ func (r *Router) routeCallback(callbackQuery *tgbotapi.CallbackQuery) {
 	fmt.Println("HandleCallback:", data)
 
 	switch {
+	case data == messages.BackToMenu || data == "/menu":
+		r.sendMainMenu(chatID, callbackQuery.From, false)
+
 	case data == "/settings":
 		r.settings(chatID)
 

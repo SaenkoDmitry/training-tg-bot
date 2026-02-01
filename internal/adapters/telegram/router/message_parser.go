@@ -17,7 +17,7 @@ func (r *Router) routeMessage(message *tgbotapi.Message) {
 
 	switch {
 	case text == messages.BackToMenu || text == "/start" || text == "/menu":
-		r.sendMainMenu(chatID, message.From)
+		r.sendMainMenu(chatID, message.From, true)
 
 	case text == messages.StartWorkout || text == "/start_workout":
 		r.workoutsHandler.RouteMessage(chatID, "/workouts/start")
@@ -37,6 +37,9 @@ func (r *Router) routeMessage(message *tgbotapi.Message) {
 	case text == messages.Measurements || text == "measurements_menu":
 		r.measurementsHandler.RouteMessage(chatID, "measurements_menu")
 
+	case text == messages.LibraryOfExercises || text == "exercise_show_all_groups":
+		r.exercisesHandler.RouteMessage(chatID, "exercise_show_all_groups")
+
 	case text == messages.HowToUse || text == "/about":
 		r.about(chatID)
 
@@ -48,8 +51,12 @@ func (r *Router) routeMessage(message *tgbotapi.Message) {
 	}
 }
 
-func (r *Router) sendMainMenu(chatID int64, from *tgbotapi.User) {
-	text := messages.Hello
+func (r *Router) sendMainMenu(chatID int64, from *tgbotapi.User, hello bool) {
+	text := "♡"
+
+	if hello {
+		text = messages.Hello
+	}
 
 	user, _ := r.createUserUC.Execute(chatID, from)
 
@@ -67,7 +74,7 @@ func (r *Router) sendMainMenu(chatID int64, from *tgbotapi.User) {
 	))
 	rows = append(rows, tgbotapi.NewKeyboardButtonRow(
 		//tgbotapi.NewKeyboardButton(messages.Settings),
-		tgbotapi.NewKeyboardButton(messages.Exercises),
+		tgbotapi.NewKeyboardButton(messages.LibraryOfExercises),
 		tgbotapi.NewKeyboardButton(messages.HowToUse),
 	))
 
@@ -93,7 +100,7 @@ func (r *Router) settings(chatID int64) {
 		tgbotapi.NewInlineKeyboardButtonData(messages.Measurements, "measurements_menu"),
 	))
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData(messages.Exercises, "exercise_show_all_groups"),
+		tgbotapi.NewInlineKeyboardButtonData(messages.LibraryOfExercises, "exercise_show_all_groups"),
 	))
 	msg := tgbotapi.NewMessage(chatID, "<b>Выберите действие:</b>")
 	msg.ParseMode = constants.HtmlParseMode

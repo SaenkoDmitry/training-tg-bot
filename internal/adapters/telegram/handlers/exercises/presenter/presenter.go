@@ -248,7 +248,7 @@ func (p *Presenter) ShowAllGroups(chatID int64, groups []models.ExerciseGroupTyp
 		)
 	}
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData(messages.BackTo, "/settings"),
+		tgbotapi.NewInlineKeyboardButtonData(messages.BackTo, "/menu"),
 	))
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
