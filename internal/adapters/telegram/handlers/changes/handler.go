@@ -249,6 +249,7 @@ func (h *Handler) RouteMessage(chatID int64, text string) {
 		}
 		createdMeasurement, _ := h.createMeasurementUC.Execute(newMeasurement)
 		h.presenter.showCreated(chatID, createdMeasurement)
+		h.userStatesMachine.Clear(chatID)
 
 	case strings.HasPrefix(state, "awaiting_reps_"):
 		exerciseID, _ := strconv.ParseInt(strings.TrimPrefix(state, "awaiting_reps_"), 10, 64)
