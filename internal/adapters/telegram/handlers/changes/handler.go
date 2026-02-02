@@ -310,6 +310,7 @@ func (h *Handler) RouteMessage(chatID int64, text string) {
 			h.commonPresenter.HandleInternalError(err, chatID, h.changeNextSetUC.Name())
 			return
 		}
+		h.userStatesMachine.Clear(chatID)
 		if res, manageErr := h.manageProgramUC.Execute(chatID); manageErr == nil {
 			h.programPresenter.ShowProgramManageDialog(chatID, res)
 		}
@@ -321,6 +322,7 @@ func (h *Handler) RouteMessage(chatID int64, text string) {
 			h.commonPresenter.HandleInternalError(err, chatID, h.dayTypesCreateUC.Name())
 			return
 		}
+		h.userStatesMachine.Clear(chatID)
 		if res, addErr := h.getAllGroupsUC.Execute(); addErr == nil {
 			h.programPresenter.ShowSelectDayTypeDialog(chatID, dayTypeID, res)
 		}
@@ -404,7 +406,7 @@ func (h *Handler) RouteMessage(chatID int64, text string) {
 			h.commonPresenter.HandleInternalError(err, chatID, h.dayTypesUpdateUC.Name())
 			return
 		}
-
+		h.userStatesMachine.Clear(chatID)
 		h.dayTypesHandler.ViewDayType(chatID, dayType.ID)
 	}
 }
