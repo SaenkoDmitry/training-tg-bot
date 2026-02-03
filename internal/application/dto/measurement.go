@@ -1,6 +1,7 @@
 package dto
 
 type Measurement struct {
+	ID        int64
 	CreatedAt string
 
 	Shoulders string

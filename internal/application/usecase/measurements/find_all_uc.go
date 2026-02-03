@@ -42,6 +42,7 @@ func (uc *FindAllByUserUseCase) Execute(chatID int64, limit, offset int) (*dto.F
 	result := make([]dto.Measurement, 0, len(measurementObjs))
 	for _, m := range measurementObjs {
 		result = append(result, dto.Measurement{
+			ID:        m.ID,
 			CreatedAt: utils.FormatDate(m.CreatedAt),
 			Shoulders: utils.FormatCentimeters(m.Shoulders),
 			Chest:     utils.FormatCentimeters(m.Chest),

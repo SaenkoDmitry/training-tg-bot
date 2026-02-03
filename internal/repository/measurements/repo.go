@@ -13,6 +13,7 @@ type Repo interface {
 	FindAll(userID int64) ([]models.Measurement, error)
 	FindAllLimitOffset(userID int64, limit, offset int) ([]models.Measurement, error)
 	Count(userID int64) (int64, error)
+	DeleteByID(id int64) error
 }
 
 type repoImpl struct {
@@ -23,6 +24,11 @@ func NewRepo(db *gorm.DB) Repo {
 	return &repoImpl{
 		db: db,
 	}
+}
+
+func (u *repoImpl) DeleteByID(measurementID int64) error {
+	u.db.Where("id = ?", measurementID).Delete(&models.Measurement{})
+	return nil
 }
 
 func (u *repoImpl) Delete(measurement *models.Measurement) error {

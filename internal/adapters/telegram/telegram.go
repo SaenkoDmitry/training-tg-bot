@@ -93,7 +93,8 @@ func New(token string, useCases *usecase.Container) (*App, error) {
 		useCases.UpdateDateTypeUC, useCases.GetDayTypeUC, useCases.ExerciseTypeListUC, useCases.GetProgramUC, dayTypesHandler,
 		useCases.CreateMeasurementUC)
 
-	measurementsHandler := measurements.NewHandler(bot, useCases.FindAllMeasurementsUC)
+	measurementsHandler := measurements.NewHandler(bot, useCases.FindAllMeasurementsUC, useCases.GetMeasurementByIDUC,
+		useCases.DeleteMeasurementByIDUC)
 
 	r := router.New(
 		bot,

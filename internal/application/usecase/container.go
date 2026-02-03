@@ -98,8 +98,10 @@ type Container struct {
 	DeleteDayTypeUC *daytypeusecases.DeleteUseCase
 
 	// measurements
-	CreateMeasurementUC   *measurementsusecases.CreateUseCase
-	FindAllMeasurementsUC *measurementsusecases.FindAllByUserUseCase
+	CreateMeasurementUC     *measurementsusecases.CreateUseCase
+	FindAllMeasurementsUC   *measurementsusecases.FindAllByUserUseCase
+	GetMeasurementByIDUC    *measurementsusecases.GetByIDUseCase
+	DeleteMeasurementByIDUC *measurementsusecases.DeleteByIDUseCase
 }
 
 func NewContainer(db *gorm.DB) *Container {
@@ -187,7 +189,9 @@ func NewContainer(db *gorm.DB) *Container {
 		GetUserUC:    userusecases.NewGetUseCase(usersRepo),
 
 		// measurements
-		CreateMeasurementUC:   measurementsusecases.NewCreateUseCase(measurementsRepo),
-		FindAllMeasurementsUC: measurementsusecases.NewFindAllByUserUseCase(measurementsRepo, usersRepo),
+		CreateMeasurementUC:     measurementsusecases.NewCreateUseCase(measurementsRepo),
+		FindAllMeasurementsUC:   measurementsusecases.NewFindAllByUserUseCase(measurementsRepo, usersRepo),
+		GetMeasurementByIDUC:    measurementsusecases.NewGetByIDUseCase(measurementsRepo),
+		DeleteMeasurementByIDUC: measurementsusecases.NewDeleteByIDUseCase(measurementsRepo),
 	}
 }

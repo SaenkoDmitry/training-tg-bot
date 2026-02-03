@@ -17,17 +17,18 @@ func NewPresenter(bot *tgbotapi.BotAPI) *Presenter {
 	return &Presenter{bot: bot}
 }
 
+const (
+	defaultLimit = 4
+)
+
 func (p Presenter) showMenu(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID,
 		"<b>Выберите действие:</b>")
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("➕ Добавить новое", "change_add_new_measurement"),
-			formatMoveToButton("📋 История", 3, 0),
+			formatMoveToButton("📋 История", defaultLimit, 0),
 		),
-		//tgbotapi.NewInlineKeyboardRow(
-		//	tgbotapi.NewInlineKeyboardButtonData("🗑 Удалить последнее добавленное", "measurements_delete_last"),
-		//),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(messages.Export, "export_measurements_to_excel"),
 		),
@@ -73,7 +74,7 @@ func (p Presenter) showLimitOffset(chatID int64, limit, offset int, result *dto.
 		weights = append(weights, m.Weight)
 	}
 	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf(
-		"<b>%s за период \n"+
+		"<b>%s за период (всего %d) \n"+
 			"📆 %s – %s</b>\n\n"+
 			"• <u>Плечи (см)</u>: %s\n\n"+
 			"• <u>Грудь (см)</u>: %s\n\n"+
@@ -86,8 +87,7 @@ func (p Presenter) showLimitOffset(chatID int64, limit, offset int, result *dto.
 			"• <u>Икра левая (см)</u>: %s\n\n"+
 			"• <u>Икра правая (см)</u>: %s\n\n"+
 			"• <u>Вес (кг)</u>: %s",
-		messages.Measurements,
-		from, to,
+		messages.Measurements, count, from, to,
 		strings.Join(shoulders, delimiter),
 		strings.Join(chests, delimiter),
 		strings.Join(handLeft, delimiter),
@@ -101,6 +101,16 @@ func (p Presenter) showLimitOffset(chatID int64, limit, offset int, result *dto.
 		strings.Join(weights, delimiter),
 	))
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+
+	for i := len(measurementObjs) - 1; i >= 0; i-- {
+		if (len(measurementObjs)-1)%2 == i%2 {
+			buttons = append(buttons, []tgbotapi.InlineKeyboardButton{})
+		}
+		buttons[len(buttons)-1] = append(buttons[len(buttons)-1],
+			tgbotapi.NewInlineKeyboardButtonData(measurementObjs[i].CreatedAt, fmt.Sprintf("measurements_view_%d", measurementObjs[i].ID)),
+		)
+	}
+
 	buttons = append(buttons, []tgbotapi.InlineKeyboardButton{})
 	if offset+limit < count {
 		buttons[len(buttons)-1] = append(buttons[len(buttons)-1], formatMoveToButton(messages.Earlier, limit, offset+limit))
@@ -116,6 +126,44 @@ func (p Presenter) showLimitOffset(chatID int64, limit, offset int, result *dto.
 	msg.ParseMode = constants.HtmlParseMode
 	msg.ReplyMarkup = keyboard
 	p.bot.Send(msg)
+}
+
+func (p Presenter) viewMeasurement(chatID int64, measurementObj *dto.Measurement) {
+	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf(
+		"📆 <b>%s</b>\n\n"+
+			"• <u>Плечи (см)</u>: %s\n\n"+
+			"• <u>Грудь (см)</u>: %s\n\n"+
+			"• <u>Рука левая (см)</u>: %s\n\n"+
+			"• <u>Рука правая (см)</u>: %s\n\n"+
+			"• <u>Талия (см)</u>: %s\n\n"+
+			"• <u>Ягодицы (см)</u>: %s\n\n"+
+			"• <u>Бедро левое (см)</u>: %s\n\n"+
+			"• <u>Бедро правое (см)</u>: %s\n\n"+
+			"• <u>Икра левая (см)</u>: %s\n\n"+
+			"• <u>Икра правая (см)</u>: %s\n\n"+
+			"• <u>Вес (кг)</u>: %s",
+		measurementObj.CreatedAt,
+		measurementObj.Shoulders,
+		measurementObj.Chest,
+		measurementObj.HandLeft,
+		measurementObj.HipRight,
+		measurementObj.Waist,
+		measurementObj.Buttocks,
+		measurementObj.HipLeft,
+		measurementObj.HipRight,
+		measurementObj.CalfLeft,
+		measurementObj.CalfRight,
+		measurementObj.Weight,
+	))
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("🗑 Удалить", fmt.Sprintf("measurements_delete_%d", measurementObj.ID)),
+	))
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	msg.ParseMode = constants.HtmlParseMode
+	msg.ReplyMarkup = keyboard
+	_, err := p.bot.Send(msg)
+	_ = err
 }
 
 func formatMoveToButton(text string, limit, offset int) tgbotapi.InlineKeyboardButton {
