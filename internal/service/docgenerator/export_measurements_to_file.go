@@ -19,7 +19,7 @@ func (s *serviceImpl) ExportMeasurementsToFile(measurements []*dto.Measurement) 
 	s.writeMeasurementChartSheet(f, measurements, headerStyle)
 
 	_ = f.SetRowStyle(MeasurementSheet, 1, 1, headerStyle)
-	helpers.AutoFitColumns(f, MeasurementSheet, 1, 8)
+	helpers.AutoFitColumns(f, MeasurementSheet, 1, 12)
 	_ = f.DeleteSheet(DefaultSheet)
 
 	f.SetActiveSheet(0)
