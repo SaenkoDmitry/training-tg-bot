@@ -197,8 +197,10 @@ func (h *Handler) start(chatID int64, workoutID int64) {
 	}
 }
 
+const showWorkoutsLimit = 4
+
 func (h *Handler) showMy(chatID int64, offset int) {
-	res, err := h.showMyUC.Execute(chatID, offset)
+	res, err := h.showMyUC.Execute(chatID, offset, showWorkoutsLimit)
 	if err != nil {
 		if errors.Is(err, workoutusecases.NotFoundAllErr) {
 			h.presenter.ShowNotFoundAll(chatID)

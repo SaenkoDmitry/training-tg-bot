@@ -15,7 +15,7 @@ type ExerciseTypeList struct {
 }
 
 type FindTypesByGroup struct {
-	ExerciseTypes []models.ExerciseType
+	ExerciseTypes []models.ExerciseType `json:"exercise_types"`
 }
 
 type ConfirmDeleteExercise struct {

@@ -2,27 +2,26 @@ package dto
 
 import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
-	"time"
 )
 
 type WorkoutItem struct {
-	ID        int64
-	Name      string
-	StartedAt time.Time
-	EndedAt   *time.Time
-	Duration  string
-	Completed bool
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	StartedAt string `json:"started_at"`
+	Duration  string `json:"duration"`
+	Completed bool   `json:"completed"`
+	Status    string `json:"status"`
 }
 
 type Pagination struct {
-	Offset int
-	Limit  int
-	Total  int
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
+	Total  int `json:"total"`
 }
 
 type ShowMyWorkoutsResult struct {
-	Items      []WorkoutItem
-	Pagination Pagination
+	Items      []WorkoutItem `json:"items"`
+	Pagination Pagination    `json:"pagination"`
 }
 
 type ConfirmDeleteWorkout struct {
@@ -68,7 +67,7 @@ type WorkoutStatistic struct {
 	WorkoutDay         models.WorkoutDay
 	TotalWeight        float64
 	CompletedExercises int
-	TotalTime          int
+	CardioTime         int
 	ExerciseTypesMap   map[int64]models.ExerciseType
 	ExerciseWeightMap  map[int64]float64
 	ExerciseTimeMap    map[int64]int

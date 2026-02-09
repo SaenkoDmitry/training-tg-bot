@@ -39,7 +39,7 @@ func (uc *StatsUseCase) Execute(workoutID int64) (*dto.WorkoutStatistic, error) 
 
 	totalWeight := 0.0
 	completedExercises := 0
-	totalTime := 0
+	cardioTime := 0
 
 	exerciseTypesMap := make(map[int64]models.ExerciseType)
 	exerciseWeightMap := make(map[int64]float64)
@@ -68,7 +68,7 @@ func (uc *StatsUseCase) Execute(workoutID int64) (*dto.WorkoutStatistic, error) 
 		exerciseWeightMap[exercise.ID] = exerciseWeight
 		exerciseTimeMap[exercise.ID] = exerciseTime
 		totalWeight += exerciseWeight
-		totalTime += exerciseTime
+		cardioTime += exerciseTime
 	}
 
 	return &dto.WorkoutStatistic{
@@ -79,6 +79,6 @@ func (uc *StatsUseCase) Execute(workoutID int64) (*dto.WorkoutStatistic, error) 
 		ExerciseTimeMap:    exerciseTimeMap,
 		TotalWeight:        totalWeight,
 		CompletedExercises: completedExercises,
-		TotalTime:          totalTime,
+		CardioTime:         cardioTime,
 	}, nil
 }

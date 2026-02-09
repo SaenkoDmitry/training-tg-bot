@@ -42,3 +42,6 @@ Thumbs.db
 .cache/
 
 old_version/
+
+training-tg-bot-web/node_modules
+training-tg-bot-web/dist

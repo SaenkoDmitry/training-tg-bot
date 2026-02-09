@@ -8,5 +8,5 @@ type Group struct {
 }
 
 type ExerciseGroupTypeList struct {
-	Groups []models.ExerciseGroupType
+	Groups []models.ExerciseGroupType `json:"groups"`
 }

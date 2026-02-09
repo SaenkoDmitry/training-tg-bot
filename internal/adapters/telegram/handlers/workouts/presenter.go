@@ -22,7 +22,7 @@ func NewPresenter(bot *tgbotapi.BotAPI) *Presenter {
 
 func (p *Presenter) ShowWorkoutProgress(chatID int64, progress *dto.WorkoutProgress, stats *dto.WorkoutStatistic, needShowButtons bool) {
 	totalWeight := stats.TotalWeight
-	totalTime := stats.TotalTime
+	totalTime := stats.CardioTime
 
 	var text strings.Builder
 
@@ -185,19 +185,9 @@ func (p *Presenter) ShowMy(chatID int64, res *dto.ShowMyWorkoutsResult) {
 	var rows [][]tgbotapi.InlineKeyboardButton
 	text := fmt.Sprintf("<b>%s</b> (%d-%d из %d):\n\n", messages.MyWorkouts, offset+1, min(offset+limit, count), count)
 	for i, workout := range res.Items {
-		status := "🟡"
-		if workout.Completed {
-			status = "✅"
-			if workout.EndedAt != nil {
-				status += fmt.Sprintf(" ~ %s",
-					utils.BetweenTimes(workout.StartedAt, workout.EndedAt),
-				)
-			}
-		}
-		date := utils.FormatDateTimeWithDayOfWeek(workout.StartedAt)
 
-		text += fmt.Sprintf("%d. <u>%s</u> %s\n   📆️ %s\n\n",
-			i+1+offset, workout.Name, status, date)
+		text += fmt.Sprintf("%d. <u>%s</u> %s\n   %s\n\n",
+			i+1+offset, workout.Name, workout.Status, workout.StartedAt)
 
 		// buttons
 		if i%2 == 0 {
@@ -238,7 +228,7 @@ func (p *Presenter) ShowStats(chatID int64, res *dto.WorkoutStatistic) {
 
 	completedExercises := res.CompletedExercises
 	totalWeight := res.TotalWeight
-	totalTime := res.TotalTime
+	totalTime := res.CardioTime
 
 	exerciseTypesMap := res.ExerciseTypesMap
 	exerciseWeightMap := res.ExerciseWeightMap

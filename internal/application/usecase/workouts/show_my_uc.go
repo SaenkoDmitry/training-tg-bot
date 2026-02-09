@@ -2,6 +2,7 @@ package workouts
 
 import (
 	"errors"
+	"fmt"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/users"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
@@ -12,8 +13,6 @@ type FindMyUseCase struct {
 	workoutsRepo workouts.Repo
 	usersRepo    users.Repo
 }
-
-const showWorkoutsLimit = 4
 
 func NewFindMyUseCase(repo workouts.Repo, usersRepo users.Repo) *FindMyUseCase {
 	return &FindMyUseCase{workoutsRepo: repo, usersRepo: usersRepo}
@@ -27,7 +26,7 @@ func (uc *FindMyUseCase) Name() string {
 	return "Показать мои тренировки"
 }
 
-func (uc *FindMyUseCase) Execute(chatID int64, offset int) (*dto.ShowMyWorkoutsResult, error) {
+func (uc *FindMyUseCase) Execute(chatID int64, offset, limit int) (*dto.ShowMyWorkoutsResult, error) {
 	user, err := uc.usersRepo.GetByChatID(chatID)
 	if err != nil {
 		return nil, err
@@ -37,7 +36,7 @@ func (uc *FindMyUseCase) Execute(chatID int64, offset int) (*dto.ShowMyWorkoutsR
 		return nil, err
 	}
 
-	workoutObjs, err := uc.workoutsRepo.Find(user.ID, offset, showWorkoutsLimit)
+	workoutObjs, err := uc.workoutsRepo.Find(user.ID, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -53,13 +52,21 @@ func (uc *FindMyUseCase) Execute(chatID int64, offset int) (*dto.ShowMyWorkoutsR
 			duration = utils.BetweenTimes(w.StartedAt, w.EndedAt)
 		}
 
+		status := "🟡"
+		if w.Completed {
+			status = "✅"
+			if w.EndedAt != nil {
+				status += fmt.Sprintf(" ~ %s", duration)
+			}
+		}
+
 		items = append(items, dto.WorkoutItem{
 			ID:        w.ID,
 			Name:      w.WorkoutDayType.Name,
-			StartedAt: w.StartedAt,
-			EndedAt:   w.EndedAt,
+			StartedAt: "📆️ " + utils.FormatDateTimeWithDayOfWeek(w.StartedAt),
 			Duration:  duration,
 			Completed: w.Completed,
+			Status:    status,
 		})
 	}
 
@@ -67,7 +74,7 @@ func (uc *FindMyUseCase) Execute(chatID int64, offset int) (*dto.ShowMyWorkoutsR
 		Items: items,
 		Pagination: dto.Pagination{
 			Offset: offset,
-			Limit:  showWorkoutsLimit,
+			Limit:  limit,
 			Total:  int(total),
 		},
 	}, nil
