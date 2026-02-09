@@ -148,7 +148,7 @@ func initServer(container *usecase.Container) {
 	})
 
 	// UI (React build)
-	r.Handle("/*", serveSPA("./ui"))
+	r.Handle("/*", serveSPA("./dist"))
 
 	log.Println("Server started on :8080")
 	http.ListenAndServe(":8080", r)

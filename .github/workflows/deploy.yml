@@ -38,8 +38,8 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
-          source: "ui/dist/*"
-          target: "/opt/training-tg-bot/ui/"
+          source: "ui/dist"
+          target: "/opt/training-tg-bot/"
 
       # -----------------
       # BACKEND
