@@ -18,21 +18,23 @@ func SPAHandler() http.Handler {
 	fsHandler := http.FileServer(http.FS(sub))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path
+		path := strings.TrimPrefix(r.URL.Path, "/")
 
-		// 1. API пути обрабатываются отдельно
-		if strings.HasPrefix(path, "/api/") {
+		if strings.HasPrefix(path, "api/") {
 			http.NotFound(w, r)
 			return
 		}
 
-		// 2. Если файл реально существует, отдать
-		if _, err := sub.Open(strings.TrimPrefix(path, "/")); err == nil {
-			fsHandler.ServeHTTP(w, r)
-			return
+		// Попробуем открыть как файл
+		if f, err := sub.Open(path); err == nil {
+			stat, _ := f.Stat()
+			if !stat.IsDir() { // важно, чтобы не было редиректа
+				fsHandler.ServeHTTP(w, r)
+				return
+			}
 		}
 
-		// 3. SPA fallback для React Router
+		// SPA fallback
 		r.URL.Path = "/index.html"
 		fsHandler.ServeHTTP(w, r)
 	})
