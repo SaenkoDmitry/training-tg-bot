@@ -22,15 +22,15 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: ./frontend/package-lock.json
+          cache-dependency-path: ./ui/package-lock.json
 
       - name: Install frontend deps
         run: npm ci
-        working-directory: ./frontend
+        working-directory: ./ui
 
       - name: Build frontend
         run: npm run build
-        working-directory: ./frontend
+        working-directory: ./ui
 
       - name: Copy frontend to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -38,7 +38,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
-          source: "frontend/dist/*"
+          source: "ui/dist/*"
           target: "/opt/training-tg-bot/ui/"
 
       # -----------------
