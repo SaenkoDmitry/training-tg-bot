@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {useAuth} from '../context/AuthContext.tsx';
 
-const TelegramLogin: React.FC = () => {
+const TelegramLoginWidget: React.FC = () => {
     const {user} = useAuth();
     const widgetRef = useRef<HTMLDivElement>(null);
 
@@ -10,10 +10,18 @@ const TelegramLogin: React.FC = () => {
 
         widgetRef.current.innerHTML = '';
 
+        const isDev = process.env.NODE_ENV === 'development';
+
+        const botUsername = isDev
+            ? 'fitness_gym_buddy_dev_bot'
+            : 'form_journey_bot';
+
+        console.log("botUsername", botUsername);
+
         const script = document.createElement('script');
         script.src = 'https://telegram.org/js/telegram-widget.js?15';
         script.async = true;
-        script.setAttribute('data-telegram-login', 'fitness_gym_buddy_dev_bot');
+        script.setAttribute('data-telegram-login', botUsername);
         script.setAttribute('data-size', 'large');
         script.setAttribute('data-userpic', 'true');
         script.setAttribute('data-request-access', 'write');
@@ -26,4 +34,4 @@ const TelegramLogin: React.FC = () => {
     return <div ref={widgetRef}/>;
 };
 
-export default TelegramLogin;
+export default TelegramLoginWidget;

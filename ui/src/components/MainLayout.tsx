@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Link, useLocation} from 'react-router-dom';
 import {useAuth} from '../context/AuthContext';
-import TelegramLogin from "../pages/TelegramLogin.tsx";
+import TelegramLoginWidget from "../pages/TelegramLoginWidget.tsx";
 
 const tabs = [
     {name: 'Мои тренировки', path: '/'},
@@ -70,7 +70,7 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({children}) => {
                 <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
 
                     {/* Telegram login */}
-                    {!loading && <TelegramLogin />}
+                    {!loading && <TelegramLoginWidget />}
 
                     {/* User info */}
                     {user && (
