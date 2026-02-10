@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './MeasurementsPage.css';
+import Button from "../components/Button.tsx";
 
 const PAGE_SIZE = 15;
 
@@ -85,7 +86,7 @@ const MeasurementsPage: React.FC = () => {
     const handleSaveNewMeasurement = () => {
         fetch('/api/measurements', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(newMeasurement),
         })
             .then(res => res.json())
@@ -108,12 +109,9 @@ const MeasurementsPage: React.FC = () => {
 
             {/* ===== DESKTOP BUTTON ===== */}
             {!adding && (
-                <button
-                    className="add-button desktop-only"
-                    onClick={() => setAdding(true)}
-                >
+                <Button onClick={() => setAdding(true)}>
                     ➕ Добавить новое измерение
-                </button>
+                </Button>
             )}
 
             {/* ================= TABLE (DESKTOP) ================= */}
@@ -177,7 +175,7 @@ const MeasurementsPage: React.FC = () => {
                             <td>{m.calf_left}</td>
                             <td>{m.calf_right}</td>
                             <td className="weight">{m.weight}</td>
-                            <td />
+                            <td/>
                         </tr>
                     ))}
 
@@ -259,17 +257,17 @@ const MeasurementsPage: React.FC = () => {
 };
 
 const fields: { key: keyof ToCreateMeasurement; label: string }[] = [
-    { key: 'shoulders', label: 'Плечи' },
-    { key: 'chest', label: 'Грудь' },
-    { key: 'hand_left', label: 'Л. рука' },
-    { key: 'hand_right', label: 'П. рука' },
-    { key: 'waist', label: 'Талия' },
-    { key: 'buttocks', label: 'Ягодицы' },
-    { key: 'hip_left', label: 'Л. бедро' },
-    { key: 'hip_right', label: 'П. бедро' },
-    { key: 'calf_left', label: 'Л. икра' },
-    { key: 'calf_right', label: 'П. икра' },
-    { key: 'weight', label: 'Вес' },
+    {key: 'shoulders', label: 'Плечи'},
+    {key: 'chest', label: 'Грудь'},
+    {key: 'hand_left', label: 'Л. рука'},
+    {key: 'hand_right', label: 'П. рука'},
+    {key: 'waist', label: 'Талия'},
+    {key: 'buttocks', label: 'Ягодицы'},
+    {key: 'hip_left', label: 'Л. бедро'},
+    {key: 'hip_right', label: 'П. бедро'},
+    {key: 'calf_left', label: 'Л. икра'},
+    {key: 'calf_right', label: 'П. икра'},
+    {key: 'weight', label: 'Вес'},
 ];
 
 export default MeasurementsPage;

@@ -52,6 +52,8 @@ export default function ProgramsPage() {
 
     return (
         <div className="page stack">
+            <h1>Программы</h1>
+
             <Button variant="primary" onClick={handleCreate}>
                 + Новая программа
             </Button>

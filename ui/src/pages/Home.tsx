@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import WorkoutCard from '../components/WorkoutCard';
 import {useAuth} from '../context/AuthContext';
 import '../App.css';
+import Button from "../components/Button.tsx";
 
 const LIMIT = 10;
 
@@ -83,23 +84,16 @@ const Home: React.FC = () => {
         );
 
     return (
-        <div className="container">
+        <div className="page stack">
             <h1>Мои тренировки</h1>
 
             {user && (
-                <button
-                    style={{
-                        background: '#4caf50',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 8,
-                        padding: '0.5rem 1rem',
-                        cursor: 'pointer',
-                    }}
+                <Button
+                    variant="primary"
                     onClick={() => alert('Начало новой тренировки!')}
                 >
                     Начать тренировку
-                </button>
+                </Button>
             )}
 
             <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>

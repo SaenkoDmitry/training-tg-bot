@@ -6,7 +6,7 @@ import TelegramLoginWidget from "../pages/TelegramLoginWidget.tsx";
 const tabs = [
     {name: 'Мои тренировки', path: '/'},
     // {name: 'Статистика', path: '/stats'},
-    {name: 'Мои программы', path: '/programs'},
+    {name: 'Программы', path: '/programs'},
     {name: 'Замеры', path: '/measurements'},
     {name: 'Библиотека упражнений', path: '/library'},
 ];
