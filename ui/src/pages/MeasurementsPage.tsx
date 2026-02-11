@@ -240,10 +240,21 @@ const MeasurementsPage: React.FC = () => {
                         ref={idx === measurements.length - 1 ? lastCardRef : null}
                         className="measurement-card"
                     >
-                        <div className="card-header">
-                            <span>📅 {m.created_at}</span>
-                            <span>⚖ {m.weight} кг</span>
+                        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <span>📅 {m.created_at}</span>
+                                <span style={{ marginLeft: '10px' }}>⚖ {m.weight} кг</span>
+                            </div>
+                            <Button
+                                style={{ width: '44px', height: '44px', padding: '0', borderRadius: '50%' }}
+                                variant="danger"
+                                onClick={() => handleDeleteMeasurement(m.id)}
+                                disabled={!m.id}
+                            >
+                                🗑
+                            </Button>
                         </div>
+
                         <div className="card-body two-columns">
                             <div className="card-column">
                                 <div className="card-row"><span>Плечи:</span><span>{m.shoulders}</span></div>
@@ -262,6 +273,7 @@ const MeasurementsPage: React.FC = () => {
                         </div>
                     </div>
                 ))}
+
             </div>
 
             {toast && <div className="toast">{toast}</div>}
