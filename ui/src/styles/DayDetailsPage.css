@@ -1,3 +1,5 @@
+/* ================= CARD ================= */
+
 .exercise-card {
     width: 100%;
     padding: 12px;
@@ -7,10 +9,14 @@
     box-shadow: var(--shadow-md);
 }
 
+
+/* ================= HEADER ================= */
+
 .exercise-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
 }
 
 .drag-handle {
@@ -24,6 +30,9 @@
     cursor: grabbing;
 }
 
+
+/* ================= SETS ================= */
+
 .sets {
     margin-top: 10px;
     display: flex;
@@ -31,34 +40,78 @@
     gap: 6px;
 }
 
+/* строка сета */
 .set-row {
     display: flex;
-    gap: 6px;
     align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap; /* запрещаем перенос */
 }
 
+/* группы инпутов держим вместе */
+.set-row > div {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+/* компактные инпуты */
+.set-row input {
+    width: 56px;
+    padding: 6px 4px;
+    font-size: 14px;
+}
+
+/* корзина вправо */
 .minus {
+    margin-left: auto;
     background: none;
     border: none;
     cursor: pointer;
     font-size: 18px;
 }
 
+
+/* ================= SELECTOR (самое важное) ================= */
+
 .selector {
     display: flex;
     gap: 8px;
     align-items: stretch;
+    width: 100%;
 }
 
+/* 🔥 ключевой фикс переполнения */
+.selector > * {
+    min-width: 0;
+}
+
+/* селекты гибкие */
 .selector select {
-    flex: 1;
+    flex: 1 1 0;
+    width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* кнопка фиксированная */
 .selector button {
+    flex: 0 0 auto;
     min-height: var(--tap-size);
+    white-space: nowrap;
 }
+
+
+/* ================= MOBILE ================= */
 
 @media (max-width: 480px) {
+
+    .exercise-card {
+        padding: 10px;
+    }
+
+    /* selector в колонку (удобнее пальцем) */
     .selector {
         flex-direction: column;
     }
@@ -66,5 +119,11 @@
     .selector select,
     .selector button {
         width: 100%;
+    }
+
+    /* ещё компактнее сет */
+    .set-row input {
+        width: 48px;
+        font-size: 13px;
     }
 }

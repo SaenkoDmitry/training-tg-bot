@@ -109,8 +109,12 @@ export default function DayDetailsPage() {
         ]);
     };
 
-    const removeExercise = (i: number) =>
+    const removeExercise = (i: number) => {
+        const confirmed = window.confirm("Вы уверены, что хотите удалить упражнение?");
+        if (!confirmed) return;
+
         setExercises(exercises.filter((_, idx) => idx !== i));
+    }
 
     // ---------------- SET OPS ----------------
     const updateSet = (ei: number, si: number, field: string, value: number) => {

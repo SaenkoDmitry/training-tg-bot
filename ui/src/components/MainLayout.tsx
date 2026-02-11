@@ -33,7 +33,8 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({children}) => {
                     position: 'sticky',
                     top: 0,
                     zIndex: 10,
-                    gap: 12
+                    gap: 12,
+                    background: '#fff',
                 }}
             >
                 {/* ---------- Left side ---------- */}
