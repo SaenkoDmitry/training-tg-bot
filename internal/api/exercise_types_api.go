@@ -13,7 +13,7 @@ func (s *serviceImpl) GetExerciseGroups(w http.ResponseWriter, _ *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(result.Groups)
 }
 
 func (s *serviceImpl) GetExerciseTypesByGroup(w http.ResponseWriter, r *http.Request) {
@@ -26,5 +26,5 @@ func (s *serviceImpl) GetExerciseTypesByGroup(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(result.ExerciseTypes)
 }

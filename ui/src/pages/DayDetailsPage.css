@@ -67,11 +67,34 @@ input {
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
+    align-items: stretch; /* все одной высоты */
 }
 
-select {
-    padding: 6px;
+/* одинаковый размер контролов */
+.selector select,
+.selector button {
+    height: 40px;
 }
+
+/* селекты как кнопки */
+.selector select {
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* чтобы красиво растягивались */
+.selector select:first-child {
+    flex: 1;   /* группа шире */
+}
+
+.selector select:nth-child(2) {
+    flex: 2;   /* упражнения ещё шире */
+}
+
 
 .toast {
     position: fixed;

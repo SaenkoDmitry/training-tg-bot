@@ -1,7 +1,7 @@
 import { api } from "./client";
 
 export const getExerciseGroups = () =>
-    api("/api/exercise-groups");
+    api<Group[]>("/api/exercise-groups");
 
 export const getExerciseTypesByGroup = (group: string) =>
-    api(`/api/exercise-groups/${group}`);
+    api<ExerciseType[]>(`/api/exercise-groups/${group}`);

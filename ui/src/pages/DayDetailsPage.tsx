@@ -12,7 +12,7 @@ export default function DayDetailsPage() {
     const [exercises, setExercises] = useState<any[]>([]);
     const [dayName, setDayName] = useState("");
 
-    const [groups, setGroups] = useState<any[]>([]);
+    const [groups, setGroups] = useState<Group[]>([]);
     const [types, setTypes] = useState<any[]>([]);
     const [selectedGroup, setSelectedGroup] = useState("");
     const [selectedType, setSelectedType] = useState("");
@@ -47,7 +47,7 @@ export default function DayDetailsPage() {
 
     useEffect(() => {
         load();
-        getExerciseGroups().then((r) => setGroups(r.groups));
+        getExerciseGroups().then((groups: Group[]) => setGroups(groups));
     }, []);
 
     // ---------------- AUTOSAVE (debounce 500ms) ----------------
@@ -87,20 +87,24 @@ export default function DayDetailsPage() {
     // ---------------- EXERCISE ADD ----------------
     const loadTypes = async (code: string) => {
         setSelectedGroup(code);
-        const res = await getExerciseTypesByGroup(code);
-        setTypes(res.exercise_types);
+        const exerciseTypes = await getExerciseTypesByGroup(code);
+        setTypes(exerciseTypes);
     };
 
     const addExercise = () => {
-        const ex = types.find((t) => t.id === Number(selectedType));
+        const ex: ExerciseType = types.find((t) => t.id === Number(selectedType));
         if (!ex) return;
 
+        let reps = ex.units.includes("reps") ? 10 : 0
+        let weight = ex.units.includes("weight") ? 10 : 0
+        let minutes = ex.units.includes("minutes") ? 10 : 0
+        let meters = ex.units.includes("weight") ? 10 : 0
         setExercises([
             ...exercises,
             {
                 id: ex.id,
                 name: ex.name,
-                sets: [{reps: 10, weight: 0, minutes: 0, meters: 0}],
+                sets: [{reps: reps, weight: weight, minutes: minutes, meters: meters}],
             },
         ]);
     };
@@ -115,13 +119,26 @@ export default function DayDetailsPage() {
         setExercises(copy);
     };
 
-    const addSet = (ei: number) => {
+    const addSet = (ei: number, sets: SetDTO[]) => {
         const copy = [...exercises];
-        copy[ei].sets.push({reps: 10, weight: 0, minutes: 0, meters: 0});
+        let reps = 0
+        let weight = 0
+        let minutes = 0
+        let meters = 0
+        if (sets.length > 0) {
+            reps = sets[sets.length-1].reps
+            weight = sets[sets.length-1].weight
+            minutes = sets[sets.length-1].minutes
+            meters = sets[sets.length-1].meters
+        }
+        copy[ei].sets.push({reps: reps, weight: weight, minutes: minutes, meters: meters});
         setExercises(copy);
     };
 
     const removeSet = (ei: number, si: number) => {
+        if (si == 0) {
+            return
+        }
         const copy = [...exercises];
         copy[ei].sets.splice(si, 1);
         setExercises(copy);
@@ -145,7 +162,7 @@ export default function DayDetailsPage() {
     // ---------------- UI ----------------
     return (
         <div className="page stack">
-            <div className="title">{dayName}</div>
+            <h2>{dayName}</h2>
 
             {/* selector */}
             <div className="selector">
@@ -167,7 +184,7 @@ export default function DayDetailsPage() {
                     ))}
                 </select>
 
-                <Button onClick={addExercise}>+ Добавить</Button>
+                <Button onClick={addExercise}>➕️ Добавить</Button>
             </div>
 
             {exercises.map((ex, ei) => (
@@ -186,7 +203,7 @@ export default function DayDetailsPage() {
                             ☰
                         </div>
 
-                        <b>{ex.name}</b>
+                        <h3>{ex.name}</h3>
 
                         <Button
                             variant="danger"
@@ -199,41 +216,60 @@ export default function DayDetailsPage() {
                     <div className="sets">
                         {ex.sets.map((s: any, si: number) => (
                             <div key={si} className="set-row">
-                                <input
-                                    type="number"
-                                    value={s.reps}
-                                    onChange={(e) =>
-                                        updateSet(
-                                            ei,
-                                            si,
-                                            "reps",
-                                            +e.target.value
-                                        )
-                                    }
-                                />
-                                ×
-                                <input
-                                    type="number"
-                                    value={s.weight}
-                                    onChange={(e) =>
-                                        updateSet(
-                                            ei,
-                                            si,
-                                            "weight",
-                                            +e.target.value
-                                        )
-                                    }
-                                />
+                                {s.minutes > 0 && <div>
+                                    <input
+                                        type="number"
+                                        value={s.minutes}
+                                        onChange={(e) =>
+                                            updateSet(
+                                                ei,
+                                                si,
+                                                "minutes",
+                                                +e.target.value
+                                            )
+                                        }
+                                    />
+                                    <span> мин.</span>
+                                </div>
+                                }
+                                {s.weight > 0 && <div>
+                                    <input
+                                        type="number"
+                                        value={s.reps}
+                                        onChange={(e) =>
+                                            updateSet(
+                                                ei,
+                                                si,
+                                                "reps",
+                                                +e.target.value
+                                            )
+                                        }
+                                    />
+                                    <span> × </span>
+                                    <input
+                                        type="number"
+                                        value={s.weight}
+                                        onChange={(e) =>
+                                            updateSet(
+                                                ei,
+                                                si,
+                                                "weight",
+                                                +e.target.value
+                                            )
+                                        }
+                                    />
+                                    <span> кг</span>
+                                </div>}
                                 <button
                                     className="minus"
                                     onClick={() => removeSet(ei, si)}
                                 >
-                                    −
+                                    🗑
                                 </button>
                             </div>
                         ))}
 
-                        <button className="add-set" onClick={() => addSet(ei)}>
+                        <button className="add-set" onClick={() => addSet(ei, ex.sets)}>
                             + сет
                         </button>
                     </div>
