@@ -170,7 +170,7 @@ export default function DayDetailsPage() {
 
             {/* selector */}
             <div className="selector">
-                <select onChange={(e) => loadTypes(e.target.value)}>
+                <select style={{minHeight: "var(--tap-size)"}} onChange={(e) => loadTypes(e.target.value)}>
                     <option>Группа</option>
                     {groups.map((g) => (
                         <option key={g.code} value={g.code}>
@@ -179,7 +179,7 @@ export default function DayDetailsPage() {
                     ))}
                 </select>
 
-                <select onChange={(e) => setSelectedType(e.target.value)}>
+                <select style={{minHeight: "var(--tap-size)"}} onChange={(e) => setSelectedType(e.target.value)}>
                     <option>Упражнение</option>
                     {types.map((t) => (
                         <option key={t.id} value={t.id}>
