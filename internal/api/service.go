@@ -10,6 +10,7 @@ type Service interface {
 	ReadWorkout(w http.ResponseWriter, r *http.Request)
 	GetMeasurements(w http.ResponseWriter, r *http.Request)
 	CreateMeasurement(w http.ResponseWriter, r *http.Request)
+	DeleteMeasurement(w http.ResponseWriter, r *http.Request)
 	GetExerciseGroups(w http.ResponseWriter, _ *http.Request)
 	GetExerciseTypesByGroup(w http.ResponseWriter, r *http.Request)
 	GetUserPrograms(w http.ResponseWriter, r *http.Request)

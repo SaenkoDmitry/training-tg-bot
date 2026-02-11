@@ -78,7 +78,13 @@ const WorkoutPage = () => {
                                 }
                             )}
                             <div
-                                style={{background: "#eee", height: "8px", borderRadius: "4px", overflow: "hidden", marginTop: "2px"}}>
+                                style={{
+                                    background: "#eee",
+                                    height: "8px",
+                                    borderRadius: "4px",
+                                    overflow: "hidden",
+                                    marginTop: "2px"
+                                }}>
                                 <div style={{
                                     width: `${ex.sets?.filter((set: FormattedSet) => set.completed).length / ex.sets?.length * 100}%`,
                                     height: "100%",
@@ -91,20 +97,11 @@ const WorkoutPage = () => {
                 ))}
             </ul>
 
-            <h3>Статистика</h3>
+            {(Stats.CardioTime > 0 || Stats.TotalWeight > 0) && <h3>Статистика</h3>}
 
-            <div
-                style={{
-                    display: 'grid',
-                    background: '#f9f9f9',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                }}
-            >
-                <div>
-                    {Stats.CardioTime > 0 && <p><strong>🫀 Время кардио:</strong> {Stats.CardioTime} мин</p>}
-                    {Stats.TotalWeight > 0 && <p><strong>🏋 Общий вес:</strong> {Stats.TotalWeight} кг</p>}
-                </div>
+            <div>
+                {Stats.CardioTime > 0 && <p><strong>🫀 Время кардио:</strong> {Stats.CardioTime} мин</p>}
+                {Stats.TotalWeight > 0 && <p><strong>🏋 Общий вес:</strong> {Stats.TotalWeight} кг</p>}
             </div>
         </div>
     );

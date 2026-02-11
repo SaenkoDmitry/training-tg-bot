@@ -36,6 +36,18 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({children}) => {
                     gap: 12
                 }}
             >
+                {/* ---------- Left side ---------- */}
+                <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+                    {/* Burger */}
+                    {isMobile && (
+                        <div onClick={() => setMenuOpen(!menuOpen)} style={{cursor: 'pointer'}}>
+                            <div style={{width: 25, height: 3, background: '#333', margin: '4px 0'}}/>
+                            <div style={{width: 25, height: 3, background: '#333', margin: '4px 0'}}/>
+                            <div style={{width: 25, height: 3, background: '#333', margin: '4px 0'}}/>
+                        </div>
+                    )}
+                </div>
+
                 {/* ---------- Tabs (desktop) ---------- */}
                 <div
                     style={{
@@ -89,15 +101,6 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({children}) => {
                                 Выйти
                             </button>
                         </>
-                    )}
-
-                    {/* Burger */}
-                    {isMobile && (
-                        <div onClick={() => setMenuOpen(!menuOpen)} style={{cursor: 'pointer'}}>
-                            <div style={{width: 25, height: 3, background: '#333', margin: '4px 0'}}/>
-                            <div style={{width: 25, height: 3, background: '#333', margin: '4px 0'}}/>
-                            <div style={{width: 25, height: 3, background: '#333', margin: '4px 0'}}/>
-                        </div>
                     )}
                 </div>
             </nav>

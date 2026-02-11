@@ -3,6 +3,7 @@ package dto
 type Measurement struct {
 	ID        int64  `json:"id"`
 	CreatedAt string `json:"created_at"`
+	UserID    int64  `json:"user_id"`
 
 	Shoulders string `json:"shoulders"`
 	Chest     string `json:"chest"`

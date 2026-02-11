@@ -138,6 +138,7 @@ func initServer(container *usecase.Container) {
 
 		r.Get("/", s.GetMeasurements)
 		r.Post("/", s.CreateMeasurement)
+		r.Delete("/{id}", s.DeleteMeasurement)
 	})
 
 	r.Route("/api/exercise-groups", func(r chi.Router) {

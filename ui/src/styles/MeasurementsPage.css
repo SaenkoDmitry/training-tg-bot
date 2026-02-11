@@ -1,41 +1,50 @@
+/* ================= PAGE WRAPPER ================= */
 .measurements-page {
     padding: 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #111827;
 }
 
-/* ===== TABLE ===== */
+/* ===== BUTTON ===== */
+.measurements-page > button {
+    margin-bottom: 24px; /* отступ между кнопкой и таблицей/карточками */
+}
 
+/* ===== TABLE (DESKTOP) ===== */
 .table-wrapper {
-    overflow: auto;
+    overflow-x: auto;
     max-height: 70vh;
 }
 
 .measurements-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     min-width: 900px;
-
-    background: var(--color-card);
     border-radius: var(--radius-lg);
+    overflow: hidden;
     box-shadow: var(--shadow-sm);
-    font-size: 14px;
-}
-
-.measurements-table:first-child {
-    margin-top: 16px; /* или 24px, чтобы от кнопки было больше воздуха */
+    background: var(--color-card);
 }
 
 .measurements-table th,
 .measurements-table td {
-    padding: 10px;
+    padding: 12px 8px; /* вертикальные и горизонтальные отступы */
     text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #e5e7eb;
 }
 
-.measurements-table thead {
+.measurements-table thead th {
     background: #f3f4f6;
     position: sticky;
     top: 0;
+    font-weight: 600;
+    z-index: 1;
 }
 
+/* Чередование строк */
 .measurements-table tbody tr:nth-child(even) {
     background: #fafafa;
 }
@@ -44,38 +53,53 @@
     background: var(--color-primary-soft);
 }
 
+/* Input на всю ширину ячейки */
+.measurements-table td input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;  /* компактный padding */
+    text-align: center;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Жирный вес */
 .weight {
     font-weight: 700;
 }
 
-/* ===== CARDS (mobile) ===== */
-
+/* ================= CARDS (MOBILE) ================= */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 16px; /* было 12 → мало */
-    padding-bottom: 80px; /* чтобы FAB не перекрывал */
+    gap: 16px;  /* расстояние между карточками */
+    padding: 16px 0; /* небольшой отступ сверху и снизу */
 }
 
 .measurement-card {
     background: var(--color-card);
     border-radius: var(--radius-lg);
-
-    padding: 24px; /* больше воздуха */
+    padding: 16px; /* чуть меньше, чтобы форма не «тяжелила» экран */
+    margin-top: 12px;
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+    transition: transform 0.1s;
+}
 
-    border: 1px solid var(--color-border); /* 👈 главный визуальный разделитель */
+.measurement-card:active {
+    transform: scale(0.99);
 }
 
 .measurement-card:first-child {
-    margin-top: 16px; /* или 24px, чтобы от кнопки было больше воздуха */
+    margin-top: 0;
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .card-body.two-columns {
@@ -87,25 +111,73 @@
 .card-row {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
     padding: 4px 0;
 }
 
-/* форма добавления — тоже как card */
+/* ================= FORM (ADDING NEW) ================= */
 .card-form {
     background: var(--color-card);
     border-radius: var(--radius-lg);
     padding: 16px;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--color-border);
+
+    /* Для desktop — 2 колонки, мобильный режим 1 колонка */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
 }
 
-.measurement-card:active {
-    transform: scale(0.99);
+@media (max-width: 768px) {
+    .card-form {
+        grid-template-columns: 1fr;
+    }
 }
 
-/* responsive */
+/* Поля формы */
+.card-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; /* gap между label и input */
+}
 
+.card-form-field input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 4px; /* компактный padding */
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+/* Кнопки формы */
+.card-form-buttons {
+    grid-column: span 2; /* кнопки растягиваются на две колонки */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.card-form-buttons button {
+    min-width: 100px;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .card-form-buttons {
+        grid-column: span 1;
+        justify-content: flex-start;
+    }
+
+    .card-form-buttons button {
+        flex: 1; /* растягиваем кнопки на всю ширину */
+    }
+}
+
+/* ================= RESPONSIVE ================= */
 .desktop-only {
     display: none;
 }

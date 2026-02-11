@@ -28,6 +28,8 @@ func (uc *CreateUseCase) Execute(measurement *models.Measurement) (*dto.Measurem
 	}
 
 	return &dto.Measurement{
+		ID:        measurement.ID,
+		UserID:    measurement.UserID,
 		CreatedAt: utils.FormatDate(measurement.CreatedAt),
 		Shoulders: utils.FormatCentimeters(measurement.Shoulders),
 		Chest:     utils.FormatCentimeters(measurement.Chest),

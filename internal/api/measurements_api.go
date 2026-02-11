@@ -6,6 +6,7 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/middlewares"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -26,6 +27,42 @@ func (s *serviceImpl) GetMeasurements(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+func (s *serviceImpl) DeleteMeasurement(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middlewares.FromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	measurementID, _ := strconv.ParseInt(r.PathValue("id"), 10, 64)
+
+	measurement, err := s.container.GetMeasurementByIDUC.Execute(measurementID)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	user, err := s.container.GetUserUC.Execute(claims.ChatID)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	if measurement.UserID != user.ID {
+		http.Error(w, "access denied", http.StatusForbidden)
+		return
+	}
+
+	err = s.container.DeleteMeasurementByIDUC.Execute(measurementID)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("{}"))
 }
 
 func (s *serviceImpl) CreateMeasurement(w http.ResponseWriter, r *http.Request) {

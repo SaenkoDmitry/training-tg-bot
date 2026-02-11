@@ -30,6 +30,7 @@ func (uc *GetByIDUseCase) Execute(measurementID int64) (*dto.Measurement, error)
 
 	return &dto.Measurement{
 		ID:        measurementObj.ID,
+		UserID:    measurementObj.UserID,
 		CreatedAt: utils.FormatDate(measurementObj.CreatedAt),
 		Shoulders: utils.FormatCentimeters(measurementObj.Shoulders),
 		Chest:     utils.FormatCentimeters(measurementObj.Chest),
