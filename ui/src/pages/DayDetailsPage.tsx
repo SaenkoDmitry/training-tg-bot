@@ -184,7 +184,7 @@ export default function DayDetailsPage() {
                     ))}
                 </select>
 
-                <Button onClick={addExercise}>➕️ Добавить</Button>
+                <button onClick={addExercise}>➕️ Добавить</button>
             </div>
 
             {exercises.map((ex, ei) => (

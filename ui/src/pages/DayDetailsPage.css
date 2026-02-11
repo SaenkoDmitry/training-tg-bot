@@ -63,39 +63,6 @@ input {
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-.selector {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    align-items: stretch; /* все одной высоты */
-}
-
-/* одинаковый размер контролов */
-.selector select,
-.selector button {
-    height: 40px;
-}
-
-/* селекты как кнопки */
-.selector select {
-    padding: 0 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background: white;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* чтобы красиво растягивались */
-.selector select:first-child {
-    flex: 1;   /* группа шире */
-}
-
-.selector select:nth-child(2) {
-    flex: 2;   /* упражнения ещё шире */
-}
-
-
 .toast {
     position: fixed;
     bottom: 20px;
@@ -108,3 +75,56 @@ input {
     font-size: 14px;
     opacity: 0.9;
 }
+
+.selector {
+    display: flex;
+    gap: 8px;
+    align-items: stretch; /* ← ключ */
+}
+
+/* ОБЩАЯ база */
+.selector select,
+.selector button {
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* ---- SELECT ---- */
+.selector select {
+    flex: 1;
+    padding: 10px 12px;
+    min-height: 44px;
+
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    appearance: none;
+}
+
+/* ---- BUTTON ---- */
+.selector button {
+    display: flex;           /* ← ВАЖНО */
+    align-items: center;     /* центр текста */
+    justify-content: center;
+
+    min-height: 44px;
+    padding: 0 16px;
+
+    white-space: nowrap;
+    background: #4caf50;
+    color: white;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 480px) {
+    .selector {
+        flex-direction: column;
+    }
+
+    .selector select,
+    .selector button {
+        width: 100%;
+        min-height: 52px;
+    }
+}
+
+
