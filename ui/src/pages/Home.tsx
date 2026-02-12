@@ -97,7 +97,7 @@ const Home: React.FC = () => {
 
             {user && (
                 <Button
-                    variant="primary"
+                    variant="active"
                     onClick={() => alert('Начало новой тренировки!')}
                 >
                     ▶️ Начать новую тренировку

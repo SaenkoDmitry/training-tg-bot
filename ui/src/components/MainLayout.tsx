@@ -34,7 +34,8 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({children}) => {
                     top: 0,
                     zIndex: 10,
                     gap: 12,
-                    background: '#fff',
+                    background: 'var(--color-primary)',
+                    color: 'white',
                 }}
             >
                 {/* ---------- Left side ---------- */}
@@ -65,8 +66,8 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({children}) => {
                             style={{
                                 padding: '0.5rem 1rem',
                                 borderBottom:
-                                    location.pathname === tab.path ? '3px solid var(--color-primary)' : 'none',
-                                color: location.pathname === tab.path ? 'var(--color-primary)' : '#333',
+                                    location.pathname === tab.path ? '3px solid var(--color-danger)' : 'none',
+                                color: location.pathname === tab.path ? 'white' : 'white',
                                 fontWeight: location.pathname === tab.path ? 'bold' : 'normal',
                                 textDecoration: 'none',
                                 whiteSpace: 'nowrap',
@@ -88,7 +89,7 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({children}) => {
                     {/* User info */}
                     {user && (
                         <>
-                            <span>Привет, {user.first_name} 👋</span>
+                            <b>{user.first_name} 👋</b>
                             <Button
                                 variant={"danger"}
                                 onClick={logout}

@@ -122,37 +122,18 @@ const LibraryPage: React.FC = () => {
                                 )}
 
                                 <p>
-                                    <b>Отдых: </b>{ex.rest_in_seconds}s · <b>Ед.:</b> {ex.units}
+                                    {ex.rest_in_seconds > 0 && <div style={{marginBottom: 10}}><b>Отдых: </b>{ex.rest_in_seconds} секунд</div>}
+                                    <div><b>Единицы измерения:</b> {ex.units.split(',').map(field => unitTypes[field]).join(", ")}</div>
                                 </p>
 
                                 {ex.url && (
-                                    <a
-                                        href={ex.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{
-                                            display: 'inline-block',
-                                            padding: '10px 16px',
-                                            backgroundColor: '#ffdb4d',
-                                            color: 'black',
-                                            borderRadius: 8,
-                                            boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-                                            transition: 'all 0.2s ease',
-                                            marginTop: 6,
-                                        }}
-                                        onMouseEnter={e => {
-                                            e.currentTarget.style.backgroundColor = '#ffcf27';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                            e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.2)';
-                                        }}
-                                        onMouseLeave={e => {
-                                            e.currentTarget.style.backgroundColor = '#ffdb4d';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
-                                        }}
+                                    <Button
+                                        variant={"primary"}
+                                        style={{color: "black", backgroundColor: "gold"}}
+                                        onClick={() => window.open(ex.url)}
                                     >
-                                        Смотреть технику (🛸 я.диск)
-                                    </a>
+                                        Смотреть технику 🤓
+                                    </Button>
                                 )}
                             </div>
                         </div>
@@ -164,3 +145,10 @@ const LibraryPage: React.FC = () => {
 };
 
 export default LibraryPage;
+
+const unitTypes = {
+    'reps': 'Повторения',
+    'weight': 'Вес',
+    'minutes': 'Минуты',
+    'meters': 'Метры',
+};

@@ -72,7 +72,7 @@ export default function ProgramDetailsPage() {
         <div className="page stack">
             <h2 className="title">{program.name}</h2>
 
-            <Button variant="primary" onClick={addDay}>
+            <Button variant="active" onClick={addDay}>
                 + Добавить день
             </Button>
 
