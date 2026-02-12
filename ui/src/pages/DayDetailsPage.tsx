@@ -8,22 +8,13 @@ import "../styles/DayDetailsPage.css";
 import {Loader} from "lucide-react";
 
 import {closestCenter, DndContext} from "@dnd-kit/core";
-
 import {arrayMove, SortableContext, useSortable, verticalListSortingStrategy,} from "@dnd-kit/sortable";
-
 import {CSS} from "@dnd-kit/utilities";
 
-
 // ================= SORTABLE ITEM =================
-
 function SortableExercise({id, children}: any) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-    } = useSortable({id});
+    const {attributes, listeners, setNodeRef, transform, transition} =
+        useSortable({id});
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -31,15 +22,13 @@ function SortableExercise({id, children}: any) {
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes}>
-            {children(listeners)}
+        <div ref={setNodeRef} style={style}>
+            {children({listeners, attributes})}
         </div>
     );
 }
 
-
 // ================= PAGE =================
-
 export default function DayDetailsPage() {
     const {programId, dayId} = useParams();
 
@@ -57,9 +46,7 @@ export default function DayDetailsPage() {
     const autosaveTimer = useRef<any>(null);
     const firstLoad = useRef(true);
 
-
     // ================= LOAD =================
-
     const fetchDay = async () => {
         const program = await getProgram(Number(programId));
         const day = program.day_types.find((d: any) => d.id === Number(dayId));
@@ -69,14 +56,13 @@ export default function DayDetailsPage() {
 
         if (day.preset) {
             setLoading(true);
-
             const parsed = await parsePreset(day.preset).finally(() =>
                 setLoading(false)
             );
 
             setExercises(
                 parsed.exercises.map((ex: any, i: number) => ({
-                    uid: `${ex.id}-${i}`, // 🔥 уникальный id для dnd
+                    uid: `${ex.id}-${i}`,
                     id: ex.id,
                     name: ex.name,
                     sets: ex.sets,
@@ -92,9 +78,7 @@ export default function DayDetailsPage() {
         getExerciseGroups().then(setGroups);
     }, []);
 
-
     // ================= AUTOSAVE =================
-
     useEffect(() => {
         if (firstLoad.current) return;
 
@@ -110,45 +94,44 @@ export default function DayDetailsPage() {
         }, 500);
     }, [exercises]);
 
-
     const showToast = (text: string) => {
         setToast(text);
         setTimeout(() => setToast(null), 1500);
     };
 
-
     // ================= DRAG END =================
-
     const handleDragEnd = (event: any) => {
         const {active, over} = event;
-
         if (!over || active.id === over.id) return;
 
-        const oldIndex = exercises.findIndex(e => e.uid === active.id);
-        const newIndex = exercises.findIndex(e => e.uid === over.id);
+        const oldIndex = exercises.findIndex((e) => e.uid === active.id);
+        const newIndex = exercises.findIndex((e) => e.uid === over.id);
 
         setExercises(arrayMove(exercises, oldIndex, newIndex));
     };
 
-
     // ================= EXERCISE ADD =================
-
     const loadTypes = async (code: string) => {
         setSelectedGroup(code);
         setTypes(await getExerciseTypesByGroup(code));
     };
 
     const addExercise = () => {
-        const ex: any = types.find(t => t.id === Number(selectedType));
+        const ex: any = types.find((t) => t.id === Number(selectedType));
         if (!ex) return;
+
+        let reps = ex.units.includes("reps") ? 10 : 0
+        let weight = ex.units.includes("weight") ? 10 : 0
+        let minutes = ex.units.includes("minutes") ? 10 : 0
+        let meters = ex.units.includes("meters") ? 10 : 0
 
         setExercises([
             ...exercises,
             {
-                uid: crypto.randomUUID(), // 🔥 уникальный ключ
+                uid: crypto.randomUUID(),
                 id: ex.id,
                 name: ex.name,
-                sets: [{reps: 10, weight: 0, minutes: 0, meters: 0}],
+                sets: [{reps: reps, weight: weight, minutes: minutes, meters: meters}],
             },
         ]);
     };
@@ -158,18 +141,26 @@ export default function DayDetailsPage() {
         setExercises(exercises.filter((_, idx) => idx !== i));
     };
 
-
     // ================= SET OPS =================
-
     const updateSet = (ei: number, si: number, field: string, value: number) => {
         const copy = [...exercises];
         copy[ei].sets[si][field] = value;
         setExercises(copy);
     };
 
-    const addSet = (ei: number) => {
+    const addSet = (ei: number, sets: SetDTO[]) => {
         const copy = [...exercises];
-        copy[ei].sets.push({reps: 0, weight: 0, minutes: 0, meters: 0});
+        let reps = 0
+        let weight = 0
+        let minutes = 0
+        let meters = 0
+        if (sets.length > 0) {
+            reps = sets[sets.length-1].reps
+            weight = sets[sets.length-1].weight
+            minutes = sets[sets.length-1].minutes
+            meters = sets[sets.length-1].meters
+        }
+        copy[ei].sets.push({reps: reps, weight: weight, minutes: minutes, meters: meters});
         setExercises(copy);
     };
 
@@ -180,26 +171,20 @@ export default function DayDetailsPage() {
         setExercises(copy);
     };
 
-
     // ================= PRESET =================
-
     const buildPreset = () =>
         exercises
             .map((ex) => {
                 const sets = ex.sets
                     .map((s: any) =>
-                        s.weight
-                            ? `${s.reps}*${s.weight}`
-                            : `${s.reps || s.minutes || s.meters}`
+                        s.weight ? `${s.reps}*${s.weight}` : `${s.reps || s.minutes || s.meters}`
                     )
                     .join(",");
                 return `${ex.id}:[${sets}]`;
             })
             .join(";");
 
-
     // ================= UI =================
-
     return (
         <div className="page stack">
             <h2>{dayName}</h2>
@@ -226,29 +211,27 @@ export default function DayDetailsPage() {
 
             {loading && <Loader/>}
 
-            <DndContext
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-            >
+            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext
-                    items={exercises.map(e => e.uid)}
+                    items={exercises.map((e) => e.uid)}
                     strategy={verticalListSortingStrategy}
                 >
                     {exercises.map((ex, ei) => (
                         <SortableExercise key={ex.uid} id={ex.uid}>
-                            {(listeners: any) => (
+                            {({listeners, attributes}: any) => (
                                 <div className="card exercise-card animate">
 
+                                    {/* 🔥 drag handle на отдельный div */}
+                                    <div
+                                        className="drag-handle"
+                                        {...listeners}
+                                        {...attributes}
+                                    >
+                                        ☰
+                                    </div>
+
                                     <div className="exercise-header">
-                                        <div
-                                            className="drag-handle"
-                                            {...listeners}
-                                        >
-                                            ☰
-                                        </div>
-
                                         <h3>{ex.name}</h3>
-
                                         <Button
                                             variant="danger"
                                             onClick={() => removeExercise(ei)}
@@ -260,33 +243,69 @@ export default function DayDetailsPage() {
                                     <div className="sets">
                                         {ex.sets.map((s: any, si: number) => (
                                             <div key={si} className="set-row">
-
-                                                <input
-                                                    type="number"
-                                                    value={s.reps}
-                                                    onChange={(e) =>
-                                                        updateSet(ei, si, "reps", +e.target.value)
-                                                    }
-                                                />
-
-                                                <input
-                                                    type="number"
-                                                    value={s.weight}
-                                                    onChange={(e) =>
-                                                        updateSet(ei, si, "weight", +e.target.value)
-                                                    }
-                                                />
+                                                {s.reps > 0 && (
+                                                    <>
+                                                        <input
+                                                            type="number"
+                                                            value={s.reps}
+                                                            onChange={(e) => updateSet(ei, si, "reps", +e.target.value)}
+                                                            onPointerDown={(e) => e.stopPropagation()}
+                                                        />
+                                                        <span>повт.</span>
+                                                    </>
+                                                )}
+                                                {s.weight > 0 && (
+                                                    <>
+                                                        <input
+                                                            type="number"
+                                                            value={s.weight}
+                                                            onChange={(e) => updateSet(ei, si, "weight", +e.target.value)}
+                                                            onPointerDown={(e) => e.stopPropagation()}
+                                                        />
+                                                        <span>кг</span>
+                                                    </>
+                                                )}
+                                                {s.meters > 0 && (
+                                                    <>
+                                                        <input
+                                                            type="number"
+                                                            value={s.meters}
+                                                            onChange={(e) => updateSet(ei, si, "meters", +e.target.value)}
+                                                            onPointerDown={(e) => e.stopPropagation()}
+                                                        />
+                                                        <span>м</span>
+                                                    </>
+                                                )}
+                                                {s.minutes > 0 && (
+                                                    <>
+                                                        <input
+                                                            type="number"
+                                                            value={s.minutes}
+                                                            onChange={(e) => updateSet(ei, si, "minutes", +e.target.value)}
+                                                            onPointerDown={(e) => e.stopPropagation()}
+                                                        />
+                                                        <span>мин</span>
+                                                    </>
+                                                )}
 
                                                 <button
                                                     className="minus"
-                                                    onClick={() => removeSet(ei, si)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeSet(ei, si);
+                                                    }}
                                                 >
                                                     🗑
                                                 </button>
                                             </div>
                                         ))}
 
-                                        <Button onClick={() => addSet(ei)}>
+                                        <Button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                addSet(ei, ex.sets);
+                                            }}
+                                        >
                                             + сет
                                         </Button>
                                     </div>
