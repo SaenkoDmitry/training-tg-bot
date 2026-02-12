@@ -283,6 +283,7 @@ const MeasurementsPage: React.FC = () => {
                             <div className="card-row"><span>П. икра:</span><span>{m.calf_right}</span></div>
                         </div>
                     </div>
+                    <div style={{marginTop: '16px'}}><b>{idx+1} из {count}</b></div>
                 </div>
             ))}
 
