@@ -1,146 +1,124 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import WorkoutCard from '../components/WorkoutCard';
 import {useAuth} from '../context/AuthContext';
 import '../styles/App.css';
 import Button from "../components/Button.tsx";
-import {deleteWorkout} from "../api/workouts.ts";
+import {deleteWorkout, getWorkouts} from "../api/workouts.ts";
 import {Loader} from "lucide-react";
 
 const LIMIT = 10;
 
 const Home: React.FC = () => {
-    const {user, loading: authLoading} = useAuth();
-
+    const {user} = useAuth();
     const [workouts, setWorkouts] = useState<Workout[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
-    const [offset, setOffset] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
 
+    const offsetRef = useRef(0); // храним текущий offset
     const loaderRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
+    // ---------------- DELETE WORKOUT ----------------
     const handleDelete = async (id: number) => {
-        if (!confirm('"Вы уверены, что хотите удалить тренировку?')) return;
+        if (!confirm("Вы уверены, что хотите удалить тренировку?")) return;
 
         await deleteWorkout(id);
         setWorkouts(prev => prev.filter(w => w.id !== id));
     };
 
-    // ---------------- WORKOUTS ----------------
+    // ---------------- FETCH WORKOUTS ----------------
+    const fetchWorkouts = async () => {
+        if (loading || !hasMore) return;
 
-    const fetchWorkouts = useCallback(
-        async (nextOffset: number, append = true) => {
-            if (loading) return;
+        setLoading(true);
+        try {
+            const nextOffset = offsetRef.current; // берем актуальный offset
+            const data: ShowMyWorkoutsResult = await getWorkouts(nextOffset, LIMIT);
 
-            setLoading(true);
-
-            const res = await fetch(
-                `/api/workouts?offset=${nextOffset}&limit=${LIMIT}`,
-                {credentials: 'include'}
-            );
-
-            const data = await res.json();
-
-            setWorkouts((prev) =>
-                append ? [...prev, ...data.items] : data.items
-            );
-
+            setWorkouts(prev => [...prev, ...data.items]);
             setPagination(data.pagination);
-            setOffset(nextOffset + LIMIT);
 
+            offsetRef.current += data.items.length; // обновляем offset
+            setHasMore(offsetRef.current < data.pagination.total);
+        } finally {
             setLoading(false);
-        },
-        [loading]
-    );
-
-    // ---------------- INIT ----------------
-
-    useEffect(() => {
-        if (!user) return;
-
-        fetchWorkouts(0, false);
-    }, [user]);
+        }
+    };
 
     // ---------------- INFINITE SCROLL ----------------
-
     useEffect(() => {
-        if (!loaderRef.current || !pagination) return;
+        if (!loaderRef.current || !hasMore) return;
 
         const observer = new IntersectionObserver((entries) => {
-            if (!entries[0].isIntersecting) return;
-
-            const hasMore =
-                pagination.offset + pagination.limit < pagination.total;
-
-            if (hasMore) fetchWorkouts(offset, true);
+            if (entries[0].isIntersecting && !loading) {
+                fetchWorkouts();
+            }
         });
 
         observer.observe(loaderRef.current);
-
         return () => observer.disconnect();
-    }, [offset, pagination, fetchWorkouts]);
+    }, [user, hasMore, loading]);
 
-    return <div className="page stack">
-        <h1>Мои тренировки</h1>
+    return (
+        <div className="page stack">
+            <h1>Мои тренировки</h1>
 
-        {user && (
-            <Button
-                variant="active"
-                onClick={() => alert('Начало новой тренировки!')}
-            >
-                ▶️ Начать новую тренировку
-            </Button>
-        )}
-
-        <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>
-            {workouts.map((w, idx) => (
-                <div
-                    key={w.id}
-                    onClick={() => navigate(`/workout/${w.id}`)}
-                    className="workout-item"
+            {user && (
+                <Button
+                    variant="active"
+                    onClick={() => alert('Начало новой тренировки!')}
                 >
-                    <WorkoutCard w={w} idx={idx + 1}/>
+                    ▶️ Начать новую тренировку
+                </Button>
+            )}
 
-                    <div className="workout-actions">
-                        {!w.completed && (
+            <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+                {workouts.map((w, idx) => (
+                    <div
+                        key={w.id}
+                        onClick={() => navigate(`/workout/${w.id}`)}
+                        className="workout-item"
+                    >
+                        <WorkoutCard w={w} idx={idx + 1}/>
+
+                        <div className="workout-actions">
+                            {!w.completed && (
+                                <Button
+                                    variant="active"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    ▶️
+                                </Button>
+                            )}
+
                             <Button
-                                variant="active"
+                                variant="danger"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    // handleStart(w.id);
+                                    handleDelete(w.id);
                                 }}
                             >
-                                ▶️
+                                🗑️
                             </Button>
-                        )}
-
-                        <Button
-                            variant="danger"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(w.id);
-                            }}
-                        >
-                            🗑️
-                        </Button>
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
+
+            {loading && <Loader/>}
+
+            {/* IntersectionObserver смотрит сюда */}
+            <div ref={loaderRef} style={{height: 20}}/>
+
+            {pagination && (
+                <p>
+                    {Math.min(offsetRef.current, pagination.total)} из {pagination.total}
+                </p>
+            )}
         </div>
-
-        {loading && <Loader />}
-
-        {pagination && (
-            <p>
-                {Math.min(
-                    pagination.limit + pagination.offset,
-                    pagination.total
-                )}{' '}
-                из {pagination.total}
-            </p>
-        )}
-    </div>;
+    );
 };
 
 export default Home;

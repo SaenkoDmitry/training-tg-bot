@@ -7,6 +7,11 @@ interface Workout {
     completed: boolean;
 }
 
+interface ShowMyWorkoutsResult {
+    items: Workout[];
+    pagination: Pagination;
+}
+
 interface Pagination {
     limit: number;
     offset: number;
