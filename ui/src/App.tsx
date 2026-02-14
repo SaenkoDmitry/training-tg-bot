@@ -16,6 +16,7 @@ import ProfilePage from './pages/ProfilePage';
 import RequireAuth from './components/RequireAuth';
 import StartWorkout from "./pages/StartWorkout.tsx";
 import WorkoutSession from "./pages/WorkoutSession.tsx";
+import AddExercisePage from "./pages/AddExercisePage.tsx";
 
 const App = () => (
     <AuthProvider>
@@ -40,6 +41,11 @@ const App = () => (
                     </RequireAuth>
                 }
             />
+            <Route path="/workouts/:id/add-exercise" element={
+                <RequireAuth>
+                    <MainLayout><AddExercisePage/></MainLayout>
+                </RequireAuth>
+            }/>
             <Route
                 path="/stats"
                 element={

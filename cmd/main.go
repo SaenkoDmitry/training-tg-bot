@@ -196,7 +196,7 @@ func initServer(container *usecase.Container) {
 	r.Route("/api/exercises", func(r chi.Router) {
 		r.Use(middlewares.Auth)
 
-		r.Post("/{workout_id}", s.AddExercise)
+		r.Post("/", s.AddExercise)
 		r.Delete("/{id}", s.DeleteExercise)
 	})
 
