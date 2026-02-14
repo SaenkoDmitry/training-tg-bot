@@ -20,28 +20,28 @@ func (*ExerciseType) TableName() string {
 	return "exercise_types"
 }
 
-func (t *ExerciseType) ShowReps() bool {
+func (t *ExerciseType) ContainsReps() bool {
 	if t == nil {
 		return false
 	}
 	return strings.Contains(t.Units, constants.RepsUnit)
 }
 
-func (t *ExerciseType) ShowWeight() bool {
+func (t *ExerciseType) ContainsWeight() bool {
 	if t == nil {
 		return false
 	}
 	return strings.Contains(t.Units, constants.WeightUnit)
 }
 
-func (t *ExerciseType) ShowMinutes() bool {
+func (t *ExerciseType) ContainsMinutes() bool {
 	if t == nil {
 		return false
 	}
 	return strings.Contains(t.Units, constants.MinutesUnit)
 }
 
-func (t *ExerciseType) ShowMeters() bool {
+func (t *ExerciseType) ContainsMeters() bool {
 	if t == nil {
 		return false
 	}

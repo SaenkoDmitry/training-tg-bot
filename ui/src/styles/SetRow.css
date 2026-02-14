@@ -20,16 +20,6 @@
     flex-wrap: nowrap; /* не переносим на новую строку */
 }
 
-/* input не растягиваем */
-.edit-input {
-    width: 60px; /* фиксированная ширина, чтобы все в одну строку */
-    padding: 4px 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    text-align: center;
-    font-size: 14px;
-}
-
 /* кнопки всегда справа */
 .set-actions {
     display: flex;
@@ -37,7 +27,3 @@
     margin-left: auto; /* прижимает к правому краю */
 }
 
-.set-row.done .done-highlight {
-    font-weight: 600;
-    color: green;
-}

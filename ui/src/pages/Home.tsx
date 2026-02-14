@@ -78,7 +78,7 @@ const Home: React.FC = () => {
                 {workouts.map((w, idx) => (
                     <div
                         key={w.id}
-                        onClick={() => navigate(`/workout/${w.id}`)}
+                        onClick={() => navigate(`/workouts/${w.id}`)}
                         className="workout-item"
                     >
                         <WorkoutCard w={w} idx={idx + 1}/>

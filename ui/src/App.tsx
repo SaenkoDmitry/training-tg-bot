@@ -33,7 +33,7 @@ const App = () => (
                 }
             />
             <Route
-                path="/workout/:id"
+                path="/workouts/:id"
                 element={
                     <RequireAuth>
                         <MainLayout><WorkoutPage/></MainLayout>

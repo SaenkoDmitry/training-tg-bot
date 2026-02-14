@@ -17,6 +17,13 @@ func (*Exercise) TableName() string {
 	return "exercises"
 }
 
+func (e *Exercise) GetExerciseType() *ExerciseType {
+	if e == nil {
+		return nil
+	}
+	return e.ExerciseType
+}
+
 func (e *Exercise) Status() string {
 	completedExerciseSets := e.CompletedSets()
 	allSets := len(e.Sets)

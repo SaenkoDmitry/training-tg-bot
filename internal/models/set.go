@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 )
@@ -43,15 +44,15 @@ func (s *Set) String(done bool) string {
 			text.WriteString("🚀 ")
 		}
 	}
-	if s.Exercise.ExerciseType.ShowMeters() {
+	if s.Exercise.ExerciseType.ContainsMeters() {
 		text.WriteString(fmt.Sprintf("%s метров", s.FormatMeters()))
 	}
-	if s.Exercise.ExerciseType.ShowMinutes() {
+	if s.Exercise.ExerciseType.ContainsMinutes() {
 		text.WriteString(fmt.Sprintf("%s минут", s.FormatMinutes()))
 	}
-	if s.Exercise.ExerciseType.ShowReps() && s.Exercise.ExerciseType.ShowWeight() {
+	if s.Exercise.ExerciseType.ContainsReps() && s.Exercise.ExerciseType.ContainsWeight() {
 		text.WriteString(fmt.Sprintf("%s повт. * %s кг", s.FormatReps(), s.FormatWeight()))
-	} else if s.Exercise.ExerciseType.ShowReps() {
+	} else if s.Exercise.ExerciseType.ContainsReps() {
 		text.WriteString(fmt.Sprintf("%s повт.", s.FormatReps()))
 	}
 	if s.Completed {
@@ -69,11 +70,20 @@ func (s *Set) FormatReps() string {
 	return fmt.Sprintf("<strike>%d</strike> <b>%d</b>", s.Reps, s.FactReps)
 }
 
+func formatWeight(weight float32) string {
+	// Проверяем, есть ли дробная часть
+	if math.Mod(float64(weight), 1) == 0 {
+		return fmt.Sprintf("%.0f", weight) // целое число → 0 знаков
+	} else {
+		return fmt.Sprintf("%.1f", weight) // дробное → 1 знак
+	}
+}
+
 func (s *Set) FormatWeight() string {
 	if !s.Completed || s.FactWeight == s.Weight {
-		return fmt.Sprintf("%.0f", s.Weight)
+		return formatWeight(s.Weight)
 	}
-	return fmt.Sprintf("<strike>%.0f</strike> <b>%.0f</b>", s.Weight, s.FactWeight)
+	return fmt.Sprintf("<strike>%s</strike> <b>%s</b>", formatWeight(s.Weight), formatWeight(s.FactWeight))
 }
 
 func (s *Set) FormatMinutes() string {

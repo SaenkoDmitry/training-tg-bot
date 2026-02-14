@@ -7,6 +7,7 @@ import ExerciseView from "../components/ExerciseView";
 import WorkoutControls from "../components/WorkoutControls";
 
 import {Loader} from "lucide-react";
+import Button from "../components/Button.tsx";
 
 export default function WorkoutSession() {
     const {id} = useParams();
@@ -91,24 +92,24 @@ export default function WorkoutSession() {
 
             {loading && (
                 <div className="center">
-                    <Loader className="spin"/>
+                    <Loader/>
                 </div>
             )}
 
             {!loading && session && (
-                <>
+                <div>
+                    <div>
+                        {session.exercise_index + 1} /{" "}
+                        {session.workout.exercises.length}
+                    </div>
                     <ExerciseView
                         session={session}
                         onAllSetsCompleted={() => move(true)}
                         onReload={load}
                     />
-
-                    <p>
-                        {session.exercise_index + 1} /{" "}
-                        {session.workout.exercises.length}
-                    </p>
-                </>
+                </div>
             )}
+            <Button variant={"active"} onClick={() => navigate(`/workouts/${workoutID}`)}>Прогресс</Button>
 
             <WorkoutControls
                 onPrev={() => move(false)}

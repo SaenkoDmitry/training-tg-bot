@@ -59,6 +59,11 @@ const WorkoutPage = () => {
             <div style={{marginTop: 10}}>{ProgressPercent}% выполнено</div>
         </div>
 
+        {data.progress.SessionStarted &&
+            <Button variant={"active"} onClick={() => navigate(`/sessions/${data?.progress.workout.id}`)}>
+                К тренировке</Button>
+        }
+
         {/* Упражнения */}
         <h3>Упражнения ({CompletedExercises}/{TotalExercises})</h3>
         <div style={{listStyle: "none", padding: 0}}>
@@ -99,8 +104,6 @@ const WorkoutPage = () => {
                 </div>
             ))}
         </div>
-
-        {data.progress.SessionStarted && <Button variant={"active"} onClick={() => navigate(`/sessions/${data?.progress.workout.id}`)}>К тренировке</Button>}
 
         {!data.progress.SessionStarted && <div>
             {(Stats.CardioTime > 0 || Stats.TotalWeight > 0) && <h3>Статистика</h3>}

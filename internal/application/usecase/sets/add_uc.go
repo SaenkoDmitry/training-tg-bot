@@ -38,25 +38,51 @@ func (uc *AddOneMoreUseCase) Name() string {
 }
 
 func (uc *AddOneMoreUseCase) Execute(exerciseID int64) (*dto.AddOneMoreSet, error) {
-	exercise, err := uc.exercisesRepo.Get(exerciseID)
+	ex, err := uc.exercisesRepo.Get(exerciseID)
 	if err != nil {
 		return nil, err
 	}
+	nextSet := &models.Set{
+		ExerciseID: ex.ID,
+	}
 
-	var nextSet *models.Set
-	if len(exercise.Sets) > 0 {
-		lastSet := exercise.Sets[len(exercise.Sets)-1]
-		nextSet = &models.Set{
-			ExerciseID: exercise.ID,
-			Reps:       lastSet.GetRealReps(),
-			Weight:     lastSet.GetRealWeight(),
-			Minutes:    lastSet.GetRealMinutes(),
-			Meters:     lastSet.GetRealMeters(),
-			Index:      lastSet.Index + 1,
+	if len(ex.Sets) > 0 {
+		lastSet := ex.Sets[len(ex.Sets)-1]
+		if ex.GetExerciseType().ContainsReps() {
+			nextSet.Reps = lastSet.Reps
+			if lastSet.FactReps > 0 {
+				nextSet.Reps = lastSet.FactReps
+			}
 		}
+		if ex.GetExerciseType().ContainsWeight() {
+			nextSet.Weight = lastSet.Weight
+			if lastSet.FactWeight > 0 {
+				nextSet.Weight = lastSet.FactWeight
+			}
+		}
+		if ex.GetExerciseType().ContainsMinutes() {
+			nextSet.Minutes = lastSet.Minutes
+			if lastSet.FactMinutes > 0 {
+				nextSet.Minutes = lastSet.FactMinutes
+			}
+		}
+		if ex.GetExerciseType().ContainsMeters() {
+			nextSet.Meters = lastSet.Meters
+			if lastSet.FactMeters > 0 {
+				nextSet.Meters = lastSet.FactMeters
+			}
+		}
+		nextSet.Index = lastSet.Index + 1
 	} else {
-		nextSet = &models.Set{
-			ExerciseID: exercise.ID,
+		switch {
+		case ex.GetExerciseType().ContainsReps():
+			nextSet.Reps = 10
+		case ex.GetExerciseType().ContainsWeight():
+			nextSet.Weight = 10
+		case ex.GetExerciseType().ContainsMinutes():
+			nextSet.Minutes = 10
+		case ex.GetExerciseType().ContainsMeters():
+			nextSet.Meters = 10
 		}
 	}
 
@@ -67,6 +93,6 @@ func (uc *AddOneMoreUseCase) Execute(exerciseID int64) (*dto.AddOneMoreSet, erro
 	}
 
 	return &dto.AddOneMoreSet{
-		WorkoutID: exercise.WorkoutDayID,
+		WorkoutID: ex.WorkoutDayID,
 	}, nil
 }

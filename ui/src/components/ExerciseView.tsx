@@ -21,10 +21,10 @@ export default function ExerciseView({session, onAllSetsCompleted, onReload}) {
         const temp: FormattedSet = {
             id: Date.now(),
 
-            reps: lastSet?.reps ?? 0,
-            weight: lastSet?.weight ?? 0,
-            minutes: lastSet?.minutes ?? 0,
-            meters: lastSet?.meters ?? 0,
+            reps: (lastSet?.fact_reps > 0 ? lastSet?.fact_reps : lastSet?.reps) ?? 0,
+            weight: (lastSet?.fact_weight > 0 ? lastSet?.fact_weight : lastSet?.weight) ?? 0,
+            minutes: (lastSet?.fact_minutes > 0 ? lastSet?.fact_minutes : lastSet?.minutes) ?? 0,
+            meters: (lastSet?.fact_meters > 0 ? lastSet?.fact_meters : lastSet?.meters) ?? 0,
 
             fact_reps: 0,
             fact_weight: 0,

@@ -1,9 +1,9 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import "../styles/EditableValue.css";
 
 type Props = {
-    fact: number;       // факт
-    planned?: number;   // план
+    fact: number;       // фактическое значение
+    planned?: number;   // запланированное
     suffix: string;
     completed?: boolean;
     onSave?: (v: number) => void;
@@ -16,43 +16,70 @@ export default function EditableValue({
                                           completed,
                                           onSave,
                                       }: Props) {
-    const [local, setLocal] = useState(fact || 0);
+    const [localStr, setLocalStr] = useState((fact || 0) as string);
 
-    // если fact меняется извне, синхронизируем локальный state
+    // синхронизация локального значения при изменении fact извне
     useEffect(() => {
-        setLocal(fact || 0);
+        setLocalStr((fact || 0) as string);
     }, [fact]);
 
-    // ===== после выполнения просто текст =====
-    if (completed) {
-        if (!planned || planned === fact) {
-            return <span className="value-text">{fact} {suffix}</span>;
+    const handleSave = () => {
+        if (onSave) {
+            // если ничего не введено, подставляем план
+            const valueToSend = localStr
+                ? parseFloat(localStr)           // конвертируем в число
+                : planned || 0;                  // если пустое, берем план или 0
+            onSave(valueToSend);
         }
+    };
 
+    if (completed) {
         return (
-            <span className="value-text done-highlight">
-                {planned} → {fact} {suffix}
-            </span>
+            <div className="completed-row">
+                <div className="value-text"
+                     style={{
+                         color: fact >= planned ? "var(--color-active)" : "var(--color-danger)"
+                     }}
+                >
+                    {!planned || planned === fact
+                        ? `${fact} ${suffix}`
+                        : <span>{planned} → {fact} {suffix}</span>}
+                </div>
+            </div>
         );
     }
-
-    const handleSave = () => {
-        if (onSave) onSave(local);
-    };
 
     return (
         <div className="editable-wrapper">
             <input
-                type="number"
-                value={local || ""}
+                type="text"
+                inputMode="decimal"       // цифровая клавиатура на мобильных
+                value={localStr || ""}    // хранить строку, не число
                 placeholder={planned?.toString()}
                 className="edit-input"
-                onChange={e => setLocal(+e.target.value)}
-                onKeyDown={e => {
-                    if (e.key === "Enter") handleSave();
+                onChange={e => {
+                    let val = e.target.value;
+
+                    // Заменяем запятую на точку
+                    val = val.replace(",", ".");
+
+                    // Разрешаем цифры, пустую строку и точку с максимум 1 цифрой после
+                    if (/^\d*\.?\d?$/.test(val)) {
+                        setLocalStr(val);  // сохраняем как строку
+                    }
                 }}
-                onBlur={handleSave}
+                onKeyDown={e => {
+                    if (e.key === "Enter") {
+                        setLocalStr(localStr);  // конвертируем в число при сохранении
+                        handleSave();
+                    }
+                }}
+                onBlur={() => {
+                    setLocalStr(localStr);    // конвертируем в число при потере фокуса
+                    handleSave();
+                }}
             />
+
             <span className="input-suffix">{suffix}</span>
         </div>
     );
