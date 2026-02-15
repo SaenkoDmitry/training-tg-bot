@@ -84,3 +84,25 @@
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
+
+.floating-notification {
+    position: absolute;
+    top: -35px; /* над кружком */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4caf50;
+    color: white;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}

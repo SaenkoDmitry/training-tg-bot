@@ -6,6 +6,12 @@ const POS_STORAGE = "floating_timer_pos";
 
 export default function FloatingTimer() {
     const { endTime, stop } = useGlobalTimer();
+    const [toast, setToast] = useState<string | null>(null);
+
+    const showToast = (text: string) => {
+        setToast(text);
+        setTimeout(() => setToast(null), 3000);
+    };
 
     const [remaining, setRemaining] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -142,9 +148,7 @@ export default function FloatingTimer() {
 
             <button className="floating-close" onClick={stop}>✕</button>
 
-            {finished && showNotification && (
-                <div className="floating-notification">Отдых закончен 💪</div>
-            )}
+            {finished && showToast('💪 Отдых закончен')}
         </div>
     );
 }
