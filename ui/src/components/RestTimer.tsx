@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import "../styles/RestTimer.css";
+import {Pause, Play, RotateCcw} from "lucide-react";
 
 const STORAGE_KEY = "rest_timer_end";
 
@@ -120,13 +121,11 @@ export default function RestTimer({
 
                 <div className="actions">
                     {!running ? (
-                        <Button onClick={start}>Старт</Button>
+                        <Button variant={"active"} onClick={start}><Play size={14}/>Старт</Button>
                     ) : (
-                        <Button onClick={pause}>Пауза</Button>
+                        <Button variant={"ghost"} onClick={pause}><Pause size={14}/>Пауза</Button>
                     )}
-                    <Button variant="ghost" onClick={reset}>
-                        Сброс
-                    </Button>
+                    <Button variant="ghost" onClick={reset}><RotateCcw size={14}/>Сброс</Button>
                 </div>
 
             </div>
