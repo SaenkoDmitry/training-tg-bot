@@ -6,6 +6,12 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
+            devOptions: {
+                enabled: true
+            },
+            strategies: 'injectManifest',
+            srcDir: 'src',
+            filename: 'sw.ts',
             registerType: 'autoUpdate',
             manifest: {
                 name: 'Form Journey · Training 🏔️',
@@ -44,7 +50,7 @@ export default defineConfig({
         allowedHosts: [
             'localhost',
             '127.0.0.1',
-            '8b6cdde5a1bd41.lhr.life',
+            '6e1303564809ad.lhr.life',
         ],
         proxy: {
             '/api': 'http://localhost:8080',

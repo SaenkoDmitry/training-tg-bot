@@ -1,10 +1,15 @@
-import React from "react";
+import React, {useState} from "react";
 import {useAuth} from "../context/AuthContext";
 import TelegramLoginWidget from "./TelegramLoginWidget";
 import Button from "../components/Button";
+import {subscribePush} from "../api/subscribePush.ts";
+import Toast from "../components/Toast.tsx";
+
+const VAPID_PUBLIC_KEY = 'BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms';
 
 const ProfilePage: React.FC = () => {
     const {user, logout, loading} = useAuth();
+    const [toast, setToast] = useState<string | null>(null);
 
     return (
         <div
@@ -81,6 +86,29 @@ const ProfilePage: React.FC = () => {
                     >
                         Выйти из аккаунта
                     </Button>
+
+                    <Button
+                        onClick={async () => {
+                            const permission = await Notification.requestPermission();
+                            if (permission === 'granted') {
+                                await subscribePush(VAPID_PUBLIC_KEY);
+                                setToast("Пуши включены ✅");
+                            }
+                        }}
+                    >
+                        Включить уведомления
+                    </Button>
+
+                    <button
+                        onClick={async () => {
+                            const p = await Notification.requestPermission();
+                            console.log("permission:", p);
+                        }}
+                    >
+                        TEST PERMISSION
+                    </button>
+
+                    {toast && <Toast message={toast} onClose={() => setToast(null)}/>}
                 </>
             )}
         </div>

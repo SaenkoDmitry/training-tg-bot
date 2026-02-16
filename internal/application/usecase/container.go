@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/measurements"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/pushsubscriptions"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/service/timer"
 	"gorm.io/gorm"
 
@@ -11,6 +12,7 @@ import (
 	groupusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/groups"
 	measurementsusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/measurements"
 	programusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/programs"
+	pushsubscriptionsusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/pushsubscriptions"
 	sessionusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/session"
 	setusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/sets"
 	statsusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/stats"
@@ -109,6 +111,11 @@ type Container struct {
 	GetMeasurementByIDUC    *measurementsusecases.GetByIDUseCase
 	DeleteMeasurementByIDUC *measurementsusecases.DeleteByIDUseCase
 	GetExerciseUC           *exerciseusecases.GetUseCase
+
+	// push subscriptions
+	CreatePushSubscriptionUC   *pushsubscriptionsusecases.CreateUseCase
+	FindAllPushSubscriptionsUC *pushsubscriptionsusecases.FindAllUseCase
+	DeletePushSubscriptionUC   *pushsubscriptionsusecases.DeleteUseCase
 }
 
 func NewContainer(db *gorm.DB) *Container {
@@ -122,6 +129,7 @@ func NewContainer(db *gorm.DB) *Container {
 	exerciseTypesRepo := exercisetypes.NewRepo(db)
 	exerciseGroupTypesRepo := exercisegrouptypes.NewRepo(db)
 	measurementsRepo := measurements.NewRepo(db)
+	pushSubscriptionsRepo := pushsubscriptions.NewRepo(db)
 
 	timerStore := timer.NewStore()
 	summaryService := summary.NewService()
@@ -208,5 +216,10 @@ func NewContainer(db *gorm.DB) *Container {
 		FindAllMeasurementsUC:   measurementsusecases.NewFindAllByUserUseCase(measurementsRepo, usersRepo),
 		GetMeasurementByIDUC:    measurementsusecases.NewGetByIDUseCase(measurementsRepo),
 		DeleteMeasurementByIDUC: measurementsusecases.NewDeleteByIDUseCase(measurementsRepo),
+
+		// push subscriptions
+		CreatePushSubscriptionUC:   pushsubscriptionsusecases.NewCreateUseCase(pushSubscriptionsRepo, usersRepo),
+		DeletePushSubscriptionUC:   pushsubscriptionsusecases.NewDeleteUseCase(pushSubscriptionsRepo, usersRepo),
+		FindAllPushSubscriptionsUC: pushsubscriptionsusecases.NewFindAllUseCase(pushSubscriptionsRepo, usersRepo),
 	}
 }

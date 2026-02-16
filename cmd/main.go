@@ -45,7 +45,7 @@ func main() {
 		return
 	}
 
-	go initServer(container)
+	go initServer(container, db)
 
 	// run telegram app
 	if err = app.Run(); err != nil {
@@ -103,7 +103,7 @@ func migrate(dsn string) {
 	}
 }
 
-func initServer(container *usecase.Container) {
+func initServer(container *usecase.Container, db *gorm.DB) {
 	r := chi.NewRouter()
 
 	// Средства middleware chi
@@ -111,7 +111,7 @@ func initServer(container *usecase.Container) {
 	r.Use(middleware.Recoverer) // recovery от паник
 	r.Use(middleware.RequestID) // уникальный ID запроса
 
-	s := api.New(container)
+	s := api.New(container, db)
 
 	r.Route("/api/login", func(r chi.Router) {
 		r.Post("/", s.LoginHandler)
@@ -199,6 +199,19 @@ func initServer(container *usecase.Container) {
 
 		r.Post("/", s.AddExercise)
 		r.Delete("/{id}", s.DeleteExercise)
+	})
+
+	r.Route("/api/push", func(r chi.Router) {
+		r.Use(middlewares.Auth)
+
+		r.Post("/subscribe", s.PushSubscribe)
+	})
+
+	r.Route("/api/timer", func(r chi.Router) {
+		r.Use(middlewares.Auth)
+
+		r.Post("/start", s.StartTimer)
+		r.Post("/cancel", s.CancelTimer)
 	})
 
 	// UI (React build)

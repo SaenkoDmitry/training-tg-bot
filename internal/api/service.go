@@ -2,6 +2,9 @@ package api
 
 import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/push"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/service/timermanager"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -38,14 +41,20 @@ type Service interface {
 	ChangeSet(w http.ResponseWriter, r *http.Request)
 	DeleteExercise(w http.ResponseWriter, r *http.Request)
 	AddExercise(w http.ResponseWriter, r *http.Request)
+	PushSubscribe(w http.ResponseWriter, r *http.Request)
+	StartTimer(w http.ResponseWriter, r *http.Request)
+	CancelTimer(w http.ResponseWriter, r *http.Request)
 }
 
 type serviceImpl struct {
-	container *usecase.Container
+	container    *usecase.Container
+	timerManager *timermanager.TimerManager
 }
 
-func New(container *usecase.Container) Service {
+func New(container *usecase.Container, db *gorm.DB) Service {
+	pushService := push.NewService(db)
 	return &serviceImpl{
-		container: container,
+		container:    container,
+		timerManager: timermanager.NewTimerManager(db, pushService),
 	}
 }
