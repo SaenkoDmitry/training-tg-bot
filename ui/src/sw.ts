@@ -1,9 +1,17 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute } from 'workbox-precaching'
+import { registerRoute } from 'workbox-routing'
+import { NetworkOnly } from 'workbox-strategies'
 
 declare let self: ServiceWorkerGlobalScope
 
 precacheAndRoute(self.__WB_MANIFEST)
+
+// 🚀 Пропускаем все запросы к backend
+registerRoute(
+    ({ url }) => url.pathname.startsWith('/api/'),
+    new NetworkOnly()
+)
 
 // PUSH
 self.addEventListener('push', (event) => {
