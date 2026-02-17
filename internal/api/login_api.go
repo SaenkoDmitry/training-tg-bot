@@ -77,8 +77,8 @@ func (s *serviceImpl) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Value:    signed,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // true на проде
-		SameSite: http.SameSiteLaxMode,
+		Secure:   true, // true на проде
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	w.Header().Set("Content-Type", "application/json")
