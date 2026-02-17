@@ -53,19 +53,6 @@ export default function RestTimer({ seconds, autoStartTrigger, workoutID }: Prop
             // Toast уведомление
             toast.success("Таймер завершён!");
 
-            // Notification API (для PWA на Android)
-            if ("Notification" in window) {
-                if (Notification.permission === "granted") {
-                    new Notification("Таймер завершён!");
-                } else if (Notification.permission !== "denied") {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === "granted") {
-                            new Notification("Таймер завершён!");
-                        }
-                    });
-                }
-            }
-
             // очищаем ID
             localStorage.removeItem("floatingTimerWorkoutID");
         }
