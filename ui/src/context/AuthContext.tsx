@@ -40,6 +40,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     // ---------- telegram login ----------
     useEffect(() => {
         const handleMessage = async (event: MessageEvent) => {
+            console.log("MESSAGE EVENT:", event.origin, event.data);
             if (event.origin !== 'https://oauth.telegram.org') return;
 
             let data = event.data;
