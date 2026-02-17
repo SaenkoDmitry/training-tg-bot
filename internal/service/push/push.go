@@ -7,6 +7,7 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"github.com/SherClockHolmes/webpush-go"
 	"gorm.io/gorm"
+	"io"
 	"net/http"
 	"os"
 )
@@ -91,5 +92,7 @@ func sendPush(sub *models.PushSubscription, payload []byte) (int, error) {
 
 	defer resp.Body.Close()
 	fmt.Println("push status:", resp.StatusCode)
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	fmt.Println("push response body:", string(bodyBytes))
 	return resp.StatusCode, nil
 }
