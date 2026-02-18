@@ -7,9 +7,13 @@ declare let self: ServiceWorkerGlobalScope
 
 precacheAndRoute(self.__WB_MANIFEST)
 
-// SW не должен перехватывать Telegram callback
 registerRoute(
-    ({ url }) => url.pathname.startsWith('/api/') && !url.pathname.includes('/telegram/callback'),
+    ({ request, url }) => {
+        if (url.pathname.startsWith('/api/telegram/callback')) {
+            return false
+        }
+        return url.pathname.startsWith('/api/')
+    },
     new NetworkOnly()
 )
 

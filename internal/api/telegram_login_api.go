@@ -60,9 +60,22 @@ func (s *serviceImpl) TelegramCallbackHandler(w http.ResponseWriter, r *http.Req
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true, // true на проде
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	// Редиректим обратно на SPA (например на /profile)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(`
+			<!DOCTYPE html>
+			<html>
+			<head>
+			<meta charset="utf-8" />
+			<script>
+			  window.location.replace("/");
+			</script>
+			</head>
+			<body></body>
+			</html>
+`))
+
 }

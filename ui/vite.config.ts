@@ -14,6 +14,9 @@ export default defineConfig({
                 enabled: true,
                 type: 'module',
             },
+            workbox: {
+                navigateFallback: null
+            },
             manifest: {
                 name: 'Form Journey · Training 🏔️',
                 short_name: 'Form Journey',
