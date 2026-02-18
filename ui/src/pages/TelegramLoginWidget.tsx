@@ -1,36 +1,58 @@
-import React, {useEffect, useRef} from 'react';
-import {useAuth} from '../context/AuthContext.tsx';
+import React, { useEffect, useRef } from "react";
+import { useAuth } from "../context/AuthContext";
+
+declare global {
+    interface Window {
+        onTelegramAuth: (user: any) => void;
+    }
+}
 
 const TelegramLoginWidget: React.FC = () => {
-    const {user} = useAuth();
+    const { refreshUser } = useAuth();
     const widgetRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (user || !widgetRef.current) return;
+        if (!widgetRef.current) return;
 
-        widgetRef.current.innerHTML = '';
+        widgetRef.current.innerHTML = "";
 
-        const botUsername = process.env.NODE_ENV === 'development'
-            ? 'fitness_gym_buddy_dev_bot'
-            : 'form_journey_bot';
+        const botUsername =
+            process.env.NODE_ENV === "development"
+                ? "fitness_gym_buddy_dev_bot"
+                : "form_journey_bot";
 
-        const script = document.createElement('script');
-        script.src = 'https://telegram.org/js/telegram-widget.js?15';
+        window.onTelegramAuth = async (user: any) => {
+            const res = await fetch("/api/telegram/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(user),
+            });
+
+            if (!res.ok) {
+                alert("Login failed");
+                return;
+            }
+
+            const data = await res.json();
+            localStorage.setItem("token", data.token);
+
+            await refreshUser();
+        };
+
+        const script = document.createElement("script");
+        script.src = "https://telegram.org/js/telegram-widget.js?22";
         script.async = true;
-        script.setAttribute('data-telegram-login', botUsername);
-        script.setAttribute('data-size', 'large');
-        script.setAttribute('data-userpic', 'true');
-        // ключевое для redirect flow
-        const origin = window.location.origin; // dev: https://ff06670896d562.lhr.life, prod: https://form-journey.ru
-        const callbackUrl = `${origin}/api/telegram/callback`;
-        script.setAttribute('data-auth-url', callbackUrl);
+        script.setAttribute("data-telegram-login", botUsername);
+        script.setAttribute("data-size", "large");
+        script.setAttribute("data-userpic", "true");
+        script.setAttribute("data-onauth", "onTelegramAuth(user)");
 
         widgetRef.current.appendChild(script);
-    }, [user]);
+    }, []);
 
-    if (user) return null;
-    return <div ref={widgetRef}/>;
+    return <div ref={widgetRef} />;
 };
-
 
 export default TelegramLoginWidget;

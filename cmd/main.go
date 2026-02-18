@@ -113,12 +113,8 @@ func initServer(container *usecase.Container, db *gorm.DB) {
 
 	s := api.New(container, db)
 
-	r.Route("/api/login", func(r chi.Router) {
-		r.Post("/", s.LoginHandler)
-	})
-
 	r.Route("/api/telegram", func(r chi.Router) {
-		r.Get("/callback", s.TelegramCallbackHandler)
+		r.Post("/login", s.TelegramLoginHandler)
 	})
 
 	r.Route("/api/logout", func(r chi.Router) {

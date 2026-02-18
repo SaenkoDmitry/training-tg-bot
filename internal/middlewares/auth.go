@@ -32,8 +32,8 @@ func Auth(next http.Handler) http.Handler {
 
 		claims := token.Claims.(jwt.MapClaims)
 
-		// сохраняем claims в контекст запроса
 		ctx := WithClaims(r.Context(), claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
+		//next.ServeHTTP(w, r)
 	})
 }

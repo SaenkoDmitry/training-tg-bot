@@ -4,6 +4,7 @@ type AuthContextType = {
     user: User | null;
     loading: boolean;
     logout: () => Promise<void>;
+    refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>(null as any);
@@ -14,6 +15,10 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
 
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const refreshUser = async () => {
+        await loadMe();
+    };
 
     const loadMe = async () => {
         const token = localStorage.getItem("token");
@@ -47,7 +52,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     }, []);
 
     return (
-        <AuthContext.Provider value={{user, loading, logout}}>
+        <AuthContext.Provider value={{ user, loading, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );
