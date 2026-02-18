@@ -18,3 +18,6 @@ export const finishWorkout = (workoutID: number) =>
     api<StartWorkoutDTO>(`/api/workouts/${workoutID}/finish`, {
         method: "POST",
     });
+
+export const getWorkout = (id: number) =>
+    api<ReadWorkoutDTO>(`/api/workouts/${id}`);

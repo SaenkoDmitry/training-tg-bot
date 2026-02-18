@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import '../styles/MeasurementsPage.css';
 import Button from "../components/Button.tsx";
-import {deleteMeasurement as apiDeleteMeasurement, getMeasurements} from "../api/measurements.ts";
+import {createMeasurement, deleteMeasurement as apiDeleteMeasurement, getMeasurements} from "../api/measurements.ts";
 import {useAuth} from "../context/AuthContext.tsx";
 import {Loader, Plus, Trash2} from "lucide-react";
 
@@ -101,19 +101,15 @@ const MeasurementsPage: React.FC = () => {
 
     const handleSaveNewMeasurement = async () => {
         try {
-            const res = await fetch('/api/measurements', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(newMeasurement),
+            createMeasurement(newMeasurement).then((data: Measurement) => {
+                setMeasurements(prev => [data, ...prev]);
+                setCount(prev => prev + 1);
+                setAdding(false);
+                setNewMeasurement({});
+                showToast("✅ Измерение добавлено");
+            }).catch(() => {
+                throw new Error("Ошибка при сохранении измерения");
             });
-            if (!res.ok) throw new Error("Ошибка при сохранении измерения");
-            const data: Measurement = await res.json();
-
-            setMeasurements(prev => [data, ...prev]);
-            setCount(prev => prev + 1);
-            setAdding(false);
-            setNewMeasurement({});
-            showToast("✅ Измерение добавлено");
         } catch {
             showToast("❌ Ошибка при добавлении измерения");
         }
@@ -232,7 +228,7 @@ const MeasurementsPage: React.FC = () => {
                 {loading && (
                     <tr>
                         <td colSpan={14} style={{textAlign: 'center', padding: '20px 0'}}>
-                            <Loader />
+                            <Loader/>
                         </td>
                     </tr>
                 )}

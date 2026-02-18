@@ -3,9 +3,10 @@ import React, {useEffect, useState} from 'react';
 import SafeTextRenderer from "../components/SafeTextRenderer.tsx";
 import {Loader, Play, Plus} from "lucide-react";
 import Button from "../components/Button.tsx";
+import {getWorkout} from "../api/workouts.ts";
 
 const WorkoutPage = () => {
-    const {id} = useParams<{ id: string }>();
+    const {id} = useParams<{ id: number }>();
     const [data, setData] = useState<ReadWorkoutDTO | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -15,14 +16,13 @@ const WorkoutPage = () => {
         const fetchWorkout = async () => {
             try {
                 setLoading(true);
-                const res = await fetch(`/api/workouts/${id}`);
-                if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
-                const json: ReadWorkoutDTO = await res.json();
-                setData(json);
+                getWorkout(Number(id)).then((data) => {
+                    setData(data);
+                }).finally(() => {
+                    setLoading(false);
+                });
             } catch (err: any) {
                 setError(err.message || 'Не удалось загрузить данные');
-            } finally {
-                setLoading(false);
             }
         };
 
