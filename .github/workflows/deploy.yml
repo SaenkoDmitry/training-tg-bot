@@ -72,6 +72,7 @@ jobs:
             echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
             echo "VAPID_PRIVATE_KEY=${{ secrets.VAPID_PRIVATE_KEY }}" >> .env
             echo "VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}" >> .env
+            echo "TELEGRAM_BOT_ID=${{ secrets.TELEGRAM_BOT_ID }}" >> .env
 
             sudo systemctl start training-tg-bot
             sudo systemctl status training-tg-bot --no-pager

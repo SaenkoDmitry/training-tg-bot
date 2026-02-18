@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {useAuth} from "../context/AuthContext";
-import TelegramLoginWidget from "./TelegramLoginWidget";
 import Button from "../components/Button";
 import {subscribePush, unsubscribePush} from "../api/subscribePush.ts";
 import Toast from "../components/Toast.tsx";
@@ -90,7 +89,17 @@ const ProfilePage: React.FC = () => {
                         Войдите в аккаунт
                     </div>
 
-                    <TelegramLoginWidget/>
+                    <Button
+                        variant={"primary"}
+                        onClick={() => {
+                            const origin = window.location.origin;
+
+                            window.location.href =
+                                `/api/telegram/login?origin=${encodeURIComponent(origin)}`;
+                        }}
+                    >
+                        Войти через Telegram
+                    </Button>
                 </div>
             )}
 
@@ -142,18 +151,6 @@ const ProfilePage: React.FC = () => {
                                 : "Включить уведомления"}
                         </Button>
                     )}
-
-                    {/*<Button*/}
-                    {/*    onClick={async () => {*/}
-                    {/*        const permission = await Notification.requestPermission();*/}
-                    {/*        if (permission === 'granted') {*/}
-                    {/*            await subscribePush(VAPID_PUBLIC_KEY);*/}
-                    {/*            setToast("Пуши включены ✅");*/}
-                    {/*        }*/}
-                    {/*    }}*/}
-                    {/*>*/}
-                    {/*    Включить уведомления*/}
-                    {/*</Button>*/}
 
                     {toast && <Toast message={toast} onClose={() => setToast(null)}/>}
                 </>

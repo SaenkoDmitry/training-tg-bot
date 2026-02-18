@@ -17,7 +17,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     const [loading, setLoading] = useState(true);
 
     const refreshUser = async () => {
-        await loadMe();
+        setLoading(true);
+        await loadMe().finally(() => setLoading(false));
     };
 
     const loadMe = async () => {

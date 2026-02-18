@@ -34,7 +34,10 @@ A Telegram bot for tracking workout training sessions.
 ## Configuration and secrets
 The bot requires:
 1. Environment variable `TELEGRAM_TOKEN` containing your Telegram Bot API token (get from @BotFather on Telegram)
-2. Environment variable `DATABASE_URL` containing DSN for connection to your database
+2. Environment variable `DATABASE_URL` containing DSN for connection to your database, for example 'postgresql://postgres:postgres@127.0.0.1/training_app_db?sslmode\=disable'
+3. Environment variable `JWT_SECRET` containing JWT secret key
+4. Environment variable `TELEGRAM_BOT_ID` containing your telegram bot id
+5. Environment variable `VAPID_PRIVATE_KEY` and Environment variable `VAPID_PUBLIC_KEY` containing public/private keys for push notifications
 
 ## Running
 ```bash
@@ -56,3 +59,4 @@ ssh -R 80:localhost:5173 localhost.run
 ```
 
 2. edit domain in telegram for bot and paste host to it
+

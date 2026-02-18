@@ -9,7 +9,7 @@ precacheAndRoute(self.__WB_MANIFEST)
 
 registerRoute(
     ({ request, url }) => {
-        if (url.pathname.startsWith('/api/telegram/callback')) {
+        if (url.pathname.startsWith('/api/telegram/login')) {
             return false
         }
         return url.pathname.startsWith('/api/')
