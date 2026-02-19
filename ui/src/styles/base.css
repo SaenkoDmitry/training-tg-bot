@@ -5,6 +5,8 @@
 html, body, #root {
     height: 100%;
     margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text)
 }
 
 body {
@@ -20,6 +22,8 @@ input, select {
     padding: 8px 10px;
     min-height: var(--tap-size);
     font-size: 16px;
+    color: var(--color-text);
+    background-color: var(--color-bg);
 }
 
 /* links */

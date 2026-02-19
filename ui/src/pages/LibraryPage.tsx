@@ -67,7 +67,7 @@ const LibraryPage: React.FC = () => {
         <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>
             {!loading && exercises.map((ex, index) => {
                 const isOpen = openedId === ex.id;
-                const softBg = index % 2 === 0 ? '#fff' : '#f1f0f0'; // мягкое чередование
+                const softBg = index % 2 === 0 ? 'var(--color-card)' : 'var(--color-card-alt)'; // мягкое чередование
 
                 return (
                     <div

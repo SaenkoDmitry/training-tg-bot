@@ -42,8 +42,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
         <div
             style={{
                 minHeight: '100dvh',
-                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-                background: '#f6f7f9',
             }}
         >
             {/* ---------------- DESKTOP NAVBAR ONLY ---------------- */}
@@ -59,7 +57,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
                         top: 0,
                         zIndex: 10,
                         background: 'var(--color-primary)',
-                        color: 'white',
+                        color: 'var(--color-text)',
                     }}
                 >
                     <div style={{display: 'flex', gap: 12}}>
@@ -84,7 +82,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
                         {user && (
                             <>
-                                <Button variant={"active"}
+                                <Button variant={"ghost"}
                                         onClick={() => navigate('/profile')}>{user.first_name}
                                     <CurrentIcon/>
                                 </Button>
@@ -113,7 +111,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
                         right: 12,
                         bottom: 'calc(env(safe-area-inset-bottom) + 10px)',
                         height: 70,
-                        background: '#fff',
+                        background: 'var(--color-card)',
                         borderRadius: 24,
                         display: 'flex',
                         padding: 6,

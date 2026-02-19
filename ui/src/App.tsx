@@ -20,107 +20,110 @@ import AddExercisePage from "./pages/AddExercisePage.tsx";
 import {RestTimerProvider} from "./context/RestTimerContext.tsx";
 import AuthTelegram from "./pages/AuthTelegram.tsx";
 import {UserIconProvider} from "./context/UserIconContext.tsx";
+import {ThemeProvider} from "./context/ThemeContext.tsx";
 
 const App = () => {
     return (
         <AuthProvider>
-            <UserIconProvider>
-                <RestTimerProvider>
-                    <Routes>
-                        <Route path="/auth-telegram" element={<AuthTelegram/>}/>
+            <ThemeProvider>
+                <UserIconProvider>
+                    <RestTimerProvider>
+                        <Routes>
+                            <Route path="/auth-telegram" element={<AuthTelegram/>}/>
 
-                        {/* Публичная страница профиля */}
-                        <Route path="/profile" element={<MainLayout><ProfilePage/></MainLayout>}/>
+                            {/* Публичная страница профиля */}
+                            <Route path="/profile" element={<MainLayout><ProfilePage/></MainLayout>}/>
 
-                        {/* Защищённые страницы */}
-                        <Route
-                            path="/"
-                            element={
+                            {/* Защищённые страницы */}
+                            <Route
+                                path="/"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><Home/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/workouts/:id"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><WorkoutPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route path="/workouts/:id/add-exercise" element={
                                 <RequireAuth>
-                                    <MainLayout><Home/></MainLayout>
+                                    <MainLayout><AddExercisePage/></MainLayout>
                                 </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/workouts/:id"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><WorkoutPage/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route path="/workouts/:id/add-exercise" element={
-                            <RequireAuth>
-                                <MainLayout><AddExercisePage/></MainLayout>
-                            </RequireAuth>
-                        }/>
-                        <Route
-                            path="/stats"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><StatsPage/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/programs"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><ProgramsPage/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/programs/:id"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><ProgramDetailsPage/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/programs/:programId/days/:dayId"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><DayDetailsPage/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/measurements"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><MeasurementsPage/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/library"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><LibraryPage/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/start"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><StartWorkout/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                        <Route
-                            path="/sessions/:id"
-                            element={
-                                <RequireAuth>
-                                    <MainLayout><WorkoutSession/></MainLayout>
-                                </RequireAuth>
-                            }
-                        />
-                    </Routes>
-                </RestTimerProvider>
-            </UserIconProvider>
+                            }/>
+                            <Route
+                                path="/stats"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><StatsPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/programs"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><ProgramsPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/programs/:id"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><ProgramDetailsPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/programs/:programId/days/:dayId"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><DayDetailsPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/measurements"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><MeasurementsPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/library"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><LibraryPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/start"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><StartWorkout/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/sessions/:id"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><WorkoutSession/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                        </Routes>
+                    </RestTimerProvider>
+                </UserIconProvider>
+            </ThemeProvider>
         </AuthProvider>
     );
 }

@@ -3,7 +3,6 @@
     padding: 10px 16px;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
-    color: #111827;
 }
 
 /* ===== TABLE (DESKTOP) ===== */
@@ -28,11 +27,18 @@
     padding: 12px 8px; /* вертикальные и горизонтальные отступы */
     text-align: center;
     vertical-align: middle;
-    border-bottom: 1px solid #e5e7eb;
 }
 
 .measurements-table thead th {
-    background: #d8dfee;
+    background-color: var(--color-card-alt); /* для тёмной темы можно поменять */
+}
+
+.measurements-table tbody tr:nth-child(even) {
+    background-color: var(--color-card); /* или отдельная переменная --color-card-alt */
+}
+
+.measurements-table thead th {
+    background: var(--color-card-alt);
     position: sticky;
     top: 0;
     font-weight: 600;
@@ -41,7 +47,7 @@
 
 /* Чередование строк */
 .measurements-table tbody tr:nth-child(even) {
-    background: #fafafa;
+    background: var(--color-card-alt);
 }
 
 .measurements-table tbody tr:hover {

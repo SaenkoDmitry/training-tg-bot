@@ -238,7 +238,6 @@ export default function DayDetailsPage() {
                             {({listeners, attributes}: any) => (
                                 <div className="card exercise-card-edit animate">
 
-                                    {/* 🔥 drag handle только на ручку */}
                                     <div className="drag-handle" {...listeners} {...attributes}>
                                         ☰
                                     </div>

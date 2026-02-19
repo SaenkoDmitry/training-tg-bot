@@ -62,7 +62,7 @@ const IconPicker: React.FC<Props> = ({selected, onSelect, onClose}) => {
             <div
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                    background: "#fff",
+                    background: "var(--color-bg)",
                     padding: "1.5rem",
                     borderRadius: 20,
                     width: 320,

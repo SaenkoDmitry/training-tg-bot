@@ -14,6 +14,7 @@
 
     cursor: pointer;
     transition: 0.15s;
+    color: var(--color-text);
 }
 
 .btn:active {
@@ -33,7 +34,6 @@
 /* active */
 .btn-active {
     background: var(--color-active);
-    color: white;
 }
 
 .btn-active:hover {
@@ -43,12 +43,10 @@
 /* danger */
 .btn-danger {
     background: var(--color-danger);
-    color: white;
 }
 
 .btn-danger:hover {
     background: var(--color-danger-hover);
-    color: white;
 }
 
 /* ghost */

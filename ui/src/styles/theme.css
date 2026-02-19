@@ -4,8 +4,9 @@
     --color-primary-hover: #084c7a;
     --color-primary-soft: #eef4fc;
 
-    --color-active: #6dc774;
-    --color-active-hover: #45ce51;
+    --color-active: #7ccb83;
+    --color-active-hover: #53d25e;
+    --color-active-text: white;
 
     --color-attention: #fcec3f;
     --color-attention-hover: #ffd200;
@@ -18,6 +19,7 @@
 
     --color-bg: #f6f8fa;
     --color-card: #ffffff;
+    --color-card-alt: #e1e4ec;
 
     --color-text: #1f2937;
     --color-text-muted: #6b7280;
@@ -32,4 +34,37 @@
     --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
 
     --tap-size: 44px;
+}
+
+/* ========= DARK THEME ========= */
+.dark-theme {
+    /* ========= COLORS ========= */
+    --color-primary: #204d9a;
+    --color-primary-hover: #021e65;
+    --color-primary-soft: #233162;
+
+    --color-active: #4ade80;
+    --color-active-hover: #22c55e;
+
+    --color-attention: #facc15;
+    --color-attention-hover: #eab308;
+
+    --color-danger: #f87171;
+    --color-danger-hover: #dc2626;
+
+    --color-ghost: #66707e;
+    --color-ghost-hover: #535d75;
+
+    --color-bg: #13141a;       /* Фон страницы */
+    --color-card: #1f2937;     /* Карточки / контейнеры */
+    --color-card-alt: #213142;
+
+    --color-text: #f9fafb;     /* Основной текст */
+    --color-text-muted: #9ca3af; /* Подписи / второстепенный текст */
+
+    --color-border: #374151;
+
+    /* ========= UI ========= */
+    --shadow-sm: 0 1px 4px rgba(79, 77, 77, 0.54);
+    --shadow-md: 0 4px 12px rgba(131, 131, 131, 0.36);
 }

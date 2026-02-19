@@ -1,24 +1,46 @@
-import React, {useEffect, useState} from "react";
-import {useAuth} from "../context/AuthContext";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
 import Toast from "../components/Toast";
-import {Bell, BellOff, LogOut, Pencil} from "lucide-react";
-import type {IconName} from "../components/IconPicker";
-import IconPicker, {ICONS} from "../components/IconPicker";
-import {subscribePush, unsubscribePush} from "../api/subscribePush";
-import {useUserIcon} from "../hooks/useUserIcons.ts";
+import { Bell, BellOff, LogOut, Pencil, Sun, Moon } from "lucide-react";
+import type { IconName } from "../components/IconPicker";
+import IconPicker, { ICONS } from "../components/IconPicker";
+import { subscribePush, unsubscribePush } from "../api/subscribePush";
+import { useUserIcon } from "../hooks/useUserIcons.ts";
 
-const VAPID_PUBLIC_KEY = 'BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms';
+const VAPID_PUBLIC_KEY =
+    "BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms";
 
 const ProfilePage: React.FC = () => {
-    const {user, logout, loading} = useAuth();
+    const { user, logout, loading } = useAuth();
     const [toast, setToast] = useState<string | null>(null);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [checking, setChecking] = useState(true);
 
     const [iconModalOpen, setIconModalOpen] = useState(false);
-    const {icon, updateIcon} = useUserIcon();
+    const { icon, updateIcon } = useUserIcon();
     const CurrentIcon = ICONS[icon];
+
+    const [darkMode, setDarkMode] = useState<boolean>(() => {
+        // Читаем из localStorage
+        const saved = localStorage.getItem("darkMode");
+        if (saved !== null) return saved === "true";
+
+        // Если нет сохранения — используем системную тему
+        return window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+    });
+
+// Применяем класс и сохраняем выбор
+    useEffect(() => {
+        const root = document.documentElement;
+        if (darkMode) {
+            root.classList.add("dark-theme");
+        } else {
+            root.classList.remove("dark-theme");
+        }
+        localStorage.setItem("darkMode", darkMode.toString());
+    }, [darkMode]);
 
     // --- Проверка подписки ---
     useEffect(() => {
@@ -39,12 +61,14 @@ const ProfilePage: React.FC = () => {
 
     // --- Сохранение иконки ---
     const saveIcon = async (name: IconName) => {
-        updateIcon(name).then(() => {
-            setToast("Иконка обновлена ✅");
-            setIconModalOpen(false);
-        }).catch(() => {
-            setToast("Ошибка при сохранении ❌");
-        });
+        updateIcon(name)
+            .then(() => {
+                setToast("Иконка обновлена ✅");
+                setIconModalOpen(false);
+            })
+            .catch(() => {
+                setToast("Ошибка при сохранении ❌");
+            });
     };
 
     // --- Переключение уведомлений ---
@@ -54,7 +78,6 @@ const ProfilePage: React.FC = () => {
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
 
-        // Если подписка есть → отключаем
         if (subscription) {
             await subscription.unsubscribe();
             await unsubscribePush();
@@ -63,7 +86,6 @@ const ProfilePage: React.FC = () => {
             return;
         }
 
-        // Если нет → включаем
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
             await subscribePush(VAPID_PUBLIC_KEY);
@@ -85,26 +107,32 @@ const ProfilePage: React.FC = () => {
                 gap: 20,
             }}
         >
+            {/* --- Кнопка переключения темы --- */}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                    variant="ghost"
+                    onClick={() => setDarkMode(!darkMode)}
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                >
+                    {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+                    {darkMode ? "Светлая тема" : "Тёмная тема"}
+                </Button>
+            </div>
+
             {/* ---------------- NOT LOGGED IN ---------------- */}
             {!loading && !user && (
                 <div
                     style={{
-                        background: "#fff",
-                        borderRadius: 20,
+                        background: "var(--color-card)",
+                        borderRadius: "var(--radius-lg)",
                         padding: "2rem 1.5rem",
-                        boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+                        boxShadow: "var(--shadow-md)",
                         textAlign: "center",
                     }}
                 >
-                    <div style={{fontSize: 42, marginBottom: 12}}>🔐</div>
+                    <div style={{ fontSize: 42, marginBottom: 12 }}>🔐</div>
 
-                    <div
-                        style={{
-                            fontSize: 16,
-                            fontWeight: 600,
-                            marginBottom: 16,
-                        }}
-                    >
+                    <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
                         Войдите в аккаунт
                     </div>
 
@@ -112,9 +140,9 @@ const ProfilePage: React.FC = () => {
                         variant="primary"
                         onClick={() => {
                             const origin = window.location.origin;
-
-                            window.location.href =
-                                `/api/telegram/login?origin=${encodeURIComponent(origin)}`;
+                            window.location.href = `/api/telegram/login?origin=${encodeURIComponent(
+                                origin
+                            )}`;
                         }}
                     >
                         Войти через Telegram
@@ -128,11 +156,10 @@ const ProfilePage: React.FC = () => {
                     <div
                         style={{
                             position: "relative",
-                            background: "#fff",
-                            borderRadius: 20,
+                            background: "var(--color-card)",
+                            borderRadius: "var(--radius-lg)",
                             padding: "1.5rem",
-                            boxShadow:
-                                "0 6px 20px rgba(0,0,0,0.06)",
+                            boxShadow: "var(--shadow-md)",
                             textAlign: "center",
                         }}
                     >
@@ -147,27 +174,17 @@ const ProfilePage: React.FC = () => {
                                 opacity: 0.8,
                             }}
                         >
-                            <Pencil size={18}/>
+                            <Pencil size={18} />
                         </div>
 
-                        <CurrentIcon size={40}/>
+                        <CurrentIcon size={40} />
 
-                        <div
-                            style={{
-                                fontSize: 18,
-                                fontWeight: 600,
-                            }}
-                        >
+                        <div style={{ fontSize: 18, fontWeight: 600 }}>
                             {user.first_name}
                         </div>
 
                         {user.username && (
-                            <div
-                                style={{
-                                    opacity: 0.6,
-                                    fontSize: 14,
-                                }}
-                            >
+                            <div style={{ opacity: 0.6, fontSize: 14 }}>
                                 @{user.username}
                             </div>
                         )}
@@ -183,7 +200,7 @@ const ProfilePage: React.FC = () => {
                             borderRadius: 14,
                         }}
                     >
-                        <LogOut/> Выйти из аккаунта
+                        <LogOut /> Выйти из аккаунта
                     </Button>
 
                     {!checking && (
@@ -203,12 +220,7 @@ const ProfilePage: React.FC = () => {
                         </Button>
                     )}
 
-                    {toast && (
-                        <Toast
-                            message={toast}
-                            onClose={() => setToast(null)}
-                        />
-                    )}
+                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
                     {iconModalOpen && (
                         <IconPicker
