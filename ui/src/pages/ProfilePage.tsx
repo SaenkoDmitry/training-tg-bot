@@ -1,8 +1,12 @@
 import React, {useEffect, useState} from "react";
 import {useAuth} from "../context/AuthContext";
 import Button from "../components/Button";
-import {subscribePush, unsubscribePush} from "../api/subscribePush.ts";
-import Toast from "../components/Toast.tsx";
+import Toast from "../components/Toast";
+import {Bell, BellOff, LogOut, Pencil} from "lucide-react";
+import type {IconName} from "../components/IconPicker";
+import IconPicker, {ICONS} from "../components/IconPicker";
+import {subscribePush, unsubscribePush} from "../api/subscribePush";
+import {useUserIcon} from "../hooks/useUserIcons.ts";
 
 const VAPID_PUBLIC_KEY = 'BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms';
 
@@ -12,7 +16,11 @@ const ProfilePage: React.FC = () => {
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [checking, setChecking] = useState(true);
 
-    // Проверяем есть ли активная подписка
+    const [iconModalOpen, setIconModalOpen] = useState(false);
+    const {icon, updateIcon} = useUserIcon();
+    const CurrentIcon = ICONS[icon];
+
+    // --- Проверка подписки ---
     useEffect(() => {
         const checkSubscription = async () => {
             if (!("serviceWorker" in navigator)) {
@@ -29,6 +37,17 @@ const ProfilePage: React.FC = () => {
         checkSubscription();
     }, []);
 
+    // --- Сохранение иконки ---
+    const saveIcon = async (name: IconName) => {
+        updateIcon(name).then(() => {
+            setToast("Иконка обновлена ✅");
+            setIconModalOpen(false);
+        }).catch(() => {
+            setToast("Ошибка при сохранении ❌");
+        });
+    };
+
+    // --- Переключение уведомлений ---
     const toggleNotifications = async () => {
         if (!("serviceWorker" in navigator)) return;
 
@@ -59,10 +78,10 @@ const ProfilePage: React.FC = () => {
         <div
             style={{
                 maxWidth: 420,
-                margin: '0 auto',
-                padding: '1rem',
-                display: 'flex',
-                flexDirection: 'column',
+                margin: "0 auto",
+                padding: "1rem",
+                display: "flex",
+                flexDirection: "column",
                 gap: 20,
             }}
         >
@@ -70,11 +89,11 @@ const ProfilePage: React.FC = () => {
             {!loading && !user && (
                 <div
                     style={{
-                        background: '#fff',
+                        background: "#fff",
                         borderRadius: 20,
-                        padding: '2rem 1.5rem',
-                        boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
-                        textAlign: 'center',
+                        padding: "2rem 1.5rem",
+                        boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+                        textAlign: "center",
                     }}
                 >
                     <div style={{fontSize: 42, marginBottom: 12}}>🔐</div>
@@ -90,7 +109,7 @@ const ProfilePage: React.FC = () => {
                     </div>
 
                     <Button
-                        variant={"primary"}
+                        variant="primary"
                         onClick={() => {
                             const origin = window.location.origin;
 
@@ -108,21 +127,47 @@ const ProfilePage: React.FC = () => {
                 <>
                     <div
                         style={{
-                            background: '#fff',
+                            position: "relative",
+                            background: "#fff",
                             borderRadius: 20,
-                            padding: '1.5rem',
-                            boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
-                            textAlign: 'center',
+                            padding: "1.5rem",
+                            boxShadow:
+                                "0 6px 20px rgba(0,0,0,0.06)",
+                            textAlign: "center",
                         }}
                     >
-                        <div style={{fontSize: 42, marginBottom: 8}}>👤</div>
+                        {/* Карандаш */}
+                        <div
+                            onClick={() => setIconModalOpen(true)}
+                            style={{
+                                position: "absolute",
+                                top: 12,
+                                right: 12,
+                                cursor: "pointer",
+                                opacity: 0.8,
+                            }}
+                        >
+                            <Pencil size={18}/>
+                        </div>
 
-                        <div style={{fontSize: 18, fontWeight: 600}}>
+                        <CurrentIcon size={40}/>
+
+                        <div
+                            style={{
+                                fontSize: 18,
+                                fontWeight: 600,
+                            }}
+                        >
                             {user.first_name}
                         </div>
 
                         {user.username && (
-                            <div style={{opacity: 0.6, fontSize: 14}}>
+                            <div
+                                style={{
+                                    opacity: 0.6,
+                                    fontSize: 14,
+                                }}
+                            >
                                 @{user.username}
                             </div>
                         )}
@@ -132,13 +177,13 @@ const ProfilePage: React.FC = () => {
                         variant="danger"
                         onClick={logout}
                         style={{
-                            width: '100%',
+                            width: "100%",
                             height: 48,
                             fontSize: 16,
                             borderRadius: 14,
                         }}
                     >
-                        Выйти из аккаунта
+                        <LogOut/> Выйти из аккаунта
                     </Button>
 
                     {!checking && (
@@ -146,13 +191,32 @@ const ProfilePage: React.FC = () => {
                             variant={notificationsEnabled ? "ghost" : "active"}
                             onClick={toggleNotifications}
                         >
-                            {notificationsEnabled
-                                ? "Выключить уведомления"
-                                : "Включить уведомления"}
+                            {notificationsEnabled ? (
+                                <>
+                                    <BellOff size={16} /> Выключить уведомления
+                                </>
+                            ) : (
+                                <>
+                                    <Bell size={16} /> Включить уведомления
+                                </>
+                            )}
                         </Button>
                     )}
 
-                    {toast && <Toast message={toast} onClose={() => setToast(null)}/>}
+                    {toast && (
+                        <Toast
+                            message={toast}
+                            onClose={() => setToast(null)}
+                        />
+                    )}
+
+                    {iconModalOpen && (
+                        <IconPicker
+                            selected={icon}
+                            onSelect={saveIcon}
+                            onClose={() => setIconModalOpen(false)}
+                        />
+                    )}
                 </>
             )}
         </div>

@@ -3,15 +3,11 @@ import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useAuth} from '../context/AuthContext';
 import Button from "./Button.tsx";
 
-import {
-    Dumbbell,
-    FolderKanban,
-    Ruler,
-    BookOpen,
-    User, Smile
-} from "lucide-react";
+import {BookOpen, Dumbbell, FolderKanban, Ruler, User} from "lucide-react";
 import FloatingRestTimer from "./FloatingRestTimer.tsx";
 import Toast from "./Toast.tsx";
+import {ICONS} from "./IconPicker.tsx";
+import {useUserIcon} from "../hooks/useUserIcons.ts";
 
 const tabs = [
     {name: 'Тренировки', path: '/', icon: Dumbbell},
@@ -26,6 +22,9 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const {user, logout, loading} = useAuth();
     const navigate = useNavigate();
     const [toast, setToast] = useState<string | null>(null);
+
+    const {icon} = useUserIcon();
+    const CurrentIcon = ICONS[icon];
 
     useEffect(() => {
         const handler = () => setToast("Отдых закончен 💪");
@@ -85,7 +84,10 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
                         {user && (
                             <>
-                                <Button variant={"active"} onClick={() => navigate('/profile')}>{user.first_name} <Smile /></Button>
+                                <Button variant={"active"}
+                                        onClick={() => navigate('/profile')}>{user.first_name}
+                                    <CurrentIcon/>
+                                </Button>
                             </>
                         )}
                     </div>
@@ -123,7 +125,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
                 >
                     {tabs.map((tab) => {
                         const active = location.pathname === tab.path;
-                        const Icon = tab.icon;
+                        const Icon = tab.name == 'Профиль' ? CurrentIcon : tab.icon;
 
                         return (
                             <Link
@@ -161,8 +163,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
                 </div>
             )}
 
-            <FloatingRestTimer />
-            {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+            <FloatingRestTimer/>
+            {toast && <Toast message={toast} onClose={() => setToast(null)}/>}
         </div>
     );
 };

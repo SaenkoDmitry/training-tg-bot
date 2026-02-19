@@ -17,6 +17,7 @@ type Repo interface {
 	Create(chatID int64, from *tgbotapi.User) (*models.User, error)
 	GetByID(ID int64) (*models.User, error)
 	GetByChatID(chatID int64) (*models.User, error)
+	ChangeIcon(userID int64, name string) error
 }
 
 type repoImpl struct {
@@ -108,4 +109,10 @@ func (u *repoImpl) FindTopN(offset, limit int) ([]UserWithCount, error) {
 		return []UserWithCount{}, tx.Error
 	}
 	return users, nil
+}
+
+func (u *repoImpl) ChangeIcon(userID int64, name string) error {
+	return u.db.Model(&models.User{}).
+		Where("id = ?", userID).
+		Update("icon", name).Error
 }

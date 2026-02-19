@@ -219,3 +219,7 @@ type PresetListDTO = {
 type TimerDTO = {
     id: number;
 }
+
+type IconDTO = {
+    name: string;
+}

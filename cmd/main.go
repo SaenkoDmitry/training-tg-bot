@@ -132,6 +132,13 @@ func initServer(container *usecase.Container, db *gorm.DB) {
 		r.Get("/", api.MeHandler)
 	})
 
+	r.Route("/api/users", func(r chi.Router) {
+		r.Use(middlewares.Auth)
+
+		r.Get("/icon", s.GetIcon)
+		r.Post("/change-icon", s.ChangeIcon)
+	})
+
 	r.Route("/api/workouts", func(r chi.Router) {
 		r.Use(middlewares.Auth)
 

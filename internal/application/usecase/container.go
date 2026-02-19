@@ -90,6 +90,7 @@ type Container struct {
 	DayTypesCreateUC *daytypeusecases.CreateUseCase
 	AddExPresetUC    *daytypeusecases.AddExPresetUseCase
 	UpdatePresetUC   *daytypeusecases.UpdatePresetUseCase
+	DeleteDayTypeUC  *daytypeusecases.DeleteUseCase
 	GetDayTypeUC     *daytypeusecases.GetUseCase
 
 	// groups
@@ -100,10 +101,10 @@ type Container struct {
 	MoveSessionToExerciseUC *sessionusecases.MoveToUseCase
 
 	// users
-	CreateUserUC    *userusecases.CreateUseCase
-	GetUserUC       *userusecases.GetUseCase
-	FindUserUC      *userusecases.FindUseCase
-	DeleteDayTypeUC *daytypeusecases.DeleteUseCase
+	CreateUserUC *userusecases.CreateUseCase
+	GetUserUC    *userusecases.GetUseCase
+	FindUserUC   *userusecases.FindUseCase
+	ChangeIconUC *userusecases.ChangeIconUseCase
 
 	// measurements
 	CreateMeasurementUC     *measurementsusecases.CreateUseCase
@@ -210,6 +211,7 @@ func NewContainer(db *gorm.DB) *Container {
 		CreateUserUC: userusecases.NewCreateUseCase(usersRepo, programsRepo),
 		FindUserUC:   userusecases.NewFindUseCase(usersRepo, programsRepo),
 		GetUserUC:    userusecases.NewGetUseCase(usersRepo),
+		ChangeIconUC: userusecases.NewChangeIconUseCase(usersRepo),
 
 		// measurements
 		CreateMeasurementUC:     measurementsusecases.NewCreateUseCase(measurementsRepo),
