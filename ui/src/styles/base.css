@@ -3,10 +3,17 @@
 }
 
 html, body, #root {
-    height: 100%;
     margin: 0;
     background-color: var(--color-bg);
     color: var(--color-text)
+}
+
+html, body {
+    min-height: 100%;
+}
+
+body {
+    overscroll-behavior-y: none;
 }
 
 body {
