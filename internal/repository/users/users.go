@@ -26,7 +26,7 @@ type Repo interface {
 	// ----- yandex -----
 
 	CreateYandex(profile *dto.YandexProfile) (*models.User, error)
-	GetByProfileID(chatID string) (*models.User, error)
+	GetByYandexID(chatID string) (*models.User, error)
 }
 
 type repoImpl struct {
@@ -89,10 +89,10 @@ func (u *repoImpl) GetByChatID(chatID int64) (*models.User, error) {
 	return &user, nil
 }
 
-func (u *repoImpl) GetByProfileID(profileID string) (*models.User, error) {
+func (u *repoImpl) GetByYandexID(yandexID string) (*models.User, error) {
 	var user models.User
 
-	result := u.db.Where("profile_id = ?", profileID).First(&user)
+	result := u.db.Where("yandex_id = ?", yandexID).First(&user)
 
 	if result.Error != nil {
 		return nil, NotFoundUserErr

@@ -23,7 +23,7 @@ func (uc *GetOrCreateUserByYandexUseCase) Name() string {
 }
 
 func (uc *GetOrCreateUserByYandexUseCase) Execute(profile *dto.YandexProfile) (*models.User, error) {
-	user, err := uc.usersRepo.GetByProfileID(profile.ID)
+	user, err := uc.usersRepo.GetByYandexID(profile.ID)
 	if err != nil && !errors.Is(err, users.NotFoundUserErr) {
 		return nil, err
 	}
