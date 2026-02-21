@@ -3,7 +3,7 @@ import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useAuth} from '../context/AuthContext';
 import Button from "./Button.tsx";
 
-import {BookOpen, Dumbbell, FolderKanban, Ruler, User} from "lucide-react";
+import {BookOpen, Dumbbell, FolderKanban, Moon, Ruler, Sun, User} from "lucide-react";
 import FloatingRestTimer from "./FloatingRestTimer.tsx";
 import Toast from "./Toast.tsx";
 import {ICONS} from "./IconPicker.tsx";
@@ -25,6 +25,27 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
     const {icon} = useUserIcon();
     const CurrentIcon = ICONS[icon];
+
+    const [darkMode, setDarkMode] = useState<boolean>(() => {
+        // Читаем из localStorage
+        const saved = localStorage.getItem("darkMode");
+        if (saved !== null) return saved === "true";
+
+        // Если нет сохранения — используем системную тему
+        return window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+    });
+
+    // Применяем класс и сохраняем выбор
+    useEffect(() => {
+        const root = document.documentElement;
+        if (darkMode) {
+            root.classList.add("dark-theme");
+        } else {
+            root.classList.remove("dark-theme");
+        }
+        localStorage.setItem("darkMode", darkMode.toString());
+    }, [darkMode]);
 
     useEffect(() => {
         const handler = () => setToast("Отдых закончен 💪");
@@ -78,6 +99,17 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
                     </div>
 
                     <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+
+                        {/* --- Кнопка переключения темы --- */}
+                        <div style={{display: "flex", justifyContent: "flex-end"}}>
+                            <Button
+                                variant="attention"
+                                onClick={() => setDarkMode(!darkMode)}
+                                style={{display: "flex", alignItems: "center", gap: 8}}
+                            >
+                                {darkMode ? <Sun/> : <Moon/>}
+                            </Button>
+                        </div>
 
                         {user && (
                             <>

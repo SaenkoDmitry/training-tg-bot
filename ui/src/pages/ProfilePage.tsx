@@ -1,25 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import React, {useEffect, useState} from "react";
+import {useAuth} from "../context/AuthContext";
 import Button from "../components/Button";
 import Toast from "../components/Toast";
-import { Bell, BellOff, LogOut, Pencil, Sun, Moon } from "lucide-react";
-import type { IconName } from "../components/IconPicker";
-import IconPicker, { ICONS } from "../components/IconPicker";
-import { subscribePush, unsubscribePush } from "../api/subscribePush";
-import { useUserIcon } from "../hooks/useUserIcons.ts";
+import {Bell, BellOff, LogOut, Moon, Pencil, Sun} from "lucide-react";
+import type {IconName} from "../components/IconPicker";
+import IconPicker, {ICONS} from "../components/IconPicker";
+import {subscribePush, unsubscribePush} from "../api/subscribePush";
+import {useUserIcon} from "../hooks/useUserIcons.ts";
 
 const VAPID_PUBLIC_KEY =
     "BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms";
 
 const ProfilePage: React.FC = () => {
-    const { user, logout, loading } = useAuth();
+    const {user, logout, loading} = useAuth();
     const [toast, setToast] = useState<string | null>(null);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [checking, setChecking] = useState(true);
 
     const [iconModalOpen, setIconModalOpen] = useState(false);
-    const { icon, updateIcon } = useUserIcon();
+    const {icon, updateIcon} = useUserIcon();
     const CurrentIcon = ICONS[icon];
+
+    const isMobile = window.innerWidth <= 768;
 
     const [darkMode, setDarkMode] = useState<boolean>(() => {
         // Читаем из localStorage
@@ -31,7 +33,7 @@ const ProfilePage: React.FC = () => {
             window.matchMedia("(prefers-color-scheme: dark)").matches;
     });
 
-// Применяем класс и сохраняем выбор
+    // Применяем класс и сохраняем выбор
     useEffect(() => {
         const root = document.documentElement;
         if (darkMode) {
@@ -108,16 +110,15 @@ const ProfilePage: React.FC = () => {
             }}
         >
             {/* --- Кнопка переключения темы --- */}
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            {isMobile && <div style={{display: "flex", justifyContent: "flex-end"}}>
                 <Button
-                    variant="ghost"
+                    variant="attention"
                     onClick={() => setDarkMode(!darkMode)}
-                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    style={{display: "flex", alignItems: "center", gap: 8}}
                 >
-                    {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-                    {darkMode ? "Светлая тема" : "Тёмная тема"}
+                    {darkMode ? <Sun/> : <Moon/>}
                 </Button>
-            </div>
+            </div>}
 
             {/* ---------------- NOT LOGGED IN ---------------- */}
             {!loading && !user && (
@@ -130,9 +131,9 @@ const ProfilePage: React.FC = () => {
                         textAlign: "center",
                     }}
                 >
-                    <div style={{ fontSize: 42, marginBottom: 12 }}>🔐</div>
+                    <div style={{fontSize: 42, marginBottom: 12}}>🔐</div>
 
-                    <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+                    <div style={{fontSize: 16, fontWeight: 600, marginBottom: 16}}>
                         Войдите в аккаунт
                     </div>
 
@@ -174,17 +175,17 @@ const ProfilePage: React.FC = () => {
                                 opacity: 0.8,
                             }}
                         >
-                            <Pencil size={18} />
+                            <Pencil size={18}/>
                         </div>
 
-                        <CurrentIcon size={40} />
+                        <CurrentIcon size={40}/>
 
-                        <div style={{ fontSize: 18, fontWeight: 600 }}>
+                        <div style={{fontSize: 18, fontWeight: 600}}>
                             {user.first_name}
                         </div>
 
                         {user.username && (
-                            <div style={{ opacity: 0.6, fontSize: 14 }}>
+                            <div style={{opacity: 0.6, fontSize: 14}}>
                                 @{user.username}
                             </div>
                         )}
@@ -200,7 +201,7 @@ const ProfilePage: React.FC = () => {
                             borderRadius: 14,
                         }}
                     >
-                        <LogOut /> Выйти из аккаунта
+                        <LogOut/> Выйти из аккаунта
                     </Button>
 
                     {!checking && (
@@ -210,17 +211,17 @@ const ProfilePage: React.FC = () => {
                         >
                             {notificationsEnabled ? (
                                 <>
-                                    <BellOff size={16} /> Выключить уведомления
+                                    <BellOff size={16}/> Выключить уведомления
                                 </>
                             ) : (
                                 <>
-                                    <Bell size={16} /> Включить уведомления
+                                    <Bell size={16}/> Включить уведомления
                                 </>
                             )}
                         </Button>
                     )}
 
-                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+                    {toast && <Toast message={toast} onClose={() => setToast(null)}/>}
 
                     {iconModalOpen && (
                         <IconPicker
