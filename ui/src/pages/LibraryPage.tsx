@@ -4,6 +4,7 @@ import SafeTextRenderer from "../components/SafeTextRenderer.tsx";
 import {getExerciseGroups, getExerciseTypesByGroup} from "../api/exercises.ts";
 import Button from "../components/Button.tsx";
 import {ChevronDown, Loader} from "lucide-react";
+import VideoPlayer from "../components/VideoPlayer.tsx";
 
 const LibraryPage: React.FC = () => {
     const {user, loading: authLoading} = useAuth();
@@ -118,13 +119,7 @@ const LibraryPage: React.FC = () => {
                             </div>
 
                             {ex.url && (
-                                <Button
-                                    variant={"attention"}
-                                    style={{marginTop: 16, marginBottom: 8}}
-                                    onClick={() => window.open(ex.url)}
-                                >
-                                    Смотреть технику 🤓
-                                </Button>
+                                <VideoPlayer url={ex.url}/>
                             )}
                         </div>
                     </div>
