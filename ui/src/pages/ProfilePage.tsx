@@ -146,8 +146,24 @@ const ProfilePage: React.FC = () => {
                                 localStorage.setItem("oauth_state", state);
                                 window.location.href = `/api/telegram/login?origin=${encodeURIComponent(origin)}&state=${state}`;
                             }}
+                            style={{
+                                position: "relative",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
                         >
-                            Войти через Telegram
+                            <img
+                                src="/telegram.svg"
+                                alt="Telegram"
+                                style={{
+                                    position: "absolute",
+                                    left: 16,
+                                    width: 18,
+                                    height: 18,
+                                }}
+                            />
+                            Войти через Telegram ID
                         </Button>
 
                         <Button
@@ -158,8 +174,24 @@ const ProfilePage: React.FC = () => {
                                 localStorage.setItem("oauth_state", state);
                                 window.location.href = `/api/yandex/login?origin=${encodeURIComponent(origin)}&state=${state}`;
                             }}
+                            style={{
+                                position: "relative",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
                         >
-                            Войти через Yandex <span style={{color: "black"}}>ID</span>
+                            <img
+                                src="/yandex.svg"
+                                alt="Yandex"
+                                style={{
+                                    position: "absolute",
+                                    left: 16,
+                                    width: 18,
+                                    height: 18,
+                                }}
+                            />
+                            Войти через Yandex ID
                         </Button>
                     </div>
 
