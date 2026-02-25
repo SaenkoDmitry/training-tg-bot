@@ -110,6 +110,7 @@ const LibraryPage: React.FC = () => {
                             )}
 
                             <div>
+                                {ex.accent && <div><b>Акцент:</b> <SafeTextRenderer html={ex.accent}/></div>}
                                 {ex.rest_in_seconds > 0 &&
                                     <div style={{marginBottom: 10}}><b>Отдых: </b>{ex.rest_in_seconds} секунд
                                     </div>}
