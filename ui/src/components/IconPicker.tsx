@@ -29,6 +29,9 @@ import {
     TreePine,
     HeartPulse,
     Magnet,
+    Car,
+    CarFront,
+    Candy,
 } from "lucide-react";
 
 export const ICONS = {
@@ -56,11 +59,14 @@ export const ICONS = {
     ChessKing,
     ChessQueen,
     Bus,
+    Car,
+    CarFront,
     Rocket,
     Fish,
     TreePine,
     HeartPulse,
     Magnet,
+    Candy,
 };
 
 export type IconName = keyof typeof ICONS;
