@@ -60,10 +60,28 @@ const WorkoutPage = () => {
             <div style={{marginTop: 10}}>{ProgressPercent}% выполнено</div>
         </div>
 
+        {!data.progress.SessionStarted && <div>
+            {(Stats.CardioTime > 0 || Stats.TotalWeight > 0) && <h3>Статистика</h3>}
+            <div>
+                {Stats.CardioTime > 0 && <p><strong>🫀 Время кардио:</strong> {Stats.CardioTime} мин</p>}
+                {Stats.TotalWeight > 0 && <p><strong>🏋 Общий вес:</strong> {Stats.TotalWeight} кг</p>}
+            </div>
+        </div>}
+
         {data.progress.SessionStarted &&
             <Button variant={"active"} onClick={() => navigate(`/sessions/${data?.progress.workout.id}`)}>
                 <Play size={14}/>К тренировке</Button>
         }
+
+        {data.progress.SessionStarted && (
+            <Button
+                variant="primary"
+                onClick={() => navigate(`/workouts/${id}/add-exercise`)}
+            >
+                <Plus size={14} />
+                Добавить упражнение
+            </Button>
+        )}
 
         {/* Упражнения */}
         <h3>Упражнения ({CompletedExercises}/{TotalExercises})</h3>
@@ -114,24 +132,6 @@ const WorkoutPage = () => {
                 </div>
             ))}
         </div>
-
-        {data.progress.SessionStarted && (
-            <Button
-                variant="primary"
-                onClick={() => navigate(`/workouts/${id}/add-exercise`)}
-            >
-                <Plus size={14} />
-                Добавить упражнение
-            </Button>
-        )}
-
-        {!data.progress.SessionStarted && <div>
-            {(Stats.CardioTime > 0 || Stats.TotalWeight > 0) && <h3>Статистика</h3>}
-            <div>
-                {Stats.CardioTime > 0 && <p><strong>🫀 Время кардио:</strong> {Stats.CardioTime} мин</p>}
-                {Stats.TotalWeight > 0 && <p><strong>🏋 Общий вес:</strong> {Stats.TotalWeight} кг</p>}
-            </div>
-        </div>}
     </div>;
 };
 
