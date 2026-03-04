@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useAuth} from "../context/AuthContext";
 import Button from "../components/Button";
 import Toast from "../components/Toast";
-import {Bell, BellOff, LogOut, Moon, Pencil, Sheet, Sun} from "lucide-react";
+import {Bell, BellOff, Download, LogOut, Moon, Pencil, Sun} from "lucide-react";
 import type {IconName} from "../components/IconPicker";
 import IconPicker, {ICONS} from "../components/IconPicker";
 import {subscribePush, unsubscribePush} from "../api/subscribePush";
@@ -282,7 +282,7 @@ const ProfilePage: React.FC = () => {
                                 }
                             }}
                         >
-                            <Sheet size={16}/> Скачать статистику тренировок (Excel)
+                            <Download size={16}/> Статистика тренировок (Excel)
                         </Button>
                     )}
 
