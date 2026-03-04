@@ -2,11 +2,12 @@ import React, {useEffect, useState} from "react";
 import {useAuth} from "../context/AuthContext";
 import Button from "../components/Button";
 import Toast from "../components/Toast";
-import {Bell, BellOff, LogOut, Moon, Pencil, Sun} from "lucide-react";
+import {Bell, BellOff, LogOut, Moon, Pencil, Sheet, Sun} from "lucide-react";
 import type {IconName} from "../components/IconPicker";
 import IconPicker, {ICONS} from "../components/IconPicker";
 import {subscribePush, unsubscribePush} from "../api/subscribePush";
 import {useUserIcon} from "../hooks/useUserIcons.ts";
+import {downloadExcelWorkouts} from "../api/excel.ts";
 
 const VAPID_PUBLIC_KEY =
     "BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms";
@@ -265,6 +266,23 @@ const ProfilePage: React.FC = () => {
                                     <Bell size={16}/> Включить уведомления
                                 </>
                             )}
+                        </Button>
+                    )}
+
+                    {user && !checking && (
+                        <Button
+                            variant="primary"
+                            onClick={async () => {
+                                try {
+                                    await downloadExcelWorkouts();
+                                    setToast("Файл Excel успешно скачан ✅");
+                                } catch (err) {
+                                    console.error(err);
+                                    setToast("Ошибка при скачивании Excel ❌");
+                                }
+                            }}
+                        >
+                            <Sheet size={16}/> Скачать статистику тренировок (Excel)
                         </Button>
                     )}
 

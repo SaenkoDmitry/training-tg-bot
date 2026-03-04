@@ -87,7 +87,7 @@ func New(token string, useCases *usecase.Container) (*App, error) {
 	dayTypesHandler := daytypes.NewHandler(bot, useCases.GetDayTypeUC, useCases.GetAllGroupsUC, useCases.DeleteDayTypeUC,
 		useCases.GetProgramUC, programsHandler)
 
-	exportsHandler := exports.NewHandler(bot, useCases.ExportWorkoutsToExcelUC, useCases.ExportMeasurementsToExcelUC)
+	exportsHandler := exports.NewHandler(bot, useCases.GetUserUC, useCases.ExportWorkoutsToExcelUC, useCases.ExportMeasurementsToExcelUC)
 
 	changesHandler := changes.NewHandler(bot,
 		useCases.GetUserUC, useCases.ShowCurrentExerciseSessionUC, useCases.UpdateNextSetUC,

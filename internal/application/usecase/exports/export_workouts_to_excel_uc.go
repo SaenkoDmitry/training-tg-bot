@@ -42,7 +42,7 @@ func (uc *ExportWorkoutsToExcelUseCase) Name() string {
 	return "Экспорт в Excel"
 }
 
-func (uc *ExportWorkoutsToExcelUseCase) Execute(chatID int64) (*bytes.Buffer, error) {
+func (uc *ExportWorkoutsToExcelUseCase) Execute(userID int64) (*bytes.Buffer, error) {
 	groupCodes, err := uc.exerciseGroupTypesRepo.GetAll()
 	if err != nil {
 		return nil, err
@@ -52,12 +52,7 @@ func (uc *ExportWorkoutsToExcelUseCase) Execute(chatID int64) (*bytes.Buffer, er
 		groupCodesMap[code.Code] = code.Name
 	}
 
-	user, err := uc.usersRepo.GetByChatID(chatID)
-	if err != nil {
-		return nil, err
-	}
-
-	workoutObjs, err := uc.workoutsRepo.FindAll(user.ID)
+	workoutObjs, err := uc.workoutsRepo.FindAll(userID)
 	if err != nil {
 		return nil, err
 	}

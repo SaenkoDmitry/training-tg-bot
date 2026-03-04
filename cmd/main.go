@@ -142,6 +142,11 @@ func initServer(container *usecase.Container, db *gorm.DB) {
 	})
 	r.Get("/api/video/stream", s.StreamVideo)
 
+	r.Route("/api/excel", func(r chi.Router) {
+		r.Use(middlewares.Auth)
+		r.Get("/workouts", s.DownloadExcelWorkoutsStats)
+	})
+
 	r.Route("/api/users", func(r chi.Router) {
 		r.Use(middlewares.Auth)
 

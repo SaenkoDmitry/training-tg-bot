@@ -98,6 +98,10 @@ type Service interface {
 
 	StreamVideo(w http.ResponseWriter, r *http.Request)
 	LinkVideo(w http.ResponseWriter, r *http.Request)
+
+	// ----- excel -----
+
+	DownloadExcelWorkoutsStats(w http.ResponseWriter, r *http.Request)
 }
 
 type serviceImpl struct {
