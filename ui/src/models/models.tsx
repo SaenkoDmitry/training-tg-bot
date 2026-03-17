@@ -60,7 +60,7 @@ interface Exercise {
 
 interface ReadWorkoutDTO {
     progress: WorkoutProgress;
-    Stats: WorkoutStatistic;
+    stats: WorkoutStatistic;
 }
 
 interface WorkoutProgress {
@@ -75,14 +75,14 @@ interface WorkoutProgress {
 }
 
 interface WorkoutStatistic {
-    DayType: any;
-    WorkoutDay: any;
-    TotalWeight: number;
-    CompletedExercises: number;
-    CardioTime: number; // в минутах
-    ExerciseTypesMap: Record<number, any>;
-    ExerciseWeightMap: Record<number, number>;
-    ExerciseTimeMap: Record<number, number>;
+    day_type: any;
+    workout_day: any;
+    total_weight: number;
+    completed_exercises: number;
+    cardio_time: number; // в минутах
+    exercise_types_map: Record<number, ExerciseType>;
+    exercise_weight_map: Record<number, number>;
+    exercise_time_map: Record<number, number>;
 }
 
 interface FormattedWorkout {
