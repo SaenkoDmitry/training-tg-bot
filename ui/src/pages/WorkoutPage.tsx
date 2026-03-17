@@ -5,6 +5,7 @@ import {Loader, Play, Plus} from "lucide-react";
 import Button from "../components/Button.tsx";
 import {getWorkout} from "../api/workouts.ts";
 import {moveToCertainExerciseSession} from "../api/sessions.ts";
+import {getExerciseGroups} from "../api/exercises.ts";
 
 const WorkoutPage = () => {
     const {id} = useParams<{ id: number }>();
@@ -12,18 +13,31 @@ const WorkoutPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const [groupsMap, setGroupsMap] = useState<Record<string, Group>>({});
 
     useEffect(() => {
         const fetchWorkout = async () => {
             try {
                 setLoading(true);
-                getWorkout(Number(id)).then((data) => {
-                    setData(data);
-                }).finally(() => {
-                    setLoading(false);
-                });
+
+                const [workoutData, groups]: [ReadWorkoutDTO, Group[]] = await Promise.all([
+                    getWorkout(Number(id)),
+                    getExerciseGroups()
+                ]);
+
+                setData(workoutData);
+
+                const map = groups.reduce<Record<string, Group>>((acc, group) => {
+                    acc[group.code] = group;
+                    return acc;
+                }, {});
+
+                setGroupsMap(map);
+
             } catch (err: any) {
                 setError(err.message || 'Не удалось загрузить данные');
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -34,7 +48,7 @@ const WorkoutPage = () => {
     if (error) return <p style={{color: 'red'}}>{error}</p>;
     if (!data) return <p>Данные тренировки не найдены</p>;
 
-    const {progress, Stats} = data;
+    const {progress, stats} = data;
     const {workout, ProgressPercent, RemainingMin, SessionStarted, CompletedExercises, TotalExercises} = progress;
 
     return <div className={"page stack"}>
@@ -61,10 +75,14 @@ const WorkoutPage = () => {
         </div>
 
         {!data.progress.SessionStarted && <div>
-            {(Stats.CardioTime > 0 || Stats.TotalWeight > 0) && <h3>Статистика</h3>}
+            {(stats.cardio_time > 0 || stats.total_weight > 0) && <h3>Статистика</h3>}
             <div>
-                {Stats.CardioTime > 0 && <p><strong>🫀 Время кардио:</strong> {Stats.CardioTime} мин</p>}
-                {Stats.TotalWeight > 0 && <p><strong>🏋 Общий вес:</strong> {Stats.TotalWeight} кг</p>}
+                {stats.cardio_time > 0 && <p><strong>🫀 Время кардио:</strong> {stats.cardio_time} мин</p>}
+                {stats.total_weight > 0 && <p><strong>🏋 Общий вес:</strong> {stats.total_weight} кг</p>}
+                {stats.exercise_types_map && <strong>Группы мышц:</strong>}
+                {stats.exercise_types_map && [...new Set(
+                    Object.values(stats.exercise_types_map).map(ex => ex.exercise_group_type_code)
+                )].map(code => <p key={code}> • {groupsMap[code]?.name}</p>)}
             </div>
         </div>}
 
@@ -78,7 +96,7 @@ const WorkoutPage = () => {
                 variant="primary"
                 onClick={() => navigate(`/workouts/${id}/add-exercise`)}
             >
-                <Plus size={14} />
+                <Plus size={14}/>
                 Добавить упражнение
             </Button>
         )}

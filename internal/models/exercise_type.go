@@ -6,14 +6,14 @@ import (
 )
 
 type ExerciseType struct {
-	ID                    int64 `gorm:"primaryKey;autoIncrement"`
-	Name                  string
-	Url                   string
-	ExerciseGroupTypeCode string
-	RestInSeconds         int
-	Accent                string
-	Units                 string
-	Description           string
+	ID                    int64  `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name                  string `json:"name"`
+	Url                   string `json:"url"`
+	ExerciseGroupTypeCode string `json:"exercise_group_type_code"`
+	RestInSeconds         int    `json:"rest_in_seconds"`
+	Accent                string `json:"accent"`
+	Units                 string `json:"units"`
+	Description           string `json:"description"`
 }
 
 func (*ExerciseType) TableName() string {
