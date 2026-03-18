@@ -242,6 +242,7 @@ func initServer(container *usecase.Container, db *gorm.DB) {
 
 		r.Post("/", s.AddExercise)
 		r.Delete("/{id}", s.DeleteExercise)
+		r.Get("/{exercise_id}/stats", s.GetExerciseStatsByUser)
 	})
 
 	r.Route("/api/push", func(r chi.Router) {

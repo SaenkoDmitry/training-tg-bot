@@ -2,12 +2,12 @@ import React, {useEffect, useState} from "react";
 import {useAuth} from "../context/AuthContext";
 import Button from "../components/Button";
 import Toast from "../components/Toast";
-import {Bell, BellOff, Download, LogOut, Moon, Pencil, Sun} from "lucide-react";
+import {Bell, BellOff, ChartNoAxesCombined, LogOut, Moon, Pencil, Sun} from "lucide-react";
 import type {IconName} from "../components/IconPicker";
 import IconPicker, {ICONS} from "../components/IconPicker";
 import {subscribePush, unsubscribePush} from "../api/subscribePush";
 import {useUserIcon} from "../hooks/useUserIcons.ts";
-import {downloadExcelWorkouts} from "../api/excel.ts";
+import {useNavigate} from "react-router-dom";
 
 const VAPID_PUBLIC_KEY =
     "BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms";
@@ -17,6 +17,7 @@ const ProfilePage: React.FC = () => {
     const [toast, setToast] = useState<string | null>(null);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [checking, setChecking] = useState(true);
+    const navigate = useNavigate();
 
     const [iconModalOpen, setIconModalOpen] = useState(false);
     const {icon, updateIcon} = useUserIcon();
@@ -256,22 +257,9 @@ const ProfilePage: React.FC = () => {
                         </Button>
                     )}
 
-                    {user && !checking && (
-                        <Button
-                            variant="primary"
-                            onClick={async () => {
-                                try {
-                                    await downloadExcelWorkouts();
-                                    setToast("Файл Excel успешно скачан ✅");
-                                } catch (err) {
-                                    console.error(err);
-                                    setToast("Ошибка при скачивании Excel ❌");
-                                }
-                            }}
-                        >
-                            <Download size={16}/> Статистика тренировок (Excel)
-                        </Button>
-                    )}
+                    {user && <Button variant="primary" onClick={() => navigate(`/statistics`)}>
+                        <ChartNoAxesCombined/>Посмотреть динамику
+                    </Button>}
 
                     <Button
                         variant="danger"

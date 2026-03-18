@@ -83,6 +83,7 @@ type Service interface {
 
 	DeleteExercise(w http.ResponseWriter, r *http.Request)
 	AddExercise(w http.ResponseWriter, r *http.Request)
+	GetExerciseStatsByUser(w http.ResponseWriter, r *http.Request)
 
 	// ----- notifications -----
 

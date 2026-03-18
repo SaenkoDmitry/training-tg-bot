@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {Route, Routes} from 'react-router-dom';
 import {AuthProvider} from './context/AuthContext';
 import MainLayout from './components/MainLayout';
@@ -22,6 +22,8 @@ import AuthTelegram from "./pages/AuthTelegram.tsx";
 import {UserIconProvider} from "./context/UserIconContext.tsx";
 import {ThemeProvider} from "./context/ThemeContext.tsx";
 import AuthYandex from "./pages/AuthYandex.tsx";
+import StatsPageGroup from "./pages/StatsPageGroup.tsx";
+import StatsPageGroupExercise from "./pages/StatsPageGroupExercise.tsx";
 
 const App = () => {
     return (
@@ -59,7 +61,23 @@ const App = () => {
                                 </RequireAuth>
                             }/>
                             <Route
-                                path="/stats"
+                                path="/statistics/:groupCode/exercise/:exerciseID"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><StatsPageGroupExercise/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/statistics/:groupCode"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><StatsPageGroup/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/statistics"
                                 element={
                                     <RequireAuth>
                                         <MainLayout><StatsPage/></MainLayout>

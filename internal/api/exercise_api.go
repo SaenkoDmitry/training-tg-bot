@@ -65,3 +65,26 @@ func (s *serviceImpl) AddExercise(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("{}"))
 }
+
+func (s *serviceImpl) GetExerciseStatsByUser(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middlewares.FromContext(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	exerciseID, err := helpers.ParseInt64Param("exercise_id", w, r)
+	if err != nil {
+		return
+	}
+
+	_ = exerciseID
+	_ = claims
+
+	//if _, err := s.container.GetExerciseUC.Execute(input.WorkoutID, input.ExerciseTypeID); err != nil {
+	//	return
+	//}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("{}"))
+}
