@@ -122,6 +122,9 @@ func (s *serviceImpl) isAllowedOrigin(origin string) bool {
 	if strings.HasSuffix(origin, ".lhr.life") {
 		return true
 	}
+	if strings.HasSuffix(origin, ".cloudpub.ru") {
+		return true
+	}
 	allowed := []string{
 		"http://localhost:3000",
 		"https://form-journey.ru",
