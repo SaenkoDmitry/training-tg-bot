@@ -330,7 +330,7 @@ const StatsPageMeasurement: React.FC = () => {
 
                                     return (
                                         <div key={code} style={{
-                                            backgroundColor: "var(--color-card)",
+                                            backgroundColor: "var(--color-card-alt)",
                                             padding: "4px 8px",
                                             borderRadius: 6,
                                             fontSize: 14,
