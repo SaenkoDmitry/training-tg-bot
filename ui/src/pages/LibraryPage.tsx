@@ -52,7 +52,7 @@ const LibraryPage: React.FC = () => {
         >
             {groups.map(g => (
                 <Button
-                    variant={selectedGroup === g.code ? "active" : "ghost"}
+                    variant={selectedGroup === g.code ? "primary" : "ghost"}
                     key={g.code}
                     onClick={() => setSelectedGroup(g.code)}
                 >
