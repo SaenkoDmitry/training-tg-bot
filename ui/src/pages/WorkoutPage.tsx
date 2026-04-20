@@ -108,6 +108,7 @@ const WorkoutPage = () => {
                 </Button>
             )}
         </h2>
+
         <span>
             Статус: {workout.status} {progress?.workout?.duration &&
             <span><span>~ </span>{progress.workout.duration}</span>}
@@ -131,9 +132,10 @@ const WorkoutPage = () => {
 
         {!data.progress.SessionStarted && <div>
             {(stats.cardio_time > 0 || stats.total_weight > 0) && <h3>Статистика</h3>}
-            <div>
+            <div className={"card"}>
                 {stats.cardio_time > 0 && <p><strong>🫀 Время кардио:</strong> {stats.cardio_time} мин</p>}
                 {stats.total_weight > 0 && <p><strong>🏋 Общий вес:</strong> {stats.total_weight} кг</p>}
+                <br/>
                 {stats.exercise_map && <strong>Группы мышц:</strong>}
                 {stats.exercise_map && [...new Set(
                     Object.values(stats.exercise_map).map(ex => ex.group_name)
@@ -187,8 +189,7 @@ const WorkoutPage = () => {
                 <div className="card"
                      key={ex.id}
                      style={{
-                         border: "1px solid #ddd",
-                         borderRadius: "8px",
+                         borderRadius: "20px",
                          padding: "1rem",
                          marginBottom: "0.5rem",
                          cursor: !isPublicMode && !workout.completed ? 'pointer' : 'default'
