@@ -7,10 +7,7 @@ import {createShare, getPublicWorkout, getWorkout} from "../api/workouts.ts";
 import {moveToCertainExerciseSession} from "../api/sessions.ts";
 import {getExerciseGroups} from "../api/exercises.ts";
 
-console.log('>>> WorkoutPage module loaded');
-
 const WorkoutPage = () => {
-    console.log('>>> WorkoutPage render start');
 
     const {id, token} = useParams<{ id?: string; token?: string }>();
     const isPublicMode = !!token;
@@ -98,10 +95,8 @@ const WorkoutPage = () => {
             </div>
         )}
 
-        <h2>{workout.day_type_name || `Тренировка ${workout.id}`}</h2>
-        <span>
-            Статус: {workout.status} {progress?.workout?.duration &&
-            <span><span>~ </span>{progress.workout.duration}</span>}
+        <h2>
+            {workout.day_type_name || `Тренировка ${workout.id}`}
             {!isPublicMode && workout.completed && (
                 <Button
                     style={{marginLeft: 10}}
@@ -112,6 +107,10 @@ const WorkoutPage = () => {
                     {copied ? <Check size={14} /> : <Share2 size={14} />}
                 </Button>
             )}
+        </h2>
+        <span>
+            Статус: {workout.status} {progress?.workout?.duration &&
+            <span><span>~ </span>{progress.workout.duration}</span>}
         </span>
         <span>{workout.started_at}</span>
         {RemainingMin !== undefined && RemainingMin > 0 && <span>Оставшееся время: {RemainingMin} мин</span>}
