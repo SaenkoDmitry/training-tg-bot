@@ -8,9 +8,7 @@ import IconPicker, {ICONS} from "../components/IconPicker";
 import {subscribePush, unsubscribePush} from "../api/subscribePush";
 import {useUserIcon} from "../hooks/useUserIcons.ts";
 import {useNavigate} from "react-router-dom";
-
-const VAPID_PUBLIC_KEY =
-    "BK0VOgS6oooJu5aKXkg0Amn6zVTWqEjjHjlxFJE4lMygZ_Wyp_D1LCVR3LkCEiOF4hHsCRDCNEa-TMlkR22LEms";
+import {getVapidKey} from "../api/vapid.ts";
 
 const ProfilePage: React.FC = () => {
     const {user, logout, loading} = useAuth();
@@ -92,7 +90,7 @@ const ProfilePage: React.FC = () => {
 
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
-            await subscribePush(VAPID_PUBLIC_KEY);
+            await subscribePush(await getVapidKey());
             setNotificationsEnabled(true);
             setToast("Уведомления включены ✅");
         } else {

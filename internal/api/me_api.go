@@ -2,8 +2,9 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/middlewares"
 	"net/http"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/middlewares"
 )
 
 func (s *serviceImpl) MeHandler(w http.ResponseWriter, r *http.Request) {

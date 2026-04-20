@@ -150,6 +150,8 @@ func initServer(container *usecase.Container, db *gorm.DB) {
 		r.Get("/", s.MeHandler)
 	})
 
+	r.Get("/api/vapid-key", s.GetVapidKey)
+
 	// video
 	r.Route("/api/video", func(r chi.Router) {
 		r.Use(middlewares.Auth)

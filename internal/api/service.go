@@ -13,6 +13,10 @@ import (
 type Service interface {
 	MeHandler(w http.ResponseWriter, r *http.Request)
 
+	// ----- vapid public key for push notifications -----
+
+	GetVapidKey(w http.ResponseWriter, r *http.Request)
+
 	// ----- telegram auth -----
 
 	TelegramRedirectHandler(w http.ResponseWriter, r *http.Request)

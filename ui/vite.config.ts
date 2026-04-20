@@ -15,7 +15,8 @@ export default defineConfig({
                 type: 'module',
             },
             workbox: {
-                navigateFallback: null
+                navigateFallback: '/index.html',
+                navigateFallbackDenylist: [/^\/api\//],
             },
             manifest: {
                 name: 'Form Journey · Training 🏔️',
