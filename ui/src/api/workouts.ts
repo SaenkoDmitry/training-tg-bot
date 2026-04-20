@@ -21,3 +21,16 @@ export const finishWorkout = (workoutID: number) =>
 
 export const getWorkout = (id: number) =>
     api<ReadWorkoutDTO>(`/api/workouts/${id}`);
+
+export const createShare = async (workoutId: number): Promise<{ token: string; share_url: string }> => {
+    return api<ShareDTO>(`/api/workouts/${workoutId}/share`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+    });
+};
+
+export const getPublicWorkout = async (token: string): Promise<ReadWorkoutDTO> => {
+    return api<ReadWorkoutDTO>(`/api/public/workouts/${token}`, {
+        method: 'GET',
+    });
+};

@@ -3,6 +3,7 @@ package usecase
 import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/measurements"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/pushsubscriptions"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/share"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/service/timer"
 	"gorm.io/gorm"
 
@@ -15,6 +16,7 @@ import (
 	pushsubscriptionsusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/pushsubscriptions"
 	sessionusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/session"
 	setusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/sets"
+	shareusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/share"
 	statsusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/stats"
 	timerusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/timers"
 	userusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/users"
@@ -124,6 +126,8 @@ type Container struct {
 	CreatePushSubscriptionUC   *pushsubscriptionsusecases.CreateUseCase
 	FindAllPushSubscriptionsUC *pushsubscriptionsusecases.FindAllUseCase
 	DeletePushSubscriptionUC   *pushsubscriptionsusecases.DeleteUseCase
+	CreateShareUC              *shareusecases.CreateShareUC
+	GetShareUC                 *shareusecases.GetShareUC
 }
 
 func NewContainer(db *gorm.DB) *Container {
@@ -138,6 +142,7 @@ func NewContainer(db *gorm.DB) *Container {
 	exerciseGroupTypesRepo := exercisegrouptypes.NewRepo(db)
 	measurementsRepo := measurements.NewRepo(db)
 	pushSubscriptionsRepo := pushsubscriptions.NewRepo(db)
+	shareRepo := share.NewRepo(db)
 
 	timerStore := timer.NewStore()
 	summaryService := summary.NewService()
@@ -237,5 +242,9 @@ func NewContainer(db *gorm.DB) *Container {
 		CreatePushSubscriptionUC:   pushsubscriptionsusecases.NewCreateUseCase(pushSubscriptionsRepo, usersRepo),
 		DeletePushSubscriptionUC:   pushsubscriptionsusecases.NewDeleteUseCase(pushSubscriptionsRepo, usersRepo),
 		FindAllPushSubscriptionsUC: pushsubscriptionsusecases.NewFindAllUseCase(pushSubscriptionsRepo, usersRepo),
+
+		// share
+		CreateShareUC: shareusecases.NewCreateShareUC(shareRepo),
+		GetShareUC:    shareusecases.NewGetShareUC(shareRepo),
 	}
 }

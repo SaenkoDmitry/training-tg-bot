@@ -26,6 +26,7 @@ import StatsPageGroup from "./pages/StatsPageGroup.tsx";
 import StatsPageGroupExercise from "./pages/StatsPageGroupExercise.tsx";
 import StatsPageSelectGroup from "./pages/StatsPageSelectGroup.tsx";
 import StatsPageMeasurement from "./pages/StatsPageMeasurement.tsx";
+import PublicLayout from "./components/PublicLayout.tsx";
 
 const App = () => {
     return (
@@ -55,6 +56,12 @@ const App = () => {
                                     <RequireAuth>
                                         <MainLayout><WorkoutPage/></MainLayout>
                                     </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/public/workouts/:token"
+                                element={
+                                    <PublicLayout><WorkoutPage /></PublicLayout>
                                 }
                             />
                             <Route path="/workouts/:id/add-exercise" element={

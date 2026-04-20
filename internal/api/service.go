@@ -35,6 +35,8 @@ type Service interface {
 	FinishWorkout(w http.ResponseWriter, r *http.Request)
 	ReadWorkout(w http.ResponseWriter, r *http.Request)
 	DeleteWorkout(w http.ResponseWriter, r *http.Request)
+	CreateShareWorkout(w http.ResponseWriter, r *http.Request)
+	GetPublicWorkout(w http.ResponseWriter, r *http.Request)
 
 	// ----- measurements -----
 

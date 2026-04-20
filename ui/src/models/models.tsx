@@ -75,6 +75,12 @@ interface ReadWorkoutDTO {
     stats: WorkoutStatistic;
 }
 
+interface ShareDTO {
+    token: string;
+    share_url: string;
+    created_at: string;
+}
+
 interface WorkoutProgress {
     workout: FormattedWorkout;
     TotalExercises: number;

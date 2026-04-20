@@ -1,38 +1,66 @@
 import {useNavigate, useParams} from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import SafeTextRenderer from "../components/SafeTextRenderer.tsx";
-import {Loader, Play, Plus} from "lucide-react";
+import {Check, Loader, Play, Plus, Share2} from "lucide-react";
 import Button from "../components/Button.tsx";
-import {getWorkout} from "../api/workouts.ts";
+import {createShare, getPublicWorkout, getWorkout} from "../api/workouts.ts";
 import {moveToCertainExerciseSession} from "../api/sessions.ts";
 import {getExerciseGroups} from "../api/exercises.ts";
 
+console.log('>>> WorkoutPage module loaded');
+
 const WorkoutPage = () => {
-    const {id} = useParams<{ id: number }>();
+    console.log('>>> WorkoutPage render start');
+
+    const {id, token} = useParams<{ id?: string; token?: string }>();
+    const isPublicMode = !!token;
+
     const [data, setData] = useState<ReadWorkoutDTO | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
     const [groupsMap, setGroupsMap] = useState<Record<string, Group>>({});
+    const [shareUrl, setShareUrl] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+
+    const handleShare = async () => {
+        if (!data?.progress?.workout?.id) return;
+
+        try {
+            const result = await createShare(data.progress.workout.id);
+            setShareUrl(result.share_url);
+            await navigator.clipboard.writeText(result.share_url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            setError('Не удалось создать ссылку');
+        }
+    };
 
     useEffect(() => {
         const fetchWorkout = async () => {
             try {
                 setLoading(true);
 
-                const [workoutData, groups]: [ReadWorkoutDTO, Group[]] = await Promise.all([
-                    getWorkout(Number(id)),
-                    getExerciseGroups()
-                ]);
+                let workoutData: ReadWorkoutDTO;
+
+                if (isPublicMode) {
+                    workoutData = await getPublicWorkout(token!);
+                } else {
+                    const [wd, groups]: [ReadWorkoutDTO, Group[]] = await Promise.all([
+                        getWorkout(Number(id)),
+                        getExerciseGroups()
+                    ]);
+                    workoutData = wd;
+
+                    const map = groups.reduce<Record<string, Group>>((acc, group) => {
+                        acc[group.code] = group;
+                        return acc;
+                    }, {});
+                    setGroupsMap(map);
+                }
 
                 setData(workoutData);
-
-                const map = groups.reduce<Record<string, Group>>((acc, group) => {
-                    acc[group.code] = group;
-                    return acc;
-                }, {});
-
-                setGroupsMap(map);
 
             } catch (err: any) {
                 setError(err.message || 'Не удалось загрузить данные');
@@ -41,8 +69,12 @@ const WorkoutPage = () => {
             }
         };
 
-        fetchWorkout();
-    }, [id]);
+        if (isPublicMode && token) {
+            fetchWorkout();
+        } else if (id) {
+            fetchWorkout();
+        }
+    }, [id, token, isPublicMode]);
 
     if (loading) return <Loader/>;
     if (error) return <p style={{color: 'red'}}>{error}</p>;
@@ -52,10 +84,34 @@ const WorkoutPage = () => {
     const {workout, ProgressPercent, RemainingMin, SessionStarted, CompletedExercises, TotalExercises} = progress;
 
     return <div className={"page stack"}>
+        {isPublicMode && (
+            <div style={{
+                background: '#e3f2fd',
+                color: '#1976d2',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                textAlign: 'center',
+                fontSize: '0.875rem',
+                marginBottom: '1rem'
+            }}>
+                🔗 Публичная ссылка
+            </div>
+        )}
+
         <h2>{workout.day_type_name || `Тренировка ${workout.id}`}</h2>
         <span>
             Статус: {workout.status} {progress?.workout?.duration &&
             <span><span>~ </span>{progress.workout.duration}</span>}
+            {!isPublicMode && workout.completed && (
+                <Button
+                    style={{marginLeft: 10}}
+                    variant="ghost"
+                    onClick={handleShare}
+                    disabled={copied}
+                >
+                    {copied ? <Check size={14} /> : <Share2 size={14} />}
+                </Button>
+            )}
         </span>
         <span>{workout.started_at}</span>
         {RemainingMin !== undefined && RemainingMin > 0 && <span>Оставшееся время: {RemainingMin} мин</span>}
@@ -83,19 +139,10 @@ const WorkoutPage = () => {
                 {stats.exercise_map && [...new Set(
                     Object.values(stats.exercise_map).map(ex => ex.group_name)
                 )].map(groupName => {
-                    // Фильтруем упражнения этой группы
                     const exercisesInGroup = Object.values(stats.exercise_map).filter(
                         ex => ex.group_name === groupName
                     );
-
-                    console.log('exercisesInGroup', exercisesInGroup)
-                    console.log('stats.exercise_weight_map', stats.exercise_weight_map)
-                    console.log('stats.exercise_time_map', stats.exercise_time_map)
-
-                    // Кол-во упражнений
                     const exerciseCount = exercisesInGroup.length;
-
-                    // Общий вес или время
                     let totalWeight = 0;
                     let totalTime = 0;
 
@@ -109,8 +156,6 @@ const WorkoutPage = () => {
                         }
                     });
 
-                    console.log('totalWeight', totalWeight, 'totalTime', totalTime)
-
                     return (
                         <p key={groupName}>
                             • {groupName} — {exerciseCount} упражн.,
@@ -122,19 +167,18 @@ const WorkoutPage = () => {
             </div>
         </div>}
 
-        {data.progress.SessionStarted &&
-            <Button variant={"active"} onClick={() => navigate(`/sessions/${data?.progress.workout.id}`)}>
-                <Play size={14}/>К тренировке</Button>
-        }
-
-        {data.progress.SessionStarted && (
-            <Button
-                variant="primary"
-                onClick={() => navigate(`/workouts/${id}/add-exercise`)}
-            >
-                <Plus size={14}/>
-                Добавить упражнение
-            </Button>
+        {!isPublicMode && data.progress.SessionStarted && (
+            <>
+                <Button variant={"active"} onClick={() => navigate(`/sessions/${data?.progress.workout.id}`)}>
+                    <Play size={14}/>К тренировке</Button>
+                <Button
+                    variant="primary"
+                    onClick={() => navigate(`/workouts/${id}/add-exercise`)}
+                >
+                    <Plus size={14}/>
+                    Добавить упражнение
+                </Button>
+            </>
         )}
 
         {/* Упражнения */}
@@ -148,9 +192,10 @@ const WorkoutPage = () => {
                          borderRadius: "8px",
                          padding: "1rem",
                          marginBottom: "0.5rem",
+                         cursor: !isPublicMode && !workout.completed ? 'pointer' : 'default'
                      }}
                      onClick={(e) => {
-                         if (workout.completed) {
+                         if (isPublicMode || workout.completed) {
                              e.stopPropagation();
                              return;
                          }
@@ -186,6 +231,19 @@ const WorkoutPage = () => {
                 </div>
             ))}
         </div>
+
+        {isPublicMode && (
+            <div style={{
+                textAlign: 'center',
+                marginTop: '2rem',
+                padding: '1.5rem',
+                borderTop: '1px solid #eee'
+            }}>
+                <Button variant="primary" onClick={() => navigate('/')}>
+                    Перейти в приложение
+                </Button>
+            </div>
+        )}
     </div>;
 };
 

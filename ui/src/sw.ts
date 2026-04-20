@@ -1,7 +1,8 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute } from 'workbox-precaching'
-import { registerRoute } from 'workbox-routing'
-import { NetworkOnly } from 'workbox-strategies'
+import { registerRoute, NavigationRoute } from 'workbox-routing'
+import { NetworkOnly, NetworkFirst } from 'workbox-strategies'
+import { createHandlerBoundToURL } from 'workbox-precaching'
 
 declare let self: ServiceWorkerGlobalScope
 
@@ -61,3 +62,13 @@ self.addEventListener('notificationclick', (event) => {
             })
     )
 })
+
+const handler = createHandlerBoundToURL('/index.html')
+const navigationRoute = new NavigationRoute(handler, {
+    denylist: [
+        /^\/api\//,
+        /^\/auth-telegram/,
+        /^\/auth-yandex/,
+    ]
+})
+registerRoute(navigationRoute)

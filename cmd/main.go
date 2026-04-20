@@ -177,7 +177,10 @@ func initServer(container *usecase.Container, db *gorm.DB) {
 		r.Post("/{workout_id}/finish", s.FinishWorkout) // POST /api/workouts/finish
 		r.Get("/{workout_id}", s.ReadWorkout)           // GET /api/workouts/123
 		r.Delete("/{workout_id}", s.DeleteWorkout)      // DELETE /api/workouts/123
+		r.Post("/{workout_id}/share", s.CreateShareWorkout)
 	})
+
+	r.Get("/api/public/workouts/{token}", s.GetPublicWorkout)
 
 	r.Route("/api/sessions", func(r chi.Router) {
 		r.Use(middlewares.Auth)
