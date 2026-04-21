@@ -36,7 +36,7 @@ const WorkoutPage = () => {
             console.log('e.status:', e.status);
             console.log(e.message, e.message == "rate limit exceeded")
             if (e.message?.trim() === 'rate limit exceeded') {
-                setToast('Слишком много запросов');
+                setToast('Слишком много запросов. Подождите минуту');
             } else {
                 setToast('Не удалось создать ссылку');
             }
