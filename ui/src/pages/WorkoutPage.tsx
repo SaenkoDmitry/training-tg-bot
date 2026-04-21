@@ -24,6 +24,22 @@ const WorkoutPage = () => {
     const [copied, setCopied] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
 
+    const isStandalone = typeof window !== 'undefined' && (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true
+    );
+
+    // Для публичного режима
+    const handleOpenApp = () => {
+        if (isStandalone) {
+            navigate('/');
+        } else {
+            // На iOS/Android откроет Safari/Chrome, но пользователь может
+            // переключиться в установленное PWA через системный свитчер
+            window.location.href = window.location.origin + '/?ref=shared';
+        }
+    };
+
     const {openShare, isOpen, url, close} = useShare();
 
     const handleShare = async () => {
@@ -241,15 +257,18 @@ const WorkoutPage = () => {
         </div>
 
         {isPublicMode && (
-            <div style={{
-                textAlign: 'center',
-                marginTop: '2rem',
-                padding: '1.5rem',
-                borderTop: '1px solid #eee'
-            }}>
-                <Button variant="primary" onClick={() => navigate('/')}>
-                    Перейти в приложение
-                </Button>
+            <div style={{ textAlign: 'center', marginTop: '2rem', padding: '1.5rem', borderTop: '1px solid #eee' }}>
+                {!isStandalone ? (
+                    <>
+                        <Button variant="primary" onClick={handleOpenApp}>
+                            Открыть в приложении Form Journey
+                        </Button>
+                    </>
+                ) : (
+                    <Button variant="primary" onClick={() => navigate('/')}>
+                        На главную
+                    </Button>
+                )}
             </div>
         )}
 
