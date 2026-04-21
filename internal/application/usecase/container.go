@@ -167,7 +167,7 @@ func NewContainer(db *gorm.DB) *Container {
 		ExerciseTypeListUC:      exerciseusecases.NewExerciseTypeListUseCase(exerciseTypesRepo),
 		FindTypesByGroupUC:      exerciseusecases.NewFindTypesByGroupUseCase(exerciseTypesRepo, exerciseGroupTypesRepo),
 		ConfirmDeleteExerciseUC: exerciseusecases.NewConfirmDeleteUseCase(exerciseTypesRepo, exercisesRepo),
-		DeleteExerciseUC:        exerciseusecases.NewDeleteUseCase(exercisesRepo),
+		DeleteExerciseUC:        exerciseusecases.NewDeleteUseCase(exercisesRepo, workoutsRepo, sessionsRepo),
 		GetTypeExerciseUC:       exerciseusecases.NewGetTypeUseCase(exercisesRepo, exerciseTypesRepo),
 		CreateExerciseUC:        exerciseusecases.NewCreateUseCase(exercisesRepo, workoutsRepo, exerciseTypesRepo),
 		GetExerciseUC:           exerciseusecases.NewGetUseCase(exercisesRepo),

@@ -13,8 +13,8 @@ export default function WorkoutCard({ w, idx }: WorkoutCardProps) {
                 transition: '0.2s',
             }}
         >
-            {idx}.
-            <h2 style={{ margin: 0 }}>{w.name}</h2>
+
+            <h2 style={{ margin: 0 }}>{idx}.{w.name}</h2>
 
             <p style={{ margin: '6px 0', opacity: 0.7 }}>
                 {w.started_at}

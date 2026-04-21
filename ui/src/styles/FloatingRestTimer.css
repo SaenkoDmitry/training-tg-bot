@@ -25,8 +25,8 @@
 }
 
 .floating-rest-timer .progress {
-    stroke: var(--color-primary);
-    stroke-width: 6;
+    stroke: var(--color-active);
+    stroke-width: 10;
     stroke-linecap: round;
     transition: stroke-dashoffset 0.3s linear;
 }

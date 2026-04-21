@@ -39,7 +39,7 @@
 /* ========= DARK THEME ========= */
 .dark-theme {
     /* ========= COLORS ========= */
-    --color-primary: #174061;
+    --color-primary: #195e97;
     --color-primary-hover: #021e65;
     --color-primary-soft: #213f71;
 
@@ -56,7 +56,7 @@
     --color-ghost-hover: #535d75;
 
     --color-bg: #13141a;       /* Фон страницы */
-    --color-card: var(--color-primary);     /* Карточки / контейнеры */
+    --color-card: #174061;     /* Карточки / контейнеры */
     --color-card-alt: #213142;
 
     --color-text: #f9fafb;     /* Основной текст */

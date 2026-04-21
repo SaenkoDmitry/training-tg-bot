@@ -1,10 +1,11 @@
 package session
 
 import (
+	"time"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercises"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/sessions"
-	"time"
 )
 
 type MoveToCertainUseCase struct {
@@ -48,13 +49,11 @@ func (uc *MoveToCertainUseCase) Execute(workoutID int64, exerciseIndex int) erro
 
 	if exerciseIndex < 0 {
 		session.CurrentExerciseIndex = 0
-	}
-
-	if exerciseIndex >= len(exerciseObjs) {
+	} else if exerciseIndex >= len(exerciseObjs) {
 		session.CurrentExerciseIndex = len(exerciseObjs) - 1
+	} else {
+		session.CurrentExerciseIndex = exerciseIndex
 	}
-
-	session.CurrentExerciseIndex = exerciseIndex
 
 	err = uc.sessionsRepo.Save(&session)
 	if err != nil {

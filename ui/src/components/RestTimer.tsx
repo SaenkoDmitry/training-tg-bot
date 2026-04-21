@@ -80,14 +80,14 @@ export default function RestTimer({ seconds, autoStartTrigger, workoutID }: Prop
                     <svg width="70" height="70">
                         <circle
                             className="bg"
-                            strokeWidth="6"
+                            strokeWidth="8"
                             r={radius}
                             cx="35"
                             cy="35"
                         />
                         <circle
                             className="progress"
-                            strokeWidth="6"
+                            strokeWidth="8"
                             r={radius}
                             cx="35"
                             cy="35"

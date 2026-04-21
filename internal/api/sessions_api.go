@@ -45,9 +45,8 @@ func (s *serviceImpl) MoveToExerciseSession(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	workoutID, err := strconv.ParseInt(r.PathValue("workout_id"), 10, 64)
+	workoutID, err := helpers.ParseInt64Param("workout_id", w, r)
 	if err != nil {
-		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 

@@ -46,6 +46,7 @@ const WorkoutPage = () => {
         if (!data?.progress?.workout?.id) return;
 
         try {
+            setCopied(true);
             const result = await createShare(data.progress.workout.id);
             await openShare(result.share_url);
         } catch (e: any) {
@@ -56,6 +57,8 @@ const WorkoutPage = () => {
             } else {
                 setToast('Не удалось создать ссылку');
             }
+        } finally {
+            setCopied(false)
         }
     };
 
@@ -140,7 +143,7 @@ const WorkoutPage = () => {
             {progress?.workout?.duration && <div style={{padding: 4}}>
                 <div>Длительность: ~ {progress.workout.duration}</div>
             </div>}
-            {/* Время начала*/}
+            {/* Время начала */}
             <div style={{padding: 4}}>{workout.started_at}</div>
             <div style={{padding: 4}}>
                 {RemainingMin !== undefined && RemainingMin > 0 && <span>Оставшееся время: {RemainingMin} мин</span>}

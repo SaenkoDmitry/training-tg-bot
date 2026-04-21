@@ -2,10 +2,11 @@ package session
 
 import (
 	"errors"
+	"time"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercises"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/sessions"
-	"time"
 )
 
 type MoveToUseCase struct {

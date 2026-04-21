@@ -5,7 +5,7 @@
     display: inline-flex;      /* 👈 добавляем */
     align-items: center;       /* 👈 вертикальный центр */
     justify-content: center;   /* 👈 центр по горизонтали */
-    gap: 8px;                  /* 👈 расстояние между иконкой и текстом */
+    gap: 4px;                  /* 👈 расстояние между иконкой и текстом */
 
     border-radius: var(--radius);
     font-weight: 600;

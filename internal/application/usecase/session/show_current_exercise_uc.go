@@ -2,6 +2,7 @@ package session
 
 import (
 	"errors"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/daytypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercisegrouptypes"

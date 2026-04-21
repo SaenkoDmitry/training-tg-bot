@@ -118,7 +118,7 @@ const Home: React.FC = () => {
                             onClick={() => navigate(`/workouts/${w.id}`)}
                             className="workout-item"
                         >
-                            <WorkoutCard w={w} idx={idx + 1}/>
+                            <WorkoutCard w={w} idx={pagination.total - idx}/>
 
                             <div className="workout-actions">
                                 {!w.completed && (
