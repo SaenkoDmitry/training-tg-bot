@@ -193,7 +193,7 @@ const WorkoutPage = () => {
 
                     return (
                         <p key={groupName}>
-                            • {groupName} — {exerciseCount} упражн.,
+                            • {groupName} — {exerciseCount} упр.,
                             {totalWeight > 0 ? ` вес: ${totalWeight} кг` : ''}
                             {totalTime > 0 ? ` время: ${totalTime} мин` : ''}
                         </p>
