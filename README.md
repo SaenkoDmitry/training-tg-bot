@@ -5,11 +5,31 @@ A Telegram bot for tracking workout training sessions.
 
 ## Interface
 
-### Preview and workout session
-<p align="left">
-  <img width="200" height="450" src="/screenshots/preview.png">  
-  <img width="200" height="450" src="/screenshots/list_of_workouts+statistics.png">  
-  <img width="200" height="450" src="/screenshots/workout_session.png">
+### Login / Profile page
+<p align="center">
+    <img width="200" height="450" src="/screenshots/login.png">
+    <img width="200" height="450" src="/screenshots/profile.png">
+</p>
+
+### Workouts page
+<p align="center">
+    <img width="200" height="450" src="/screenshots/workouts.png">
+</p>
+
+### Workout session page
+<p align="center">
+    <img width="200" height="450" src="/screenshots/active_workout.png">
+</p>
+
+### Library of exercises page
+<p align="center">
+    <img width="200" height="450" src="/screenshots/library_of_exercises.png">
+</p>
+
+### Progress exercise / measurements page
+<p align="center">
+    <img width="200" height="450" src="/screenshots/progress_of_exercise.png">
+    <img width="200" height="450" src="/screenshots/progress_of_measurements.png">
 </p>
 
 ### Export to Excel
