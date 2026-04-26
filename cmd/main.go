@@ -43,7 +43,13 @@ func main() {
 	// init telegram app
 	var app *telegram.App
 	go func() {
+		retryCount := 5
 		for {
+			if retryCount == 0 {
+				fmt.Println("retrying is end")
+				break
+			}
+			retryCount--
 			var err error
 			app, err = telegram.New(token, container)
 			if err != nil {
