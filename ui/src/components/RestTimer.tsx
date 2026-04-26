@@ -125,7 +125,7 @@ export default function RestTimer({ seconds, autoStartTrigger, workoutID }: Prop
     };
 
     const progress = totalSeconds > 0 ? 1 - remaining / totalSeconds : 0;
-    const radius = 28;
+    const radius = 26;
     const circumference = 2 * Math.PI * radius;
 
     const applyPreset = (s: number) => {
