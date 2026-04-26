@@ -1,30 +1,46 @@
+/* ============ REST TIMER ============ */
+
 .rest-timer {
     position: sticky;
     bottom: 0;
-
     margin-top: 10px;
-    padding: 8px;
-
+    padding: 12px;
     background: var(--color-card);
-    border-top: 1px solid rgba(97, 114, 158, 0.5);
+    border-radius: var(--radius-lg);
+    margin-bottom: 8px;
+    background: var(--color-primary-soft);
+}
+
+.rest-timer.active {
 }
 
 .timer-inner {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 10px;
     max-width: 600px;
     margin: 0 auto;
 }
 
+.timer-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* ─── Circle ─── */
 .circle {
     position: relative;
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
 }
 
 .circle svg {
-    transform: rotate(-90deg);
+    display: block;
+    width: 60px;
+    height: 60px;
 }
 
 .circle circle {
@@ -32,12 +48,10 @@
     stroke-linecap: round;
 }
 
-/* 🔥 фон-круг (трек) */
 .circle .bg {
-    stroke: rgba(148, 144, 144, 0.25);
+    stroke: var(--color-border);
 }
 
-/* 🔥 прогресс */
 .circle .progress {
     stroke: var(--color-active);
     transition: stroke-dashoffset 0.4s linear;
@@ -45,15 +59,290 @@
 
 .circle .time {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+    line-height: 1;
+}
+
+/* ─── Actions ─── */
+.actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* ─── Rest value button ─── */
+.rest-value-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 15px;
+    font-weight: 500;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: var(--tap-size);
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.rest-value-btn:active:not(:disabled) {
+    transform: scale(0.98);
+    background: var(--color-primary-soft);
+}
+
+.rest-value-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rest-label {
+    color: var(--color-text-muted);
     font-size: 14px;
 }
 
-.actions {
+.rest-time {
+    font-weight: 700;
+}
+
+/* ─── Bottom Sheet Overlay ─── */
+/* z-index: 30 — выше таб-бара (z-index: 20) */
+/* Portal в body гарантирует, что мы в одном stacking context с таб-баром */
+.rest-sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 30;
     display: flex;
+    align-items: flex-end;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.rest-sheet {
+    width: 100%;
+    background: var(--color-card);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 12px 16px 32px;
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 70vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+}
+
+.sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sheet-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.sheet-done {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+/* ─── Presets ─── */
+.presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.preset-chip {
+    flex: 1;
+    min-width: 56px;
+    padding: 10px 6px;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: var(--tap-size);
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.preset-chip:active {
+    transform: scale(0.96);
+}
+
+.preset-chip.active {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* ─── Fine tune ─── */
+.fine-tune {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.tune-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.tune-btn:active {
+    background: var(--color-primary-soft);
+    transform: scale(0.92);
+}
+
+.tune-input-wrap {
+    display: flex;
+    align-items: center;
     gap: 4px;
+}
+
+.tune-input-wrap input {
+    width: 72px;
+    height: 60px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.tune-input-wrap input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.tune-input-wrap span {
+    color: var(--color-text-muted);
+    font-size: 15px;
+}
+
+/* ─── Sheet start button ─── */
+.sheet-start-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--color-primary);
+    color: var(--color-btn-text);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 700;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: var(--tap-size);
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.sheet-start-btn:active {
+    background: var(--color-primary-hover);
+    transform: scale(0.98);
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 480px) {
+    .timer-top-row {
+        gap: 8px;
+    }
+
+    .circle {
+        width: 60px;
+        height: 60px;
+    }
+
+    .circle svg {
+        width: 60px;
+        height: 60px;
+    }
+
+    .circle .time {
+        width: 60px;
+        height: 60px;
+        font-size: 12px;
+    }
+
+    .actions {
+        gap: 4px;
+    }
+
+    .actions button {
+        padding: 0 12px;
+        font-size: 14px;
+    }
+}
+
+@media (max-height: 600px) {
+    .rest-sheet {
+        max-height: 85vh;
+    }
 }
