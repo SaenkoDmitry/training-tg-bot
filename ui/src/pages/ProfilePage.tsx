@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useAuth} from "../context/AuthContext";
 import Button from "../components/Button";
 import Toast from "../components/Toast";
-import {Bell, BellOff, ChartNoAxesCombined, LogOut, Moon, Pencil, Sun} from "lucide-react";
+import {Bell, BellOff, ChartNoAxesCombined, LogOut, Moon, Pencil, Sun, UserLock} from "lucide-react";
 import type {IconName} from "../components/IconPicker";
 import IconPicker, {ICONS} from "../components/IconPicker";
 import {subscribePush, unsubscribePush} from "../api/subscribePush";
@@ -101,16 +101,7 @@ const ProfilePage: React.FC = () => {
     };
 
     return (
-        <div
-            style={{
-                maxWidth: 420,
-                margin: "0 auto",
-                padding: "1rem",
-                display: "flex",
-                flexDirection: "column",
-                gap: 20,
-            }}
-        >
+        <div className={"page stack"}>
             {/* --- Кнопка переключения темы --- */}
             {isMobile && <div style={{display: "flex", justifyContent: "flex-end"}}>
                 <Button
@@ -125,15 +116,17 @@ const ProfilePage: React.FC = () => {
             {/* ---------------- NOT LOGGED IN ---------------- */}
             {!loading && !user && (
                 <div
+                    className={"card"}
                     style={{
                         background: "var(--color-card)",
                         borderRadius: "var(--radius-lg)",
-                        padding: "2rem 1.5rem",
                         boxShadow: "var(--shadow-sm)",
                         textAlign: "center",
                     }}
                 >
-                    <div style={{fontSize: 42, marginBottom: 12}}>🔐</div>
+                    <div>
+                        <UserLock size={42}/>
+                    </div>
 
                     <div style={{fontSize: 16, fontWeight: 600, marginBottom: 16}}>
                         Войдите в аккаунт
@@ -204,11 +197,11 @@ const ProfilePage: React.FC = () => {
             {user && (
                 <>
                     <div
+                        className={"card"}
                         style={{
                             position: "relative",
                             background: "var(--color-card)",
                             borderRadius: "var(--radius-lg)",
-                            padding: "1.5rem",
                             boxShadow: "var(--shadow-sm)",
                             textAlign: "center",
                         }}
@@ -221,7 +214,7 @@ const ProfilePage: React.FC = () => {
                                 top: 12,
                                 right: 12,
                                 cursor: "pointer",
-                                opacity: 0.8,
+                                opacity: 0.5,
                             }}
                         >
                             <Pencil size={18}/>

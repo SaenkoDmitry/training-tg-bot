@@ -45,9 +45,8 @@ const LibraryPage: React.FC = () => {
             style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-                gap: 12,          // ← больше расстояние
-                padding: '4px 2px',
-                marginBottom: 20
+                gap: 8,
+                padding: '4px 2px'
             }}
         >
             {groups.map(g => (
