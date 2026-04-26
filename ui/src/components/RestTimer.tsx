@@ -29,36 +29,58 @@ export default function RestTimer({ seconds, autoStartTrigger, workoutID }: Prop
     const [showEditor, setShowEditor] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const sheetRef = useRef<HTMLDivElement>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setCustomSeconds(seconds);
     }, [seconds]);
 
-    // 🔥 Закрытие по клику вне sheet + блокировка click-through
+    // 🔥 Надёжное закрытие по клику вне sheet
     useEffect(() => {
         if (!showEditor) return;
 
-        const handlePointerDown = (e: PointerEvent) => {
-            // Если клик вне sheet — закрываем и блокируем дальнейшую обработку
-            if (sheetRef.current && !sheetRef.current.contains(e.target as Node)) {
+        const closeSheet = () => {
+            console.log("[RestTimer] closing sheet"); // для отладки
+            setShowEditor(false);
+        };
+
+        // iOS: touchstart важнее click, ловим на document
+        const handleTouch = (e: TouchEvent) => {
+            const touch = e.touches[0] || e.changedTouches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            if (sheetRef.current && !sheetRef.current.contains(target as Node)) {
                 e.preventDefault();
                 e.stopPropagation();
-                setShowEditor(false);
+                closeSheet();
             }
         };
 
-        // 🔥 capture: true — ловим ДО того, как событие дойдёт до кнопок под overlay
-        document.addEventListener("pointerdown", handlePointerDown, true);
+        // Fallback: click для desktop
+        const handleClick = (e: MouseEvent) => {
+            if (sheetRef.current && !sheetRef.current.contains(e.target as Node)) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation(); // 🔥 блокируем ВСЕ обработчики
+                closeSheet();
+            }
+        };
+
+        // 🔥 capture: true — самый высокий приоритет
+        document.addEventListener("touchstart", handleTouch, { capture: true, passive: false });
+        document.addEventListener("click", handleClick, true);
+        document.addEventListener("touchend", handleTouch, { capture: true, passive: false });
 
         return () => {
-            document.removeEventListener("pointerdown", handlePointerDown, true);
+            document.removeEventListener("touchstart", handleTouch, { capture: true });
+            document.removeEventListener("click", handleClick, true);
+            document.removeEventListener("touchend", handleTouch, { capture: true });
         };
     }, [showEditor]);
 
     // Закрытие по Escape
     useEffect(() => {
         if (!showEditor) return;
-
         const handleKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") setShowEditor(false);
         };
@@ -117,7 +139,7 @@ export default function RestTimer({ seconds, autoStartTrigger, workoutID }: Prop
     };
 
     const sheetContent = showEditor && (
-        <div className="rest-sheet-overlay">
+        <div className="rest-sheet-overlay" ref={overlayRef}>
             <div className="rest-sheet" ref={sheetRef}>
                 <div className="sheet-handle" />
 
