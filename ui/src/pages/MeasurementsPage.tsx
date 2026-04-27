@@ -147,10 +147,6 @@ const MeasurementsPage: React.FC = () => {
             </Button>
         )}
 
-        {/* ===== HEADER (одинаковый с Home/Programs) ===== */}
-        <div className="desktop-only" style={{marginBottom: 12}}>
-        </div>
-
         {/* ======== TABLE (DESKTOP) ======== */}
         <div className="desktop-only table-wrapper">
             <table className="measurements-table">
@@ -306,7 +302,7 @@ const MeasurementsPage: React.FC = () => {
                             <div className="card-row"><span>П. икра:</span><span>{m.calf_right}</span></div>
                         </div>
                     </div>
-                    <div style={{marginTop: '16px'}}><b>{idx + 1} из {count}</b></div>
+                    <div style={{marginTop: '16px'}}><b>№{count-idx}</b></div>
                 </div>
             ))}
 

@@ -18,7 +18,7 @@
 
     --color-bg: #f6f8fa;
     --color-card: #ffffff;
-    --color-card-alt: #e3f1fb;
+    --color-card-alt: #e9f3fa;
 
     --color-text: #1f2937;
     --color-text-muted: #51658f;
@@ -29,6 +29,9 @@
     /* ========= UI ========= */
     --radius: 12px;
     --radius-lg: 16px;
+
+    --card-gap: 8px;
+    --card-padding: 16px;
 
     --shadow-sm: 0 1px 4px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
@@ -64,6 +67,8 @@
     --color-btn-text: white;
 
     --color-border: #374151;
+
+    --card-gap: 8px;
 
     /* ========= UI ========= */
     --shadow-sm: 0 1px 4px rgba(79, 77, 77, 0.54);

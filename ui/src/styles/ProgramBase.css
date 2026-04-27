@@ -11,7 +11,7 @@
 .stack {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--card-gap);
 }
 
 .row {
@@ -30,7 +30,7 @@
     border: 1px solid var(--color-border);
     background: var(--color-card);
     border-radius: var(--radius-lg);
-    padding: 14px 16px;
+    padding: var(--card-padding);
     box-shadow: var(--shadow-sm);
     cursor: pointer;
 }

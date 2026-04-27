@@ -1,7 +1,8 @@
-# Training Telegram Bot
+# Training App
 
 ## Overview
-A Telegram bot for tracking workout training sessions.
+Training Web + PWA application for tracking workout training sessions.
+You can track your progress in strength and cardio workouts on graphs and the dynamics of the progress of your body measurements.
 
 ## Interface
 
@@ -54,10 +55,12 @@ A Telegram bot for tracking workout training sessions.
 - `internal/utils/` - Utility functions
 
 ## Dependencies
-- Go 1.24
-- `github.com/go-telegram-bot-api/telegram-bot-api/v5` - Telegram Bot API
+- Go 1.26
+- `github.com/go-telegram-bot-api/telegram-bot-api/v5` - Telegram Bot API – Deprecated due to internal laws
 - `github.com/pressly/goose/v3` - for database migrations
 - `gorm.io/gorm, gorm.io/driver/postgres` - ORM with Postgres driver
+- Frontend on React + TypeScript + pure CSS
+- Authorization via Yandex OAuth API (https://oauth.yandex.ru/)
 
 ## Configuration and secrets
 The bot requires:
@@ -66,6 +69,7 @@ The bot requires:
 3. Environment variable `JWT_SECRET` containing JWT secret key
 4. Environment variable `TELEGRAM_BOT_ID` containing your telegram bot id
 5. Environment variable `VAPID_PRIVATE_KEY` and Environment variable `VAPID_PUBLIC_KEY` containing public/private keys for push notifications
+6. Environment variable `YANDEX_CLIENT_ID` and Environment variable `YANDEX_CLIENT_SECRET` containing keys to communicate with Yandex OAuth API
 
 ## Running
 ```bash

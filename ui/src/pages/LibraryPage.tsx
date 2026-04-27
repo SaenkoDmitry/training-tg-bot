@@ -45,8 +45,7 @@ const LibraryPage: React.FC = () => {
             style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-                gap: 8,
-                padding: '4px 2px'
+                gap: 'var(--card-gap)',
             }}
         >
             {groups.map(g => (
@@ -64,21 +63,21 @@ const LibraryPage: React.FC = () => {
         }
         {loading && <Loader/>}
 
-        <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+        <div style={{display: 'flex', flexDirection: 'column', gap: "var(--card-gap)"}}>
             {!loading && exercises.map((ex, index) => {
                 const isOpen = openedId === ex.id;
-                const softBg = index % 2 === 0 ? 'var(--color-card)' : 'var(--color-card-alt)'; // мягкое чередование
+                const itemBg = index % 2 === 0 ? 'var(--color-card)' : 'var(--color-card-alt)'; // мягкое чередование
 
                 return (
                     <div
                         key={ex.id}
                         style={{
                             border: '1px solid var(--color-border)',
-                            borderRadius: 12,
-                            padding: 12,
+                            borderRadius: 'var(--radius)',
+                            padding: 'var(--card-padding)',
                             transition: 'all 0.2s ease',
-                            boxShadow: isOpen ? '0 6px 12px rgba(0,0,0,0.15)' : '0 2px 4px rgba(0,0,0,0.05)',
-                            backgroundColor: softBg,
+                            boxShadow: 'var(--shadow-sm)',
+                            backgroundColor: itemBg,
                             cursor: 'pointer',
                         }}
                         onClick={() => setOpenedId(prev => (prev === ex.id ? null : ex.id))}
@@ -90,7 +89,7 @@ const LibraryPage: React.FC = () => {
                                 display: 'inline-block',
                                 transition: 'transform 0.3s ease',
                                 transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                            }}><ChevronDown size={22}/></span>
+                            }}><ChevronDown size={20}/></span>
                         </div>
 
                         {/* раскрытие с плавным эффектом */}

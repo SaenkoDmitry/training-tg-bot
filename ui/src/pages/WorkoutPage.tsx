@@ -151,11 +151,12 @@ const WorkoutPage = () => {
 
             {/* Прогресс тренировки */}
             <div>
-                <div style={{background: '#eee', borderRadius: '8px', overflow: 'hidden', height: '20px'}}>
+                <div style={{background: '#eee', borderRadius: 'var(--radius)', overflow: 'hidden', height: '20px'}}>
                     <div
                         style={{
                             width: `${ProgressPercent}%`,
-                            background: ProgressPercent >= 85 ? 'var(--color-active)' : 50 < ProgressPercent && ProgressPercent < 85 ? 'var(--color-attention)' : 'var(--color-danger)',
+                            background: ProgressPercent >= 85 ? 'var(--color-active)' : 50 < ProgressPercent &&
+                                ProgressPercent < 85 ? 'var(--color-attention)' : 'var(--color-danger)',
                             height: '100%',
                         }}
                     />

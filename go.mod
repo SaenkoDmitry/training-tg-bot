@@ -1,6 +1,6 @@
 module github.com/SaenkoDmitry/training-tg-bot
 
-go 1.24.1
+go 1.26
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
