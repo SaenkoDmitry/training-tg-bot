@@ -8,6 +8,7 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/api/helpers"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/api/validator"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/metrics"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/middlewares"
 )
 
@@ -31,6 +32,8 @@ func (s *serviceImpl) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *serviceImpl) StartWorkout(w http.ResponseWriter, r *http.Request) {
+	metrics.WorkoutsTotal.WithLabelValues("started").Inc()
+
 	claims, ok := middlewares.FromContext(r.Context())
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -143,6 +146,8 @@ func (s *serviceImpl) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *serviceImpl) FinishWorkout(w http.ResponseWriter, r *http.Request) {
+	metrics.WorkoutsTotal.WithLabelValues("finished").Inc()
+
 	claims, ok := middlewares.FromContext(r.Context())
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)

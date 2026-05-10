@@ -8,12 +8,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/SaenkoDmitry/training-tg-bot/internal/metrics"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/service/limiter"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	_ "github.com/pressly/goose/v3"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -30,6 +33,9 @@ func main() {
 	token := os.Getenv("TELEGRAM_TOKEN")
 	dsn := os.Getenv("DATABASE_URL")
 	fmt.Printf("TELEGRAM_TOKEN: %s, DATABASE_URL: %s\n", token, dsn)
+
+	registry := metrics.Init()
+	metrics.StartSystemMetricsCollector()
 
 	// init database
 	db := initDB(dsn)
@@ -69,7 +75,7 @@ func main() {
 		}
 	}()
 
-	go initServer(container, db)
+	go initServer(container, db, registry)
 
 	// главная горутина блокируется навсегда
 	select {}
@@ -125,7 +131,7 @@ func migrate(dsn string) {
 	}
 }
 
-func initServer(container *usecase.Container, db *gorm.DB) {
+func initServer(container *usecase.Container, db *gorm.DB, registry *prometheus.Registry) {
 	r := chi.NewRouter()
 
 	shareLimiter := limiter.NewRateLimiter(10, time.Minute)
@@ -136,7 +142,10 @@ func initServer(container *usecase.Container, db *gorm.DB) {
 	r.Use(middleware.RequestID) // уникальный ID запроса
 
 	// custom
+	r.Use(middlewares.MetricsMiddleware(metrics.ApiRequestsTotal, metrics.ApiRequestDuration))
 	r.Use(middlewares.ShareLimiterMiddleware(shareLimiter))
+
+	r.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 
 	s := api.New(container, db)
 
