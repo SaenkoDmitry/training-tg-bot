@@ -43,6 +43,8 @@ func main() {
 	// health check handler
 	go healthCheckAPIHandler(db)
 
+	metrics.StartUsersCollector(db)
+
 	// use cases
 	container := usecase.NewContainer(db)
 

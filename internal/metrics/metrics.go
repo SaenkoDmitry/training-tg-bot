@@ -8,6 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
+	"gorm.io/gorm"
 )
 
 var (
@@ -25,9 +26,9 @@ var (
 
 	// Бизнес-метрики
 
-	ActiveUsers = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "app_active_users_total",
-		Help: "Number of currently active users",
+	TotalUsers = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "app_users_total",
+		Help: "Total number of registered users",
 	})
 
 	WorkoutsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -57,7 +58,7 @@ func Init() *prometheus.Registry {
 	registry.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 
 	// Наши кастомные
-	registry.MustRegister(CpuUsage, MemUsage, ActiveUsers, WorkoutsTotal, ApiRequestsTotal, ApiRequestDuration)
+	registry.MustRegister(CpuUsage, MemUsage, TotalUsers, WorkoutsTotal, ApiRequestsTotal, ApiRequestDuration)
 
 	return registry
 }
@@ -85,4 +86,22 @@ func StartSystemMetricsCollector() {
 			// Уже собирается через NewGoCollector, но можно добавить кастомные
 		}
 	}()
+}
+
+func StartUsersCollector(db *gorm.DB) {
+	updateTotalUsers(db)
+
+	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		for range ticker.C {
+			updateTotalUsers(db)
+		}
+	}()
+}
+
+func updateTotalUsers(db *gorm.DB) {
+	var count int64
+	if err := db.Table("users").Count(&count).Error; err == nil {
+		TotalUsers.Set(float64(count))
+	}
 }
