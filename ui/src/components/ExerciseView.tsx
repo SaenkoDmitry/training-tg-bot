@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {addSet, changeSet, completeSet, deleteSet,} from "../api/sets";
 import SetRow from "./SetRow.tsx";
 import RestTimer from "./RestTimer.tsx";
@@ -8,6 +8,7 @@ import "../styles/workout.css";
 import {deleteExercise} from "../api/exercises.ts";
 import {ArrowDown, ArrowUp, Plus, Trash2} from "lucide-react";
 import VideoPlayer from "./VideoPlayer.tsx";
+import SafeTextRenderer from "./SafeTextRenderer.tsx";
 
 export default function ExerciseView({session, onAllSetsCompleted, onReload}) {
     const [sets, setSets] = useState(session.exercise.sets);
@@ -172,6 +173,15 @@ export default function ExerciseView({session, onAllSetsCompleted, onReload}) {
                 )}
             </div>
 
+            {videoOpen && <div style={{padding: 'var(--card-padding)'}}>
+                {ex.accent && <div><b>Основные мышцы:</b>
+                    <SafeTextRenderer html={ex.accent}/>
+                </div>}
+                <br/>
+                {ex.secondary_accent && <div><b>Второстепенные мышцы:</b>
+                    <SafeTextRenderer html={ex.secondary_accent}/>
+                </div>}
+            </div>}
             {videoOpen && <VideoPlayer url={ex.url}/>}
 
             <div className="sets">
