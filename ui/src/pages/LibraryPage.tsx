@@ -111,8 +111,11 @@ const LibraryPage: React.FC = () => {
                             )}
 
                             <div>
-                                {ex.accent && <div style={{marginBottom: 10}}><b>Акцент:</b>
+                                {ex.accent && <div style={{marginBottom: 10}}><b>Основные мышцы:</b>
                                     <SafeTextRenderer html={ex.accent}/>
+                                </div>}
+                                {ex.secondary_accent && <div style={{marginBottom: 10}}><b>Второстепенные мышцы:</b>
+                                    <SafeTextRenderer html={ex.secondary_accent}/>
                                 </div>}
                                 {ex.rest_in_seconds > 0 &&
                                     <div style={{marginBottom: 10}}><b>Отдых: </b>{ex.rest_in_seconds} секунд

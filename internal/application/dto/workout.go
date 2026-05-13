@@ -91,17 +91,18 @@ func MapToFormattedExercise(ex models.Exercise, groupsMap map[string]string) *Fo
 		sets = append(sets, MapToFormattedSet(s, ex))
 	}
 	return &FormattedExercise{
-		ID:            ex.ID,
-		Name:          ex.ExerciseType.Name,
-		Units:         ex.ExerciseType.Units,
-		GroupName:     groupsMap[ex.ExerciseType.ExerciseGroupTypeCode],
-		RestInSeconds: ex.ExerciseType.RestInSeconds,
-		Accent:        ex.ExerciseType.Accent,
-		Description:   ex.ExerciseType.Description,
-		Url:           ex.ExerciseType.Url,
-		SumWeight:     sumWeight,
-		Index:         ex.Index,
-		Sets:          sets,
+		ID:              ex.ID,
+		Name:            ex.ExerciseType.Name,
+		Units:           ex.ExerciseType.Units,
+		GroupName:       groupsMap[ex.ExerciseType.ExerciseGroupTypeCode],
+		RestInSeconds:   ex.ExerciseType.RestInSeconds,
+		Accent:          ex.ExerciseType.Accent,
+		SecondaryAccent: ex.ExerciseType.SecondaryAccent,
+		Description:     ex.ExerciseType.Description,
+		Url:             ex.ExerciseType.Url,
+		SumWeight:       sumWeight,
+		Index:           ex.Index,
+		Sets:            sets,
 	}
 }
 
@@ -127,17 +128,18 @@ func MapToFormattedSet(s models.Set, ex models.Exercise) *FormattedSet {
 }
 
 type FormattedExercise struct {
-	ID            int64           `json:"id"`
-	Name          string          `json:"name"`
-	Url           string          `json:"url"`
-	GroupName     string          `json:"group_name"`
-	RestInSeconds int             `json:"rest_in_seconds"`
-	Accent        string          `json:"accent"`
-	Units         string          `json:"units"`
-	Description   string          `json:"description"`
-	Index         int             `json:"index"`
-	Sets          []*FormattedSet `json:"sets"`
-	SumWeight     float32         `json:"sum_weight"`
+	ID              int64           `json:"id"`
+	Name            string          `json:"name"`
+	Url             string          `json:"url"`
+	GroupName       string          `json:"group_name"`
+	RestInSeconds   int             `json:"rest_in_seconds"`
+	Accent          string          `json:"accent"`
+	SecondaryAccent string          `json:"secondary_accent"`
+	Units           string          `json:"units"`
+	Description     string          `json:"description"`
+	Index           int             `json:"index"`
+	Sets            []*FormattedSet `json:"sets"`
+	SumWeight       float32         `json:"sum_weight"`
 }
 
 type FormattedSet struct {

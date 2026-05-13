@@ -32,6 +32,7 @@ interface ExerciseType {
     exercise_group_type_code: string;
     rest_in_seconds: number;
     accent: string;
+    secondary_accent: string;
     units: string;
     description: string;
 }

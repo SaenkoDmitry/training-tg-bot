@@ -19,14 +19,15 @@ type FindTypesByGroup struct {
 }
 
 type ExerciseTypeDTO struct {
-	ID            int64  `json:"id"`
-	Name          string `json:"name"`
-	Url           string `json:"url"`
-	GroupName     string `json:"group_name"`
-	RestInSeconds int    `json:"rest_in_seconds"`
-	Accent        string `json:"accent"`
-	Units         string `json:"units"`
-	Description   string `json:"description"`
+	ID              int64  `json:"id"`
+	Name            string `json:"name"`
+	Url             string `json:"url"`
+	GroupName       string `json:"group_name"`
+	RestInSeconds   int    `json:"rest_in_seconds"`
+	Accent          string `json:"accent"`
+	SecondaryAccent string `json:"secondary_accent"`
+	Units           string `json:"units"`
+	Description     string `json:"description"`
 }
 
 func MapExerciseTypeDTOList(types []models.ExerciseType, groupsMap map[string]string) []*ExerciseTypeDTO {
@@ -39,14 +40,15 @@ func MapExerciseTypeDTOList(types []models.ExerciseType, groupsMap map[string]st
 
 func MapExerciseTypeDTO(t models.ExerciseType, groupsMap map[string]string) *ExerciseTypeDTO {
 	return &ExerciseTypeDTO{
-		ID:            t.ID,
-		Name:          t.Name,
-		Url:           t.Url,
-		GroupName:     groupsMap[t.ExerciseGroupTypeCode],
-		RestInSeconds: t.RestInSeconds,
-		Accent:        t.Accent,
-		Units:         t.Units,
-		Description:   t.Description,
+		ID:              t.ID,
+		Name:            t.Name,
+		Url:             t.Url,
+		GroupName:       groupsMap[t.ExerciseGroupTypeCode],
+		RestInSeconds:   t.RestInSeconds,
+		Accent:          t.Accent,
+		SecondaryAccent: t.SecondaryAccent,
+		Units:           t.Units,
+		Description:     t.Description,
 	}
 }
 

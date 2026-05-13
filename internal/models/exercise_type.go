@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"strings"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 )
 
 type ExerciseType struct {
@@ -12,6 +13,7 @@ type ExerciseType struct {
 	ExerciseGroupTypeCode string `json:"exercise_group_type_code"`
 	RestInSeconds         int    `json:"rest_in_seconds"`
 	Accent                string `json:"accent"`
+	SecondaryAccent       string `json:"secondary_accent"`
 	Units                 string `json:"units"`
 	Description           string `json:"description"`
 }

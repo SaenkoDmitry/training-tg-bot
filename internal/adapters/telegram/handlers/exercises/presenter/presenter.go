@@ -2,12 +2,13 @@ package presenter
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/messages"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"strings"
 )
 
 type Presenter struct {
@@ -31,7 +32,10 @@ func (p *Presenter) ShowCurrentSession(chatID int64, res *dto.CurrentExerciseSes
 	text.WriteString(fmt.Sprintf("<b>%s</b>\n\n", dayType.Name))
 	text.WriteString(fmt.Sprintf("<b>Упражнение %d/%d:</b> %s\n\n", exerciseIndex+1, len(workoutDay.Exercises), exerciseObj.Name))
 	if exerciseObj.Accent != "" {
-		text.WriteString(fmt.Sprintf("<b>Акцент:</b> %s\n\n", exerciseObj.Accent))
+		text.WriteString(fmt.Sprintf("<b>Основные мышцы:</b> %s\n\n", exerciseObj.Accent))
+	}
+	if exerciseObj.SecondaryAccent != "" {
+		text.WriteString(fmt.Sprintf("<b>Второстепенные мышцы:</b> %s\n\n", exerciseObj.SecondaryAccent))
 	}
 
 	text.WriteString("<b>Подходы:</b>\n")
