@@ -32,13 +32,16 @@ const LibraryPage: React.FC = () => {
         setLoading(true);
 
         getExerciseTypesByGroup(selectedGroup).then((exerciseTypes: ExerciseType[]) => {
-            setExercises(exerciseTypes);
+            const sorted = [...exerciseTypes].sort((a, b) =>
+                a.name.localeCompare(b.name)
+            );
+            setExercises(sorted);
             setLoading(false);
         })
     }, [selectedGroup]);
 
     return <div className={"page stack"}>
-        <h1>Библиотека упражнений</h1>
+        <h1>Упражнения</h1>
 
         {/* ---------- GROUP TABS ---------- */}
         <div

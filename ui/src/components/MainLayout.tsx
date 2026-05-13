@@ -13,7 +13,7 @@ const tabs = [
     {name: 'Тренировки', path: '/', icon: Dumbbell},
     {name: 'Программы', path: '/programs', icon: FolderKanban},
     {name: 'Замеры', path: '/measurements', icon: Ruler},
-    {name: 'Библиотека', path: '/library', icon: BookOpen},
+    {name: 'Упражнения', path: '/library', icon: BookOpen},
     {name: 'Профиль', path: '/profile', icon: User},
 ];
 
