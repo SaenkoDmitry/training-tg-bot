@@ -36,7 +36,7 @@ func (s *Set) String(done bool) string {
 
 	if s.Completed {
 		if s.CompletedAt != nil {
-			text.WriteString(fmt.Sprintf("✅ [%s]: ", s.CompletedAt.Add(3*time.Hour).Format("15:04:05")))
+			text.WriteString(fmt.Sprintf("✅ [<u>⏱️%s</u>]: ", s.CompletedAt.Add(3*time.Hour).Format("15:04:05")))
 		}
 	} else {
 		if done {

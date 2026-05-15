@@ -141,7 +141,7 @@ const WorkoutPage = () => {
                 Статус: {workout.status}
             </div>
             {progress?.workout?.duration && <div style={{padding: 4}}>
-                <div>Длительность: ~ {progress.workout.duration}</div>
+                <div>⏱️ Длительность: {progress.workout.duration}</div>
             </div>}
             {/* Время начала */}
             <div style={{padding: 4}}>{workout.started_at}</div>
@@ -169,7 +169,7 @@ const WorkoutPage = () => {
             {(stats.cardio_time > 0 || stats.total_weight > 0) && <h3>Статистика</h3>}
             <div className={"card"}>
                 {stats.cardio_time > 0 && <p><strong>🫀 Время кардио:</strong> {stats.cardio_time} мин</p>}
-                {stats.total_weight > 0 && <p><strong>🏋 Общий вес:</strong> {stats.total_weight} кг</p>}
+                {stats.total_weight > 0 && <p><strong>🏋 Общий вес:</strong> {stats.total_weight.toLocaleString('ru-RU')} кг</p>}
                 <br/>
                 {stats.exercise_map && <strong>Группы мышц:</strong>}
                 {stats.exercise_map && [...new Set(
@@ -195,7 +195,7 @@ const WorkoutPage = () => {
                     return (
                         <p key={groupName}>
                             • {groupName} — {exerciseCount} упр.,
-                            {totalWeight > 0 ? ` вес: ${totalWeight} кг` : ''}
+                            {totalWeight > 0 ? ` вес: ${totalWeight.toLocaleString('ru-RU')} кг` : ''}
                             {totalTime > 0 ? ` время: ${totalTime} мин` : ''}
                         </p>
                     );
