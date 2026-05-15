@@ -217,7 +217,6 @@ const WorkoutPage = () => {
             </>
         )}
 
-        {/* Упражнения */}
         <h3>Упражнения ({CompletedExercises}/{TotalExercises})</h3>
         <div style={{listStyle: "none", padding: 0}}>
             {workout.exercises?.map((ex: FormattedExercise) => (

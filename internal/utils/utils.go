@@ -2,12 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 )
 
 func FormatDuration(duration time.Duration) string {
@@ -16,11 +17,11 @@ func FormatDuration(duration time.Duration) string {
 	seconds := int(duration.Seconds()) % 60
 
 	if hours > 0 {
-		return fmt.Sprintf("%d ч %d мин", hours, minutes)
+		return fmt.Sprintf("%dч%dмин", hours, minutes)
 	} else if minutes > 0 {
-		return fmt.Sprintf("%d мин", minutes)
+		return fmt.Sprintf("%dмин", minutes)
 	}
-	return fmt.Sprintf("%d сек", seconds)
+	return fmt.Sprintf("%dсек", seconds)
 }
 
 func BetweenTimes(startedAt time.Time, endedAt *time.Time) string {

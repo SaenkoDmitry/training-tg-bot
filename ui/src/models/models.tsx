@@ -5,6 +5,9 @@ interface Workout {
     duration?: string;
     status?: string;
     completed: boolean;
+    cardio_distance?: number;
+    cardio_time?: number;
+    has_valid_cardio_data?: boolean;
 }
 
 interface ShowMyWorkoutsResult {

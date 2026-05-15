@@ -2,7 +2,7 @@ package workouts
 
 import (
 	"errors"
-	"fmt"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/users"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
@@ -54,19 +54,21 @@ func (uc *FindMyUseCase) Execute(userID int64, offset, limit int) (*dto.ShowMyWo
 
 		status := "🟡"
 		if w.Completed {
-			status = "✅"
-			if w.EndedAt != nil {
-				status += fmt.Sprintf(" ~ %s", duration)
-			}
+			status = "✅️"
 		}
 
+		cardioDistance, cardioTime, hasValidCardioData := w.CalcCardioDistanceAndTime()
+
 		items = append(items, dto.WorkoutItem{
-			ID:        w.ID,
-			Name:      w.WorkoutDayType.Name,
-			StartedAt: "📆️ " + utils.FormatDateTimeWithDayOfWeek(w.StartedAt),
-			Duration:  duration,
-			Completed: w.Completed,
-			Status:    status,
+			ID:                 w.ID,
+			Name:               w.WorkoutDayType.Name,
+			StartedAt:          "📆️ " + utils.FormatDateTimeWithDayOfWeek(w.StartedAt),
+			Duration:           duration,
+			Completed:          w.Completed,
+			Status:             status,
+			HasValidCardioData: hasValidCardioData,
+			CardioDistance:     cardioDistance,
+			CardioTime:         cardioTime,
 		})
 	}
 

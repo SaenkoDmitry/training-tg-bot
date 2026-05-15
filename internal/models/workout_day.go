@@ -21,6 +21,24 @@ type WorkoutDay struct {
 	WorkoutDayType *WorkoutDayType `gorm:"foreignKey:WorkoutDayTypeID;references:ID"`
 }
 
+func (w *WorkoutDay) CalcCardioDistanceAndTime() (distance int, time int, hasData bool) {
+	for _, ex := range w.Exercises {
+		if ex.ExerciseType == nil || ex.ExerciseType.ExerciseGroupTypeCode != "cardio" {
+			continue
+		}
+
+		for _, s := range ex.Sets {
+			if s.FactMeters == 0 || s.FactMinutes == 0 {
+				continue
+			}
+			hasData = true
+			distance += s.FactMeters
+			time += s.FactMinutes
+		}
+	}
+	return
+}
+
 func (w *WorkoutDay) GetUser() *User {
 	if w == nil {
 		return nil

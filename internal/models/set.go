@@ -46,10 +46,10 @@ func (s *Set) String(done bool) string {
 		}
 	}
 	if s.Exercise != nil && s.Exercise.ExerciseType != nil && s.Exercise.ExerciseType.ContainsMeters() {
-		text.WriteString(fmt.Sprintf("%s метров", s.FormatMeters()))
+		text.WriteString(fmt.Sprintf("%s метров ", s.FormatMeters()))
 	}
 	if s.Exercise != nil && s.Exercise.ExerciseType != nil && s.Exercise.ExerciseType.ContainsMinutes() {
-		text.WriteString(fmt.Sprintf("%s минут", s.FormatMinutes()))
+		text.WriteString(fmt.Sprintf("%s минут ", s.FormatMinutes()))
 	}
 	if s.Exercise != nil && s.Exercise.ExerciseType != nil && s.Exercise.ExerciseType.ContainsReps() && s.Exercise.ExerciseType.ContainsWeight() {
 		text.WriteString(fmt.Sprintf("%s повт. * %s кг", s.FormatReps(), s.FormatWeight()))
@@ -65,10 +65,11 @@ func (s *Set) String(done bool) string {
 }
 
 func strikePlanned[T cmp.Ordered](planned, actual T, completed bool) string {
+	zeroT := new(T)
 	if !completed {
 		return fmt.Sprintf("%v", planned)
 	}
-	if planned == actual {
+	if planned == actual || planned == *zeroT {
 		return fmt.Sprintf("%v", actual)
 	}
 	return fmt.Sprintf("<strike>%v</strike> <b>%v</b>", planned, actual)
@@ -82,9 +83,8 @@ func formatWeight(weight float32) string {
 	// Проверяем, есть ли дробная часть
 	if math.Mod(float64(weight), 1) == 0 {
 		return fmt.Sprintf("%.0f", weight) // целое число → 0 знаков
-	} else {
-		return fmt.Sprintf("%.1f", weight) // дробное → 1 знак
 	}
+	return fmt.Sprintf("%.1f", weight) // дробное → 1 знак
 }
 
 func (s *Set) FormatWeight() string {

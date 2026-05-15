@@ -8,12 +8,15 @@ import (
 )
 
 type WorkoutItem struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	StartedAt string `json:"started_at"`
-	Duration  string `json:"duration"`
-	Completed bool   `json:"completed"`
-	Status    string `json:"status"`
+	ID                 int64  `json:"id"`
+	Name               string `json:"name"`
+	StartedAt          string `json:"started_at"`
+	Duration           string `json:"duration"`
+	Completed          bool   `json:"completed"`
+	Status             string `json:"status"`
+	HasValidCardioData bool   `json:"has_valid_cardio_data"`
+	CardioDistance     int    `json:"cardio_distance"`
+	CardioTime         int    `json:"cardio_time"`
 }
 
 type Pagination struct {
