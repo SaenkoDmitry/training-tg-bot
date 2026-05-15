@@ -11,7 +11,7 @@ export default function WorkoutCard({w, idx}: WorkoutCardProps) {
             <div style={{paddingTop: 4, fontWeight: 600, opacity: 0.6}}>
                 {w.status}
                 {!w.has_valid_cardio_data && w.duration && <> ⏱️{w.duration}</>}
-                {w.has_valid_cardio_data && w.cardio_distance > 0 && <> 🏃🏼{w.cardio_distance / 1000}км за ⏱️{w.cardio_time}мин</>}
+                {w.has_valid_cardio_data && w.cardio_distance > 0 && <> 🏃🏼{w.cardio_distance / 1000} км за ⏱️{w.cardio_time} мин</>}
             </div>
         </div>
     );

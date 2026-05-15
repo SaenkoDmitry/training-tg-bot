@@ -17,11 +17,11 @@ func FormatDuration(duration time.Duration) string {
 	seconds := int(duration.Seconds()) % 60
 
 	if hours > 0 {
-		return fmt.Sprintf("%dч%dмин", hours, minutes)
+		return fmt.Sprintf("%d ч %d мин", hours, minutes)
 	} else if minutes > 0 {
-		return fmt.Sprintf("%dмин", minutes)
+		return fmt.Sprintf("%d мин", minutes)
 	}
-	return fmt.Sprintf("%dсек", seconds)
+	return fmt.Sprintf("%d сек", seconds)
 }
 
 func BetweenTimes(startedAt time.Time, endedAt *time.Time) string {
