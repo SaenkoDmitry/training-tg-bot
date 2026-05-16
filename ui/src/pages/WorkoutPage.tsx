@@ -105,8 +105,6 @@ const WorkoutPage = () => {
     }, [id, token, isPublicMode]);
 
     useEffect(() => {
-        if (!data || isPublicMode) return;
-
         const workout = data.progress.workout;
 
         setCaloriesLoading(true);
