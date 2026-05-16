@@ -279,5 +279,5 @@ interface UpdateProfileRequest {
 interface PreviewCaloriesResponse {
     calories: number | null;
     duration_min: number | null;
-    reason?: string;
+    weight_note: "actual" | "current" | "missing";
 }

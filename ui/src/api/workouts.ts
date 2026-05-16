@@ -39,4 +39,3 @@ export const previewCalories = (workoutId: number): Promise<PreviewCaloriesRespo
     api(`/api/workouts/${workoutId}/preview-calories`, {
         method: "POST",
     });
-

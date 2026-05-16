@@ -24,7 +24,7 @@ const WorkoutPage = () => {
     const [copied, setCopied] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
 
-    const [liveCalories, setLiveCalories] = useState<{ calories: number; durationMin: number } | null>(null);
+    const [liveCalories, setLiveCalories] = useState<{ calories: number; durationMin: number, weightNote: string } | null>(null);
     const [caloriesLoading, setCaloriesLoading] = useState(false);
 
     const isStandalone = typeof window !== 'undefined' && (
@@ -108,7 +108,6 @@ const WorkoutPage = () => {
         if (!data || isPublicMode) return;
 
         const workout = data.progress.workout;
-        if (workout.completed) return;
 
         setCaloriesLoading(true);
         previewCalories(workout.id)
@@ -116,7 +115,8 @@ const WorkoutPage = () => {
                 if (res.calories !== null) {
                     setLiveCalories({
                         calories: res.calories,
-                        durationMin: res.duration_min ?? 0
+                        durationMin: res.duration_min ?? 0,
+                        weightNote: res.weight_note ?? ''
                     });
                 } else {
                     setLiveCalories(null);
@@ -149,26 +149,27 @@ const WorkoutPage = () => {
             );
         }
 
-        if (!workout.completed) {
-            if (caloriesLoading) {
-                return <div style={{opacity: 0.5, fontSize: 14}}>Расчёт калорий...</div>;
-            }
-            if (liveCalories) {
-                return (
-                    <div style={{display: "flex", alignItems: "baseline", gap: 8, justifyContent: "center"}}>
-                        <Flame size={20} color="var(--color-attention)"/>
-                        <span style={{fontSize: 24, fontWeight: 700}}>{Math.round(liveCalories.calories)}</span>
-                        <span style={{opacity: 0.6}}>ккал</span>
-                        <span style={{opacity: 0.5, fontSize: 13, marginLeft: 4}}>
-                        ~{liveCalories.durationMin} мин
-                    </span>
-                    </div>
-                );
-            }
-            return <div style={{opacity: 0.5, fontSize: 13}}>Укажите вес и пол в профиле для расчёта калорий</div>;
+        if (caloriesLoading) {
+            return <div style={{opacity: 0.5, fontSize: 14}}>Расчёт калорий...</div>;
         }
-
-        return null;
+        if (liveCalories) {
+            return (
+                <div style={{display: "flex", alignItems: "baseline", gap: 8, justifyContent: "center", flexWrap: "wrap"}}>
+                    <Flame size={20} color="var(--color-attention)" />
+                    <span style={{fontSize: 24, fontWeight: 700}}>{Math.round(liveCalories.calories)}</span>
+                    <span style={{opacity: 0.6}}>ккал</span>
+                    <span style={{opacity: 0.5, fontSize: 13, marginLeft: 4}}>
+                ~{liveCalories.durationMin} мин
+            </span>
+                    {liveCalories.weightNote === "current" && (
+                        <span style={{opacity: 0.4, fontSize: 11, width: "100%", textAlign: "center"}}>
+                    рассчитано с текущим весом
+                </span>
+                    )}
+                </div>
+            );
+        }
+        return <div style={{opacity: 0.5, fontSize: 13}}>Укажите вес и пол в профиле для расчёта калорий</div>;
     })();
 
     return <div className={"page stack"}>

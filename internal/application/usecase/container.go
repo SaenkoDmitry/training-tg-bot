@@ -230,6 +230,7 @@ func NewContainer(db *gorm.DB) *Container {
 		FindUserUC:      userusecases.NewFindUseCase(usersRepo, programsRepo),
 		GetUserUC:       userusecases.NewGetUseCase(usersRepo),
 		GetUserByIDUC:   userusecases.NewGetByIDUseCase(usersRepo),
+		ChangeIconUC:    userusecases.NewChangeIconUseCase(usersRepo),
 		UpdateProfileUC: userusecases.NewUpdateProfileUC(usersRepo),
 
 		// auth

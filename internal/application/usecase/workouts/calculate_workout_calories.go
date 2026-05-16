@@ -48,7 +48,18 @@ func (uc *CalculateWorkoutCaloriesUC) Execute(workoutID int64) (*dto.CaloriesCal
 		return nil, err
 	}
 
-	if user.WeightKg == nil || *user.WeightKg == 0 {
+	var weightKg float64
+	var weightNote string
+
+	if workout.UserWeightKg != nil && *workout.UserWeightKg > 0 {
+		// Вес на момент тренировки сохранён (finishWorkout)
+		weightKg = *workout.UserWeightKg
+		weightNote = "actual"
+	} else if user.WeightKg != nil && *user.WeightKg > 0 {
+		// Ретроспектива: берём текущий вес
+		weightKg = *user.WeightKg
+		weightNote = "current"
+	} else {
 		return nil, ErrWeightRequired
 	}
 
@@ -61,16 +72,13 @@ func (uc *CalculateWorkoutCaloriesUC) Execute(workoutID int64) (*dto.CaloriesCal
 		return nil, err
 	}
 
-	calc := calculator.NewCalculator(*user.WeightKg, *user.Gender, user.BirthDate)
+	calc := calculator.NewCalculator(weightKg, *user.Gender, user.BirthDate)
 	calories, durationMin := calc.CalculateWorkout(exerciseObjs)
-
-	workout.EstimatedCalories = &calories
-	workout.EstimatedDurationMinutes = &durationMin
-	workout.UserWeightKg = user.WeightKg
 
 	return &dto.CaloriesCalc{
 		Calories:    calories,
 		DurationMin: durationMin,
 		UserWeight:  user.WeightKg,
+		WeightNote:  weightNote,
 	}, nil
 }

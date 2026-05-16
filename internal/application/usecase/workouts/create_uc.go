@@ -2,6 +2,8 @@ package workouts
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/constants"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
@@ -10,7 +12,6 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/users"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/utils"
-	"time"
 )
 
 type CreateUseCase struct {
@@ -29,18 +30,19 @@ func (uc *CreateUseCase) Name() string {
 }
 
 func (uc *CreateUseCase) Execute(userID, dayTypeID int64) (*dto.CreateWorkout, error) {
+	user, err := uc.usersRepo.GetByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
 	workout := &models.WorkoutDay{
 		UserID:           userID,
 		WorkoutDayTypeID: dayTypeID,
 		StartedAt:        time.Now(),
 		Completed:        false,
+		UserWeightKg:     user.WeightKg,
 	}
 	if err := uc.workoutsRepo.Create(workout); err != nil {
-		return nil, err
-	}
-
-	user, err := uc.usersRepo.GetByID(userID)
-	if err != nil {
 		return nil, err
 	}
 
