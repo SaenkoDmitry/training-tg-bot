@@ -218,8 +218,5 @@ func (s *serviceImpl) PreviewWorkoutCalories(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
-		"calories":     caloriesCalc.Calories,
-		"duration_min": caloriesCalc.DurationMin,
-	})
+	json.NewEncoder(w).Encode(caloriesCalc)
 }

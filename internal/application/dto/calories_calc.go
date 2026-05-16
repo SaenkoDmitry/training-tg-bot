@@ -1,7 +1,7 @@
 package dto
 
 type CaloriesCalc struct {
-	Calories    float64
-	DurationMin int
-	UserWeight  *float64
+	Calories    float64  `json:"calories"`
+	DurationMin int      `json:"duration_min"`
+	UserWeight  *float64 `json:"user_weight"`
 }

@@ -69,6 +69,7 @@ func (u *repoImpl) FindAllByWorkoutID(workoutDayID int64) ([]models.Exercise, er
 	fmt.Println("FindAllByWorkoutID")
 
 	u.db.Where("workout_day_id = ?", workoutDayID).
+		Preload("ExerciseType").
 		Preload("Sets", func(db *gorm.DB) *gorm.DB {
 			return db.Order("sets.index ASC")
 		}).

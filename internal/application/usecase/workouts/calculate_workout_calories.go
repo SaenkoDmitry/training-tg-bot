@@ -65,7 +65,7 @@ func (uc *CalculateWorkoutCaloriesUC) Execute(workoutID int64) (*dto.CaloriesCal
 	calories, durationMin := calc.CalculateWorkout(exerciseObjs)
 
 	workout.EstimatedCalories = &calories
-	workout.EstimatedDurationMin = &durationMin
+	workout.EstimatedDurationMinutes = &durationMin
 	workout.UserWeightKg = user.WeightKg
 
 	return &dto.CaloriesCalc{

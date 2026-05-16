@@ -27,6 +27,18 @@ var metValues = map[string]float64{
 	"cardio":   0.0, // считаем отдельно по скорости
 }
 
+// среднее время выполнения подхода по группам мышц
+var repDurationSec = map[string]int{
+	"legs":     5, // приседания медленные
+	"back":     4, // тяги
+	"chest":    3, // жим лёжа
+	"biceps":   2, // сгибания быстрые
+	"triceps":  2,
+	"deltas":   3,
+	"press":    2, // пресс
+	"buttocks": 4,
+}
+
 // Кардио MET по типу (приблизительно)
 var cardioMETs = map[string]float64{
 	"run_treadmill": 9.8,
@@ -50,6 +62,9 @@ func (c *CalorieCalculator) CalculateWorkout(exercises []models.Exercise) (float
 	var totalDurationSec int
 
 	for _, ex := range exercises {
+		if ex.CompletedSets() == 0 {
+			continue
+		}
 		calories, durationSec := c.calculateExercise(ex)
 		totalCalories += calories
 		totalDurationSec += durationSec
@@ -66,7 +81,10 @@ func (c *CalorieCalculator) calculateExercise(ex models.Exercise) (float64, int)
 }
 
 // Силовое: MET × вес × время
-func (c *CalorieCalculator) calculateStrength(ex models.Exercise, exType *models.ExerciseType) (float64, int) {
+func (c *CalorieCalculator) calculateStrength(
+	ex models.Exercise,
+	exType *models.ExerciseType,
+) (calories float64, durationSec int) {
 	met := metValues[exType.ExerciseGroupTypeCode]
 	if met == 0 {
 		met = 5.0 // fallback
@@ -75,29 +93,41 @@ func (c *CalorieCalculator) calculateStrength(ex models.Exercise, exType *models
 	// Длительность: работа + отдых
 	totalReps := 0
 	for _, s := range ex.Sets {
+
+		// скипаем расчет для сета, если еще не выполнено
+		if !s.Completed {
+			continue
+		}
+
 		reps := s.FactReps
 		if reps == 0 {
-			reps = s.Reps // если ещё не выполнено, берём план
+			reps = s.Reps // если факт не указан, берём план
 		}
-		totalReps += int(reps)
+		totalReps += reps
 	}
 
-	// 3 сек на повтор + отдых между подходами
-	workSec := totalReps * 3
-	restSec := (len(ex.Sets) - 1) * int(exType.RestInSeconds)
+	workSec := totalReps * repDurationSec[ex.ExerciseType.ExerciseGroupTypeCode]
+
+	restSec := 0
+	for _, s := range ex.Sets {
+		if !s.Completed {
+			continue
+		}
+		restSec += exType.RestInSeconds
+	}
 	if restSec < 0 {
 		restSec = 0
 	}
-	durationSec := workSec + restSec
+	durationSec = workSec + restSec
 
 	// Корректировка на вес штанги: +10% за каждые 50% от веса тела
 	avgWeight := c.avgWeight(ex.Sets)
 	weightMultiplier := 1.0 + (avgWeight/c.UserWeightKg)*0.2
 
 	hours := float64(durationSec) / 3600.0
-	calories := met * c.UserWeightKg * hours * weightMultiplier * c.genderFactor() * c.ageFactor()
+	calories = met * c.UserWeightKg * hours * weightMultiplier * c.genderFactor() * c.ageFactor()
 
-	return calories, durationSec
+	return
 }
 
 // Кардио: MET × вес × время (из minutes/meters)
@@ -106,15 +136,18 @@ func (c *CalorieCalculator) calculateCardio(ex models.Exercise, exType *models.E
 	var meters int
 
 	for _, s := range ex.Sets {
+		if !s.Completed {
+			continue
+		}
 		if s.FactMinutes > 0 {
-			minutes += int(s.FactMinutes)
+			minutes += s.FactMinutes
 		} else if s.Minutes > 0 {
-			minutes += int(s.Minutes)
+			minutes += s.Minutes
 		}
 		if s.FactMeters > 0 {
-			meters += int(s.FactMeters)
+			meters += s.FactMeters
 		} else if s.Meters > 0 {
-			meters += int(s.Meters)
+			meters += s.Meters
 		}
 	}
 
@@ -135,6 +168,9 @@ func (c *CalorieCalculator) avgWeight(sets []models.Set) float64 {
 	var total float64
 	var count int
 	for _, s := range sets {
+		if !s.Completed {
+			continue
+		}
 		w := s.FactWeight
 		if w == 0 {
 			w = s.Weight

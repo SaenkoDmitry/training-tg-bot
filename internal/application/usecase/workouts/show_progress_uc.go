@@ -93,16 +93,16 @@ func (uc *ShowProgressUseCase) Execute(workoutID int64) (*dto.WorkoutProgress, e
 	}
 
 	return &dto.WorkoutProgress{
-		Workout:              dto.MapToFormattedWorkout(w, groupsMap),
-		TotalExercises:       totalExercises,
-		CompletedExercises:   completedExercises,
-		TotalSets:            totalSets,
-		CompletedSets:        completedSets,
-		ProgressPercent:      progress,
-		RemainingMin:         remaining,
-		SessionStarted:       session.IsActive,
-		EstimatedCalories:    w.EstimatedCalories,
-		EstimatedDurationMin: w.EstimatedDurationMin,
-		UserWeightKg:         w.UserWeightKg,
+		Workout:                  dto.MapToFormattedWorkout(w, groupsMap),
+		TotalExercises:           totalExercises,
+		CompletedExercises:       completedExercises,
+		TotalSets:                totalSets,
+		CompletedSets:            completedSets,
+		ProgressPercent:          progress,
+		RemainingMin:             remaining,
+		SessionStarted:           session.IsActive,
+		EstimatedCalories:        w.EstimatedCalories,
+		EstimatedDurationMinutes: w.EstimatedDurationMinutes,
+		UserWeightKg:             w.UserWeightKg,
 	}, nil
 }

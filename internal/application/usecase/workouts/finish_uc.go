@@ -35,7 +35,7 @@ func (uc *FinishUseCase) Execute(workoutID int64, caloriesCalc *dto.CaloriesCalc
 
 	if caloriesCalc != nil {
 		workoutDay.EstimatedCalories = &caloriesCalc.Calories
-		workoutDay.EstimatedDurationMin = &caloriesCalc.DurationMin
+		workoutDay.EstimatedDurationMinutes = &caloriesCalc.DurationMin
 		workoutDay.UserWeightKg = caloriesCalc.UserWeight
 	}
 

@@ -1,9 +1,9 @@
 import {useNavigate, useParams} from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import SafeTextRenderer from "../components/SafeTextRenderer.tsx";
-import {Check, Loader, Play, Plus, Share2} from "lucide-react";
+import {Check, Flame, Loader, Play, Plus, Share2} from "lucide-react";
 import Button from "../components/Button.tsx";
-import {createShare, getPublicWorkout, getWorkout} from "../api/workouts.ts";
+import {createShare, getPublicWorkout, getWorkout, previewCalories} from "../api/workouts.ts";
 import {moveToCertainExerciseSession} from "../api/sessions.ts";
 import {getExerciseGroups} from "../api/exercises.ts";
 import ShareSheet from "../components/ShareSheet.tsx";
@@ -23,6 +23,9 @@ const WorkoutPage = () => {
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+
+    const [liveCalories, setLiveCalories] = useState<{ calories: number; durationMin: number } | null>(null);
+    const [caloriesLoading, setCaloriesLoading] = useState(false);
 
     const isStandalone = typeof window !== 'undefined' && (
         window.matchMedia('(display-mode: standalone)').matches ||
@@ -101,12 +104,72 @@ const WorkoutPage = () => {
         }
     }, [id, token, isPublicMode]);
 
+    useEffect(() => {
+        if (!data || isPublicMode) return;
+
+        const workout = data.progress.workout;
+        if (workout.completed) return;
+
+        setCaloriesLoading(true);
+        previewCalories(workout.id)
+            .then(res => {
+                if (res.calories !== null) {
+                    setLiveCalories({
+                        calories: res.calories,
+                        durationMin: res.duration_min ?? 0
+                    });
+                } else {
+                    setLiveCalories(null);
+                }
+            })
+            .catch(() => setLiveCalories(null))
+            .finally(() => setCaloriesLoading(false));
+    }, [data?.progress?.workout?.id, data?.progress?.workout?.completed, isPublicMode]);
+
     if (loading) return <Loader/>;
     if (error) return <p style={{color: 'red'}}>{error}</p>;
     if (!data) return <p>Данные тренировки не найдены</p>;
 
     const {progress, stats} = data;
     const {workout, ProgressPercent, RemainingMin, SessionStarted, CompletedExercises, TotalExercises} = progress;
+
+    const caloriesEl = (() => {
+        if (workout.completed && progress.EstimatedCalories != null) {
+            return (
+                <div style={{display: "flex", alignItems: "baseline", gap: 8, justifyContent: "center"}}>
+                    <Flame size={20} color="var(--color-danger)"/>
+                    <span style={{fontSize: 24, fontWeight: 700}}>{Math.round(progress.EstimatedCalories)}</span>
+                    <span style={{opacity: 0.6}}>ккал</span>
+                    {progress.EstimatedDurationMin != null && (
+                        <span style={{opacity: 0.5, fontSize: 13, marginLeft: 4}}>
+                        ~{progress.EstimatedDurationMin} мин
+                    </span>
+                    )}
+                </div>
+            );
+        }
+
+        if (!workout.completed) {
+            if (caloriesLoading) {
+                return <div style={{opacity: 0.5, fontSize: 14}}>Расчёт калорий...</div>;
+            }
+            if (liveCalories) {
+                return (
+                    <div style={{display: "flex", alignItems: "baseline", gap: 8, justifyContent: "center"}}>
+                        <Flame size={20} color="var(--color-attention)"/>
+                        <span style={{fontSize: 24, fontWeight: 700}}>{Math.round(liveCalories.calories)}</span>
+                        <span style={{opacity: 0.6}}>ккал</span>
+                        <span style={{opacity: 0.5, fontSize: 13, marginLeft: 4}}>
+                        ~{liveCalories.durationMin} мин
+                    </span>
+                    </div>
+                );
+            }
+            return <div style={{opacity: 0.5, fontSize: 13}}>Укажите вес и пол в профиле для расчёта калорий</div>;
+        }
+
+        return null;
+    })();
 
     return <div className={"page stack"}>
         {isPublicMode && (
@@ -136,6 +199,12 @@ const WorkoutPage = () => {
             )}
         </h2>
 
+        {caloriesEl && (
+            <div className={"card"} style={{textAlign: "center", padding: "12px"}}>
+                {caloriesEl}
+            </div>
+        )}
+
         <div className={"card"}>
             <div style={{padding: 4}}>
                 Статус: {workout.status}
@@ -156,7 +225,7 @@ const WorkoutPage = () => {
                         style={{
                             width: `${ProgressPercent}%`,
                             background: ProgressPercent >= 85 ? 'var(--color-active)' : 50 < ProgressPercent &&
-                                ProgressPercent < 85 ? 'var(--color-attention)' : 'var(--color-danger)',
+                            ProgressPercent < 85 ? 'var(--color-attention)' : 'var(--color-danger)',
                             height: '100%',
                         }}
                     />
@@ -169,7 +238,8 @@ const WorkoutPage = () => {
             {(stats.cardio_time > 0 || stats.total_weight > 0) && <h3>Статистика</h3>}
             <div className={"card"}>
                 {stats.cardio_time > 0 && <p><strong>🫀 Время кардио:</strong> {stats.cardio_time} мин</p>}
-                {stats.total_weight > 0 && <p><strong>🏋 Общий вес:</strong> {stats.total_weight.toLocaleString('ru-RU')} кг</p>}
+                {stats.total_weight > 0 &&
+                    <p><strong>🏋 Общий вес:</strong> {stats.total_weight.toLocaleString('ru-RU')} кг</p>}
                 <br/>
                 {stats.exercise_map && <strong>Группы мышц:</strong>}
                 {stats.exercise_map && [...new Set(
