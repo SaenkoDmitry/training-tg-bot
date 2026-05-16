@@ -13,7 +13,7 @@ import load = Simulate.load;
 
 const LIMIT = 10;
 
-type MetricType = "max" | "avg" | "volume" | "minutes";
+type MetricType = "max" | "avg" | "volume" | "minutes" | "meters";
 
 const StatsPageGroupExercise: React.FC = () => {
     const {groupCode, exerciseID} = useParams();
@@ -64,7 +64,9 @@ const StatsPageGroupExercise: React.FC = () => {
                 const exercisesMap = Object.fromEntries(exerciseTypes.map(e => [e.id, e]));
                 setExercisesMap(exercisesMap);
 
-                if (exercisesMap[Number(exerciseID)].units.includes('minutes')) {
+                if (exercisesMap[Number(exerciseID)].units.includes('meters')) {
+                    setMetric('meters');
+                } else if (exercisesMap[Number(exerciseID)].units.includes('minutes')) {
                     setMetric('minutes');
                 }
 
