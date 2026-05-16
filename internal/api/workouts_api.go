@@ -2,12 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/api/helpers"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/api/validator"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/workouts"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/metrics"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/middlewares"
 )
@@ -109,7 +112,10 @@ func (s *serviceImpl) ReadWorkout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&ReadWorkoutDTO{Progress: progress, Stats: stats})
+	json.NewEncoder(w).Encode(&ReadWorkoutDTO{
+		Progress: progress,
+		Stats:    stats,
+	})
 }
 
 type ReadWorkoutDTO struct {
@@ -164,7 +170,12 @@ func (s *serviceImpl) FinishWorkout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = s.container.FinishWorkoutUC.Execute(workoutID)
+	caloriesCalc, err := s.container.CalculateWorkoutCaloriesUC.Execute(workoutID)
+	if err != nil {
+		fmt.Printf("error calculating workout calories: %v\n", err)
+	}
+
+	_, err = s.container.FinishWorkoutUC.Execute(workoutID, caloriesCalc)
 	if err != nil {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
@@ -172,4 +183,43 @@ func (s *serviceImpl) FinishWorkout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("{}"))
+}
+
+func (s *serviceImpl) PreviewWorkoutCalories(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middlewares.FromContext(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	workoutID, err := helpers.ParseInt64Param("workout_id", w, r)
+	if err != nil {
+		return
+	}
+
+	if err = validator.ValidateAccessToWorkout(s.container, claims.UserID, workoutID); err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+
+	caloriesCalc, err := s.container.CalculateWorkoutCaloriesUC.Execute(workoutID)
+	if err != nil {
+		if errors.Is(err, workouts.ErrWeightRequired) || errors.Is(err, workouts.ErrGenderRequired) {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]any{
+				"calories":     nil,
+				"duration_min": nil,
+				"reason":       "profile_incomplete",
+			})
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"calories":     caloriesCalc.Calories,
+		"duration_min": caloriesCalc.DurationMin,
+	})
 }

@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"fmt"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/measurements"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -47,6 +48,7 @@ func New(token string, useCases *usecase.Container) (*App, error) {
 		useCases.StatsWorkoutUC,
 		useCases.GetByUserProgramUC,
 		useCases.GetUserUC,
+		useCases.CalculateWorkoutCaloriesUC,
 	)
 
 	exercisesHandler := exercises.NewHandler(

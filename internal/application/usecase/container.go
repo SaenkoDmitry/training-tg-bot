@@ -37,16 +37,17 @@ import (
 type Container struct {
 
 	// workouts
-	ConfirmDeleteWorkoutUC *workoutusecases.ConfirmDeleteUseCase
-	DeleteWorkoutUC        *workoutusecases.DeleteUseCase
-	CreateWorkoutUC        *workoutusecases.CreateUseCase
-	ShowWorkoutProgressUC  *workoutusecases.ShowProgressUseCase
-	FindMyWorkoutsUC       *workoutusecases.FindMyUseCase
-	StartWorkoutUC         *workoutusecases.StartUseCase
-	ConfirmFinishWorkoutUC *workoutusecases.ConfirmFinishUseCase
-	FinishWorkoutUC        *workoutusecases.FinishUseCase
-	FindWorkoutsByUserUC   *workoutusecases.FindByUserIDUseCase
-	StatsWorkoutUC         *workoutusecases.StatsUseCase
+	ConfirmDeleteWorkoutUC     *workoutusecases.ConfirmDeleteUseCase
+	DeleteWorkoutUC            *workoutusecases.DeleteUseCase
+	CreateWorkoutUC            *workoutusecases.CreateUseCase
+	ShowWorkoutProgressUC      *workoutusecases.ShowProgressUseCase
+	FindMyWorkoutsUC           *workoutusecases.FindMyUseCase
+	StartWorkoutUC             *workoutusecases.StartUseCase
+	ConfirmFinishWorkoutUC     *workoutusecases.ConfirmFinishUseCase
+	FinishWorkoutUC            *workoutusecases.FinishUseCase
+	FindWorkoutsByUserUC       *workoutusecases.FindByUserIDUseCase
+	StatsWorkoutUC             *workoutusecases.StatsUseCase
+	CalculateWorkoutCaloriesUC *workoutusecases.CalculateWorkoutCaloriesUC
 
 	// exercises
 	ShowCurrentExerciseSessionUC *sessionusecases.ShowCurrentExerciseSessionUseCase
@@ -105,11 +106,12 @@ type Container struct {
 	MoveToCertainUC         *sessionusecases.MoveToCertainUseCase
 
 	// users
-	CreateUserUC  *userusecases.CreateUseCase
-	GetUserUC     *userusecases.GetUseCase
-	GetUserByIDUC *userusecases.GetByIDUseCase
-	FindUserUC    *userusecases.FindUseCase
-	ChangeIconUC  *userusecases.ChangeIconUseCase
+	CreateUserUC    *userusecases.CreateUseCase
+	GetUserUC       *userusecases.GetUseCase
+	GetUserByIDUC   *userusecases.GetByIDUseCase
+	FindUserUC      *userusecases.FindUseCase
+	ChangeIconUC    *userusecases.ChangeIconUseCase
+	UpdateProfileUC *userusecases.UpdateProfileUseCase
 
 	// auth
 	GetOrCreateUserByTelegramUC *userusecases.GetOrCreateUserByTelegramUseCase
@@ -152,16 +154,17 @@ func NewContainer(db *gorm.DB) *Container {
 	return &Container{
 
 		// workouts
-		DeleteWorkoutUC:        workoutusecases.NewDeleteUseCase(workoutsRepo, setsRepo, exercisesRepo),
-		ConfirmDeleteWorkoutUC: workoutusecases.NewConfirmDeleteUseCase(workoutsRepo, dayTypesRepo),
-		CreateWorkoutUC:        workoutusecases.NewCreateUseCase(workoutsRepo, exercisesRepo, usersRepo, dayTypesRepo),
-		StartWorkoutUC:         workoutusecases.NewStartUseCase(workoutsRepo, sessionsRepo),
-		FindMyWorkoutsUC:       workoutusecases.NewFindMyUseCase(workoutsRepo, usersRepo),
-		ShowWorkoutProgressUC:  workoutusecases.NewShowProgressUseCase(workoutsRepo, sessionsRepo, exerciseGroupTypesRepo),
-		ConfirmFinishWorkoutUC: workoutusecases.NewConfirmFinishUseCase(workoutsRepo, dayTypesRepo),
-		FinishWorkoutUC:        workoutusecases.NewFinishUseCase(workoutsRepo, sessionsRepo),
-		FindWorkoutsByUserUC:   workoutusecases.NewFindByUserUseCase(workoutsRepo, usersRepo),
-		StatsWorkoutUC:         workoutusecases.NewStatsUseCase(workoutsRepo, dayTypesRepo, exerciseTypesRepo, exerciseGroupTypesRepo),
+		DeleteWorkoutUC:            workoutusecases.NewDeleteUseCase(workoutsRepo, setsRepo, exercisesRepo),
+		ConfirmDeleteWorkoutUC:     workoutusecases.NewConfirmDeleteUseCase(workoutsRepo, dayTypesRepo),
+		CreateWorkoutUC:            workoutusecases.NewCreateUseCase(workoutsRepo, exercisesRepo, usersRepo, dayTypesRepo),
+		StartWorkoutUC:             workoutusecases.NewStartUseCase(workoutsRepo, sessionsRepo),
+		FindMyWorkoutsUC:           workoutusecases.NewFindMyUseCase(workoutsRepo, usersRepo),
+		ShowWorkoutProgressUC:      workoutusecases.NewShowProgressUseCase(workoutsRepo, sessionsRepo, exerciseGroupTypesRepo),
+		ConfirmFinishWorkoutUC:     workoutusecases.NewConfirmFinishUseCase(workoutsRepo, dayTypesRepo),
+		FinishWorkoutUC:            workoutusecases.NewFinishUseCase(workoutsRepo, sessionsRepo),
+		FindWorkoutsByUserUC:       workoutusecases.NewFindByUserUseCase(workoutsRepo, usersRepo),
+		StatsWorkoutUC:             workoutusecases.NewStatsUseCase(workoutsRepo, dayTypesRepo, exerciseTypesRepo, exerciseGroupTypesRepo),
+		CalculateWorkoutCaloriesUC: workoutusecases.NewCalculateWorkoutCaloriesUC(workoutsRepo, exercisesRepo, usersRepo),
 
 		// exercises
 		ExerciseTypeListUC:      exerciseusecases.NewExerciseTypeListUseCase(exerciseTypesRepo),
@@ -223,11 +226,11 @@ func NewContainer(db *gorm.DB) *Container {
 		MoveToCertainUC:         sessionusecases.NewMoveToCertainUseCase(sessionsRepo, exercisesRepo),
 
 		// users
-		CreateUserUC:  userusecases.NewCreateUseCase(usersRepo, programsRepo),
-		FindUserUC:    userusecases.NewFindUseCase(usersRepo, programsRepo),
-		GetUserUC:     userusecases.NewGetUseCase(usersRepo),
-		GetUserByIDUC: userusecases.NewGetByIDUseCase(usersRepo),
-		ChangeIconUC:  userusecases.NewChangeIconUseCase(usersRepo),
+		CreateUserUC:    userusecases.NewCreateUseCase(usersRepo, programsRepo),
+		FindUserUC:      userusecases.NewFindUseCase(usersRepo, programsRepo),
+		GetUserUC:       userusecases.NewGetUseCase(usersRepo),
+		GetUserByIDUC:   userusecases.NewGetByIDUseCase(usersRepo),
+		UpdateProfileUC: userusecases.NewUpdateProfileUC(usersRepo),
 
 		// auth
 		GetOrCreateUserByTelegramUC: userusecases.NewGetOrCreateUserByTelegramUseCase(usersRepo),

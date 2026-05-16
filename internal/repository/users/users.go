@@ -2,8 +2,9 @@ package users
 
 import (
 	"errors"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"time"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
@@ -60,12 +61,27 @@ func (u *repoImpl) CreateTelegram(from *tgbotapi.User) (*models.User, error) {
 }
 
 func (u *repoImpl) CreateYandex(profile *dto.YandexProfile) (*models.User, error) {
+	var birthDate *time.Time
+	if profile.Birthday != "" {
+		parsed, err := time.Parse("2006-01-02", profile.Birthday)
+		if err == nil {
+			birthDate = &parsed
+		}
+	}
+
+	var gender *string
+	if profile.Sex == "male" || profile.Sex == "female" {
+		gender = &profile.Sex
+	}
+
 	user := models.User{
 		YandexID:    profile.ID,
 		YandexLogin: profile.Login,
 		FirstName:   profile.FirstName,
 		LastName:    profile.LastName,
 		Email:       profile.DefaultEmail,
+		BirthDate:   birthDate,
+		Gender:      gender,
 		CreatedAt:   time.Now(),
 	}
 	err := u.db.Transaction(func(tx *gorm.DB) error {

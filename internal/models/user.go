@@ -12,10 +12,15 @@ type User struct {
 	Username string // telegram
 	ChatID   int64  // telegram
 
-	FirstName       string
-	LastName        string
-	Email           string
-	LanguageCode    string
+	FirstName    string
+	LastName     string
+	Email        string
+	LanguageCode string
+	Gender       *string
+	WeightKg     *float64
+	HeightCm     *int
+	BirthDate    *time.Time
+
 	Icon            string
 	ActiveProgramID *int64
 	CreatedAt       time.Time

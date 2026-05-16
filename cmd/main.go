@@ -190,6 +190,8 @@ func initServer(container *usecase.Container, db *gorm.DB, registry *prometheus.
 	r.Route("/api/users", func(r chi.Router) {
 		r.Use(middlewares.Auth)
 
+		r.Get("/profile", s.GetProfile)
+		r.Patch("/profile", s.UpdateProfile)
 		r.Get("/icon", s.GetIcon)
 		r.Post("/change-icon", s.ChangeIcon)
 	})
@@ -203,6 +205,7 @@ func initServer(container *usecase.Container, db *gorm.DB, registry *prometheus.
 		r.Get("/{workout_id}", s.ReadWorkout)           // GET /api/workouts/123
 		r.Delete("/{workout_id}", s.DeleteWorkout)      // DELETE /api/workouts/123
 		r.Post("/{workout_id}/share", s.CreateShareWorkout)
+		r.Post("/{workout_id}/preview-calories", s.PreviewWorkoutCalories)
 	})
 
 	r.Get("/api/public/workouts/{token}", s.GetPublicWorkout)

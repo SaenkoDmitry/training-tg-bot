@@ -174,6 +174,10 @@ type WorkoutProgress struct {
 	RemainingMin    *int
 
 	SessionStarted bool
+
+	EstimatedCalories    *float64
+	EstimatedDurationMin *int
+	UserWeightKg         *float64
 }
 
 type WorkoutStatistic struct {

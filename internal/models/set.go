@@ -46,7 +46,7 @@ func (s *Set) String(done bool) string {
 		}
 	}
 	if s.Exercise != nil && s.Exercise.ExerciseType != nil && s.Exercise.ExerciseType.ContainsMeters() {
-		text.WriteString(fmt.Sprintf("%s метров ", s.FormatMeters()))
+		text.WriteString(fmt.Sprintf("%s км ", s.FormatMeters()))
 	}
 	if s.Exercise != nil && s.Exercise.ExerciseType != nil && s.Exercise.ExerciseType.ContainsMinutes() {
 		text.WriteString(fmt.Sprintf("%s минут ", s.FormatMinutes()))
@@ -96,7 +96,7 @@ func (s *Set) FormatMinutes() string {
 }
 
 func (s *Set) FormatMeters() string {
-	return strikePlanned(s.Meters, s.FactMeters, s.Completed)
+	return strikePlanned(float64(s.Meters)/1000, float64(s.FactMeters)/1000, s.Completed)
 }
 
 func (s *Set) GetRealReps() int {

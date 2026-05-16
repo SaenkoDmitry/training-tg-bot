@@ -3,12 +3,13 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
-	"github.com/golang-jwt/jwt/v4"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func (s *serviceImpl) YandexRedirectHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,10 +30,11 @@ func (s *serviceImpl) YandexRedirectHandler(w http.ResponseWriter, r *http.Reque
 	redirectURI := origin + "/auth-yandex"
 
 	authURL := fmt.Sprintf(
-		"https://oauth.yandex.ru/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s",
+		"https://oauth.yandex.ru/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
 		url.QueryEscape(clientID),
 		url.QueryEscape(redirectURI),
 		url.QueryEscape(state),
+		url.QueryEscape("login:birthday login:info"),
 	)
 
 	http.Redirect(w, r, authURL, http.StatusFound)

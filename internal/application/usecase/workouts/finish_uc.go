@@ -1,11 +1,12 @@
 package workouts
 
 import (
+	"time"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/daytypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/sessions"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
-	"time"
 )
 
 type FinishUseCase struct {
@@ -22,7 +23,7 @@ func (uc *FinishUseCase) Name() string {
 	return "Завершение тренировки"
 }
 
-func (uc *FinishUseCase) Execute(workoutID int64) (*dto.FinishWorkout, error) {
+func (uc *FinishUseCase) Execute(workoutID int64, caloriesCalc *dto.CaloriesCalc) (*dto.FinishWorkout, error) {
 	workoutDay, err := uc.workoutsRepo.Get(workoutID)
 	if err != nil {
 		return nil, err
@@ -31,6 +32,12 @@ func (uc *FinishUseCase) Execute(workoutID int64) (*dto.FinishWorkout, error) {
 	now := time.Now()
 	workoutDay.Completed = true
 	workoutDay.EndedAt = &now
+
+	if caloriesCalc != nil {
+		workoutDay.EstimatedCalories = &caloriesCalc.Calories
+		workoutDay.EstimatedDurationMin = &caloriesCalc.DurationMin
+		workoutDay.UserWeightKg = caloriesCalc.UserWeight
+	}
 
 	if err = uc.workoutsRepo.Save(&workoutDay); err != nil {
 		return nil, err

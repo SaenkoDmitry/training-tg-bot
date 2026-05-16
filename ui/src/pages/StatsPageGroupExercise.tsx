@@ -185,6 +185,11 @@ const StatsPageGroupExercise: React.FC = () => {
         return (weights.length ? (weights.reduce((a, b) => a + b, 0) / weights.length) : 0).toFixed(0);
     }
 
+    function calcMeters(sets: FormattedSet[]): string {
+        const meters = sets.map(s => s.fact_meters || s.meters || 0).filter(Boolean);
+        return (meters.length ? (meters.reduce((a, b) => a + b, 0) / meters.length) : 0).toFixed(0);
+    }
+
     function calcVolume(sets: FormattedSet[]): string {
         return (sets.reduce((sum, s) => {
             const w = s.fact_weight || s.weight || 0;
@@ -210,6 +215,7 @@ const StatsPageGroupExercise: React.FC = () => {
         const avgWeight = calcAvgWeight(sets);
         const volume = calcVolume(sets);
         const minutes = calcMinutes(sets);
+        const meters = calcMeters(sets);
 
         if (exercisesMap[Number(exerciseID)]?.units?.includes('reps')) {
             return {
@@ -220,9 +226,23 @@ const StatsPageGroupExercise: React.FC = () => {
             };
         }
 
+        if (exercisesMap[Number(exerciseID)]?.units?.includes('meters') && exercisesMap[Number(exerciseID)]?.units?.includes('minutes')) {
+            return {
+                date: stat.date,
+                meters,
+                minutes
+            };
+        }
+
+        if (exercisesMap[Number(exerciseID)]?.units?.includes('minutes')) {
+            return {
+                date: stat.date,
+                minutes,
+            };
+        }
+
         return {
             date: stat.date,
-            minutes,
         };
     }).reverse();
 
@@ -230,7 +250,8 @@ const StatsPageGroupExercise: React.FC = () => {
         max: {key: "maxWeight", label: "Макс вес"},
         avg: {key: "avgWeight", label: "Средний вес"},
         volume: {key: "volume", label: "Объём"},
-        minutes: {key: "minutes", label: "Минуты"}
+        minutes: {key: "minutes", label: "Минуты"},
+        meters: {key: "meters", label: "Метры"}
     };
 
     const currentMetric = metricMap[metric];
@@ -242,7 +263,8 @@ const StatsPageGroupExercise: React.FC = () => {
     const units = exercisesMap[Number(exerciseID)].units;
 
     const isWeight = units.includes('weight');
-    const isMinutes = units.includes('minutes');
+    const isMinutes = units.includes('minutes') && !units.includes('meters');
+    const isCardio = units.includes('minutes') && units.includes('meters');
 
     return (
         <div className="page stack">
@@ -264,6 +286,13 @@ const StatsPageGroupExercise: React.FC = () => {
             </div>}
             {isMinutes && <div style={{display: "flex", gap: 6}}>
                 {(["minutes"] as MetricType[]).map(m => (
+                    <Button key={m} variant={metric === m ? "primary" : "ghost"} onClick={() => setMetric(m)}>
+                        {metricMap[m].label}
+                    </Button>
+                ))}
+            </div>}
+            {isCardio && <div style={{display: "flex", gap: 6}}>
+                {(["meters", "minutes"] as MetricType[]).map(m => (
                     <Button key={m} variant={metric === m ? "primary" : "ghost"} onClick={() => setMetric(m)}>
                         {metricMap[m].label}
                     </Button>

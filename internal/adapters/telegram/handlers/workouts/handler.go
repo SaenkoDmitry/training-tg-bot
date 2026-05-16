@@ -2,13 +2,15 @@ package workouts
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/common"
 	exercisepresenter "github.com/SaenkoDmitry/training-tg-bot/internal/adapters/telegram/handlers/exercises/presenter"
 	programusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/programs"
 	exerciseusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/session"
 	userusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/users"
-	"strconv"
-	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
@@ -33,9 +35,10 @@ type Handler struct {
 
 	getUserUC *userusecases.GetUseCase
 
-	presenter          *Presenter
-	exercisesPresenter *exercisepresenter.Presenter
-	commonPresenter    *common.Presenter
+	presenter                  *Presenter
+	exercisesPresenter         *exercisepresenter.Presenter
+	commonPresenter            *common.Presenter
+	calculateWorkoutCaloriesUC *workoutusecases.CalculateWorkoutCaloriesUC
 }
 
 func NewHandler(
@@ -53,6 +56,7 @@ func NewHandler(
 	statsUC *workoutusecases.StatsUseCase,
 	getByUserProgramUC *programusecases.GetByUserUseCase,
 	getUserUC *userusecases.GetUseCase,
+	calculateWorkoutCaloriesUC *workoutusecases.CalculateWorkoutCaloriesUC,
 ) *Handler {
 	return &Handler{
 		deleteUC:                     deleteUC,
@@ -68,6 +72,7 @@ func NewHandler(
 		getByUserProgramUC:           getByUserProgramUC,
 		statsUC:                      statsUC,
 		getUserUC:                    getUserUC,
+		calculateWorkoutCaloriesUC:   calculateWorkoutCaloriesUC,
 
 		presenter:          NewPresenter(bot),
 		commonPresenter:    common.NewPresenter(bot),
@@ -234,7 +239,11 @@ func (h *Handler) confirmFinish(chatID int64, workoutID int64) {
 }
 
 func (h *Handler) finish(chatID int64, workoutID int64) {
-	if _, err := h.finishUC.Execute(workoutID); err != nil {
+	caloriesCalc, err := h.calculateWorkoutCaloriesUC.Execute(workoutID)
+	if err != nil {
+		fmt.Printf("error calculating workout calories: %v\n", err)
+	}
+	if _, err := h.finishUC.Execute(workoutID, caloriesCalc); err != nil {
 		h.commonPresenter.HandleInternalError(err, chatID, h.showMyUC.Name())
 		return
 	}

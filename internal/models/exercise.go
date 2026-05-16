@@ -13,6 +13,9 @@ type Exercise struct {
 
 	Sets  []Set `gorm:"foreignKey:ExerciseID;constraint:OnDelete:CASCADE"`
 	Index int
+
+	EstimatedCalories    *float64
+	EstimatedDurationSec *int
 }
 
 func (*Exercise) TableName() string {

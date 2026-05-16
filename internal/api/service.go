@@ -29,6 +29,8 @@ type Service interface {
 
 	// ----- user profile icon -----
 
+	GetProfile(w http.ResponseWriter, r *http.Request)
+	UpdateProfile(w http.ResponseWriter, r *http.Request)
 	GetIcon(w http.ResponseWriter, r *http.Request)
 	ChangeIcon(w http.ResponseWriter, r *http.Request)
 
@@ -41,6 +43,7 @@ type Service interface {
 	DeleteWorkout(w http.ResponseWriter, r *http.Request)
 	CreateShareWorkout(w http.ResponseWriter, r *http.Request)
 	GetPublicWorkout(w http.ResponseWriter, r *http.Request)
+	PreviewWorkoutCalories(w http.ResponseWriter, r *http.Request)
 
 	// ----- measurements -----
 

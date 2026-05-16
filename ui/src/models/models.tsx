@@ -95,6 +95,10 @@ interface WorkoutProgress {
     ProgressPercent: number;
     RemainingMin: number | null;
     SessionStarted: boolean;
+
+    EstimatedCalories?: number;
+    EstimatedDurationMin?: number;
+    UserWeightKg?: number;
 }
 
 interface WorkoutStatistic {
@@ -250,4 +254,30 @@ type TimerDTO = {
 
 type IconDTO = {
     name: string;
+}
+
+interface UserProfile {
+    id: number;
+    first_name: string;
+    last_name?: string;
+    username?: string;
+    email?: string;
+    icon: string;
+    birth_date?: string;  // "YYYY-MM-DD"
+    gender?: "male" | "female";
+    weight_kg?: number;
+    height_cm?: number;
+}
+
+interface UpdateProfileRequest {
+    birth_date?: string | null;
+    gender?: "male" | "female" | null;
+    weight_kg?: number | null;
+    height_cm?: number | null;
+}
+
+interface PreviewCaloriesResponse {
+    calories: number | null;
+    duration_min: number | null;
+    reason?: string;
 }

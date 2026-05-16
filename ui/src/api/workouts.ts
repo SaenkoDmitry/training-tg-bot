@@ -34,3 +34,9 @@ export const getPublicWorkout = async (token: string): Promise<ReadWorkoutDTO> =
         method: 'GET',
     });
 };
+
+export const previewCalories = (workoutId: number): Promise<PreviewCaloriesResponse> =>
+    api(`/api/workouts/${workoutId}/preview-calories`, {
+        method: "POST",
+    });
+

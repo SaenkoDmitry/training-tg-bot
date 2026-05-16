@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { getUserIcon, changeUserIcon } from "../api/users";
+import { getUserIcon, changeUserIcon } from "../api/profile.ts";
 import { ICONS } from "../components/IconPicker";
 import type { IconName } from "../components/IconPicker";
 

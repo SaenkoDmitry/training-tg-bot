@@ -2,10 +2,11 @@ package workouts
 
 import (
 	"errors"
+	"time"
+
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/exercisegrouptypes"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/sessions"
-	"time"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/workouts"
 )
@@ -92,13 +93,16 @@ func (uc *ShowProgressUseCase) Execute(workoutID int64) (*dto.WorkoutProgress, e
 	}
 
 	return &dto.WorkoutProgress{
-		Workout:            dto.MapToFormattedWorkout(w, groupsMap),
-		TotalExercises:     totalExercises,
-		CompletedExercises: completedExercises,
-		TotalSets:          totalSets,
-		CompletedSets:      completedSets,
-		ProgressPercent:    progress,
-		RemainingMin:       remaining,
-		SessionStarted:     session.IsActive,
+		Workout:              dto.MapToFormattedWorkout(w, groupsMap),
+		TotalExercises:       totalExercises,
+		CompletedExercises:   completedExercises,
+		TotalSets:            totalSets,
+		CompletedSets:        completedSets,
+		ProgressPercent:      progress,
+		RemainingMin:         remaining,
+		SessionStarted:       session.IsActive,
+		EstimatedCalories:    w.EstimatedCalories,
+		EstimatedDurationMin: w.EstimatedDurationMin,
+		UserWeightKg:         w.UserWeightKg,
 	}, nil
 }

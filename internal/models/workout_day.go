@@ -19,6 +19,10 @@ type WorkoutDay struct {
 
 	User           *User           `gorm:"foreignKey:UserID;references:ID"`
 	WorkoutDayType *WorkoutDayType `gorm:"foreignKey:WorkoutDayTypeID;references:ID"`
+
+	EstimatedCalories    *float64
+	EstimatedDurationMin *int
+	UserWeightKg         *float64
 }
 
 func (w *WorkoutDay) CalcCardioDistanceAndTime() (distance int, time int, hasData bool) {
