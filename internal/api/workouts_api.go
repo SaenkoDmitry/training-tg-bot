@@ -186,19 +186,8 @@ func (s *serviceImpl) FinishWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *serviceImpl) PreviewWorkoutCalories(w http.ResponseWriter, r *http.Request) {
-	claims, ok := middlewares.FromContext(r.Context())
-	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	workoutID, err := helpers.ParseInt64Param("workout_id", w, r)
 	if err != nil {
-		return
-	}
-
-	if err = validator.ValidateAccessToWorkout(s.container, claims.UserID, workoutID); err != nil {
-		helpers.WriteError(w, err)
 		return
 	}
 
@@ -206,11 +195,7 @@ func (s *serviceImpl) PreviewWorkoutCalories(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		if errors.Is(err, workouts.ErrWeightRequired) || errors.Is(err, workouts.ErrGenderRequired) {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]any{
-				"calories":     nil,
-				"duration_min": nil,
-				"reason":       "profile_incomplete",
-			})
+			json.NewEncoder(w).Encode(&dto.CaloriesCalc{})
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)

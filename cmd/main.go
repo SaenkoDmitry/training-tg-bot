@@ -205,9 +205,9 @@ func initServer(container *usecase.Container, db *gorm.DB, registry *prometheus.
 		r.Get("/{workout_id}", s.ReadWorkout)           // GET /api/workouts/123
 		r.Delete("/{workout_id}", s.DeleteWorkout)      // DELETE /api/workouts/123
 		r.Post("/{workout_id}/share", s.CreateShareWorkout)
-		r.Post("/{workout_id}/preview-calories", s.PreviewWorkoutCalories)
 	})
 
+	r.Post("/api/public/workouts/{workout_id}/preview-calories", s.PreviewWorkoutCalories)
 	r.Get("/api/public/workouts/{token}", s.GetPublicWorkout)
 
 	r.Route("/api/sessions", func(r chi.Router) {
