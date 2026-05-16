@@ -149,6 +149,10 @@ const WorkoutPage = () => {
             );
         }
 
+        if (isPublicMode) {
+            return null;
+        }
+
         if (caloriesLoading) {
             return <div style={{opacity: 0.5, fontSize: 14}}>Расчёт калорий...</div>;
         }

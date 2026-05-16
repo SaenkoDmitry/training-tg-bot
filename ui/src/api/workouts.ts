@@ -36,6 +36,6 @@ export const getPublicWorkout = async (token: string): Promise<ReadWorkoutDTO> =
 };
 
 export const previewCalories = (workoutId: number): Promise<PreviewCaloriesResponse> =>
-    api(`/api/public/workouts/${workoutId}/preview-calories`, {
+    api(`/api/workouts/${workoutId}/preview-calories`, {
         method: "POST",
     });
