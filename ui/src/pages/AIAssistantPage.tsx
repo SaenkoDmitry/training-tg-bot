@@ -102,7 +102,11 @@ export default function AIAssistantPage() {
 
     const copyPrompt = async () => {
         if (!result) return;
-        await navigator.clipboard.writeText(`${result.system_prompt}\n\n${result.user_prompt}`);
+        await navigator.clipboard.writeText(
+            `system prompt:\n${result.system_prompt}\n\n` +
+            `user prompt:\n${result.user_prompt}\n\n` +
+            `output schema:\n${JSON.stringify(result.output_schema, null, 2)}`
+        );
         showToast("📋 Prompt скопирован");
     };
 

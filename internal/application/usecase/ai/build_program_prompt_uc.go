@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	defaultHistoryLimit      = 50
-	defaultMeasurementLimit  = 20
+	defaultHistoryLimit      = 15
+	defaultMeasurementLimit  = 10
 	defaultHistoryPeriodDays = 90
 )
 
