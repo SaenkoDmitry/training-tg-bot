@@ -41,6 +41,7 @@ type Set struct {
 	Reps    int
 	Weight  float32
 	Minutes int
+	Meters  int
 }
 
 func SplitPreset(preset string) []Exercise {
@@ -78,6 +79,11 @@ func SplitPreset(preset string) []Exercise {
 				result[len(result)-1].Sets = append(result[len(result)-1].Sets, Set{
 					Reps:   int(reps),
 					Weight: float32(weight),
+				})
+			} else if strings.HasSuffix(approach, "m") {
+				meters, _ := strconv.ParseInt(strings.TrimSuffix(approach, "m"), 10, 64)
+				result[len(result)-1].Sets = append(result[len(result)-1].Sets, Set{
+					Meters: int(meters),
 				})
 			} else {
 				minutes, _ := strconv.ParseInt(approach, 10, 64)

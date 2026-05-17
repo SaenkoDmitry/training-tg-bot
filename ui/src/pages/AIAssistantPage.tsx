@@ -1,8 +1,8 @@
 import React, {useEffect, useMemo, useState} from "react";
 import Button from "../components/Button";
-import {buildAIProgramPrompt, getAIProgramContext} from "../api/ai";
+import {buildAIProgramPrompt, createProgramFromAI, getAIProgramContext} from "../api/ai";
 import {getPrograms} from "../api/programs";
-import {Bot, Clipboard, Loader, Sparkles} from "lucide-react";
+import {Bot, Clipboard, Loader, Save, Sparkles} from "lucide-react";
 import "../styles/AIAssistantPage.css";
 
 const defaultRequest: AIProgramPromptRequest = {
@@ -45,6 +45,9 @@ export default function AIAssistantPage() {
     const [previewContext, setPreviewContext] = useState<AIProgramContext | null>(null);
     const [result, setResult] = useState<AIProgramPromptResponse | null>(null);
     const [loading, setLoading] = useState(false);
+    const [applying, setApplying] = useState(false);
+    const [aiJson, setAIJson] = useState("");
+    const [activateCreated, setActivateCreated] = useState(true);
     const [toast, setToast] = useState<string | null>(null);
 
     const selectedProgramID = request.program_id || undefined;
@@ -101,6 +104,25 @@ export default function AIAssistantPage() {
         if (!result) return;
         await navigator.clipboard.writeText(`${result.system_prompt}\n\n${result.user_prompt}`);
         showToast("📋 Prompt скопирован");
+    };
+
+    const applyProgram = async () => {
+        try {
+            setApplying(true);
+            const parsed = JSON.parse(aiJson);
+            const program = parsed.program || parsed;
+            const response = await createProgramFromAI({
+                program,
+                warnings: parsed.warnings || [],
+                validation_notes: parsed.validation_notes || [],
+                activate: activateCreated,
+            });
+            showToast(`✅ Создана программа «${response.name}» (${response.days_count} дн.)`);
+        } catch (e) {
+            showToast(e instanceof Error ? `❌ ${e.message}` : "❌ Не удалось создать программу");
+        } finally {
+            setApplying(false);
+        }
     };
 
     return (
@@ -213,6 +235,40 @@ export default function AIAssistantPage() {
                     <pre>{result.user_prompt}</pre>
                     <h3>JSON schema для ответа</h3>
                     <pre>{JSON.stringify(result.output_schema, null, 2)}</pre>
+                </section>
+            )}
+
+            {result && (
+                <section className="ai-card">
+                    <h2>5. Создать программу из JSON ответа AI</h2>
+                    <p className="ai-help">
+                        Вставьте сюда полный JSON-ответ нейросети. Можно вставить как весь объект с полем <code>program</code>, так и сам объект программы.
+                    </p>
+                    <label className="ai-checkbox">
+                        <input
+                            type="checkbox"
+                            checked={activateCreated}
+                            onChange={(e) => setActivateCreated(e.target.checked)}
+                        />
+                        Сделать созданную программу активной
+                    </label>
+                    <textarea
+                        rows={10}
+                        placeholder={`{
+  "summary": "...",
+  "program": {
+    "name": "AI программа",
+    "days": []
+  },
+  "warnings": [],
+  "validation_notes": []
+}`}
+                        value={aiJson}
+                        onChange={(e) => setAIJson(e.target.value)}
+                    />
+                    <Button variant="active" onClick={applyProgram} disabled={applying || !aiJson.trim()}>
+                        {applying ? <Loader size={14}/> : <Save size={14}/>} Создать программу
+                    </Button>
                 </section>
             )}
 

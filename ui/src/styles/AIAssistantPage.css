@@ -96,3 +96,18 @@
         grid-template-columns: 1fr;
     }
 }
+
+.ai-help {
+    color: var(--color-text-muted);
+    line-height: 1.45;
+}
+
+.ai-checkbox {
+    flex-direction: row !important;
+    align-items: center;
+    font-weight: 600 !important;
+}
+
+.ai-checkbox input {
+    width: auto;
+}

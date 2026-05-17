@@ -361,3 +361,44 @@ interface AIProgramContext {
     available_group_codes: string[];
     compatibility_notes: string[];
 }
+
+
+interface AIApplyProgramRequest {
+    program: AIGeneratedProgram;
+    warnings?: string[];
+    validation_notes?: string[];
+    activate: boolean;
+}
+
+interface AIApplyProgramResponse {
+    program_id: number;
+    name: string;
+    days_count: number;
+    rules_count: number;
+}
+
+interface AIGeneratedProgram {
+    name: string;
+    days: AIGeneratedProgramDay[];
+}
+
+interface AIGeneratedProgramDay {
+    name: string;
+    focus?: string[];
+    exercises: AIGeneratedProgramExercise[];
+}
+
+interface AIGeneratedProgramExercise {
+    exercise_type_id: number;
+    sets: AIGeneratedProgramSet[];
+    rest_in_seconds?: number;
+    reason: string;
+    progression_rule: string;
+}
+
+interface AIGeneratedProgramSet {
+    reps?: number;
+    weight?: number;
+    minutes?: number;
+    meters?: number;
+}

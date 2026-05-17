@@ -135,3 +135,43 @@ type AIExerciseCatalogItem struct {
 	Units           string `json:"units"`
 	RestInSeconds   int    `json:"rest_in_seconds"`
 }
+
+type AIApplyProgramRequest struct {
+	Program  AIGeneratedProgram `json:"program"`
+	Warnings []string           `json:"warnings"`
+	Notes    []string           `json:"validation_notes"`
+	Activate bool               `json:"activate"`
+}
+
+type AIApplyProgramResponse struct {
+	ProgramID  int64  `json:"program_id"`
+	Name       string `json:"name"`
+	DaysCount  int    `json:"days_count"`
+	RulesCount int    `json:"rules_count"`
+}
+
+type AIGeneratedProgram struct {
+	Name string                  `json:"name"`
+	Days []AIGeneratedProgramDay `json:"days"`
+}
+
+type AIGeneratedProgramDay struct {
+	Name      string                       `json:"name"`
+	Focus     []string                     `json:"focus"`
+	Exercises []AIGeneratedProgramExercise `json:"exercises"`
+}
+
+type AIGeneratedProgramExercise struct {
+	ExerciseTypeID  int64                   `json:"exercise_type_id"`
+	Sets            []AIGeneratedProgramSet `json:"sets"`
+	RestInSeconds   int                     `json:"rest_in_seconds"`
+	Reason          string                  `json:"reason"`
+	ProgressionRule string                  `json:"progression_rule"`
+}
+
+type AIGeneratedProgramSet struct {
+	Reps    int     `json:"reps"`
+	Weight  float32 `json:"weight"`
+	Minutes int     `json:"minutes"`
+	Meters  int     `json:"meters"`
+}

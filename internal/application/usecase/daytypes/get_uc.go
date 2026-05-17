@@ -68,7 +68,9 @@ func formatPreset(preset string, exerciseTypesMap map[int64]models.ExerciseType)
 			if i > 0 {
 				buffer.WriteString(", ")
 			}
-			if set.Minutes > 0 {
+			if set.Meters > 0 {
+				buffer.WriteString(fmt.Sprintf("%d м", set.Meters))
+			} else if set.Minutes > 0 {
 				buffer.WriteString(fmt.Sprintf("%d мин", set.Minutes))
 			} else {
 				buffer.WriteString(fmt.Sprintf("%d * %.0f кг", set.Reps, set.Weight))

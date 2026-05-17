@@ -58,3 +58,26 @@ func (s *serviceImpl) BuildAIProgramPrompt(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }
+
+func (s *serviceImpl) CreateProgramFromAI(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middlewares.FromContext(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var req dto.AIApplyProgramRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	result, err := s.container.ApplyAIProgramUC.Execute(claims.UserID, req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}

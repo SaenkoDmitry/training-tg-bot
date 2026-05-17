@@ -39,6 +39,7 @@ type Container struct {
 
 	// ai
 	BuildProgramPromptUC *aiusecases.BuildProgramPromptUseCase
+	ApplyAIProgramUC     *aiusecases.ApplyProgramUseCase
 
 	// workouts
 	ConfirmDeleteWorkoutUC     *workoutusecases.ConfirmDeleteUseCase
@@ -159,6 +160,7 @@ func NewContainer(db *gorm.DB) *Container {
 
 		// ai
 		BuildProgramPromptUC: aiusecases.NewBuildProgramPromptUseCase(usersRepo, programsRepo, workoutsRepo, measurementsRepo, exerciseTypesRepo, exerciseGroupTypesRepo),
+		ApplyAIProgramUC:     aiusecases.NewApplyProgramUseCase(db, exerciseTypesRepo),
 
 		// workouts
 		DeleteWorkoutUC:            workoutusecases.NewDeleteUseCase(workoutsRepo, setsRepo, exercisesRepo),

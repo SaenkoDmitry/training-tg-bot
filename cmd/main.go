@@ -180,6 +180,7 @@ func initServer(container *usecase.Container, db *gorm.DB, registry *prometheus.
 
 		r.Get("/program-context", s.GetAIProgramContext)
 		r.Post("/program-prompt", s.BuildAIProgramPrompt)
+		r.Post("/programs", s.CreateProgramFromAI)
 	})
 
 	// video

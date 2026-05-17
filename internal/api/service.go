@@ -17,6 +17,7 @@ type Service interface {
 
 	GetAIProgramContext(w http.ResponseWriter, r *http.Request)
 	BuildAIProgramPrompt(w http.ResponseWriter, r *http.Request)
+	CreateProgramFromAI(w http.ResponseWriter, r *http.Request)
 
 	// ----- vapid public key for push notifications -----
 

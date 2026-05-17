@@ -10,3 +10,10 @@ export const buildAIProgramPrompt = (request: AIProgramPromptRequest) =>
         method: "POST",
         body: JSON.stringify(request),
     });
+
+
+export const createProgramFromAI = (request: AIApplyProgramRequest) =>
+    api<AIApplyProgramResponse>("/api/ai/programs", {
+        method: "POST",
+        body: JSON.stringify(request),
+    });
