@@ -50,6 +50,9 @@ export default function AIAssistantPage() {
     const [activateCreated, setActivateCreated] = useState(true);
     const [toast, setToast] = useState<string | null>(null);
 
+    const [focusRaw, setFocusRaw] = useState("");
+    const [limitationsRaw, setLimitationsRaw] = useState("");
+
     const selectedProgramID = request.program_id || undefined;
 
     useEffect(() => {
@@ -133,7 +136,7 @@ export default function AIAssistantPage() {
         <div className="page stack ai-page">
             <div className="ai-hero">
                 <div>
-                    <h1><Bot/> AI-помощник программы</h1>
+                    <h1><Bot/> AI-помощник</h1>
                     <p>
                         Собирает профиль, историю тренировок, замеры, текущую программу и пожелания в компактный JSON-контекст и prompt для нейросети.
                     </p>
@@ -198,12 +201,22 @@ export default function AIAssistantPage() {
                     </label>
                     <label>
                         Фокусные группы через запятую
-                        <input value={request.focus.join(", ")} placeholder="chest, back, legs" onChange={(e) => update("focus", splitText(e.target.value))}/>
+                        <input value={focusRaw}
+                               onChange={(e) => {
+                                   setFocusRaw(e.target.value);
+                                   update("focus", splitText(e.target.value));
+                               }} placeholder="chest, back, legs, biceps, triceps, deltas, press, cardio, buttocks"
+                        />
                     </label>
                 </div>
                 <label>
                     Ограничения / травмы / запреты через запятую или с новой строки
-                    <textarea rows={3} placeholder="не нагружать поясницу, не делать бег" value={request.limitations.join("\n")} onChange={(e) => update("limitations", splitText(e.target.value))}/>
+                    <textarea rows={3} placeholder="не нагружать поясницу, не делать бег"
+                              value={limitationsRaw}
+                              onChange={(e) => {
+                                  setLimitationsRaw(e.target.value);
+                                  update("focus", splitText(e.target.value));
+                              }}/>
                 </label>
                 <label>
                     Пожелания свободным текстом
