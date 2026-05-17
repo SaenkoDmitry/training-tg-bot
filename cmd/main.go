@@ -175,6 +175,14 @@ func initServer(container *usecase.Container, db *gorm.DB, registry *prometheus.
 
 	r.Get("/api/vapid-key", s.GetVapidKey)
 
+	r.Route("/api/ai", func(r chi.Router) {
+		r.Use(middlewares.Auth)
+
+		r.Get("/program-context", s.GetAIProgramContext)
+		r.Post("/program-prompt", s.BuildAIProgramPrompt)
+		r.Post("/programs", s.CreateProgramFromAI)
+	})
+
 	// video
 	r.Route("/api/video", func(r chi.Router) {
 		r.Use(middlewares.Auth)

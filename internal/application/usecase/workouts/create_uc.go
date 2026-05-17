@@ -89,7 +89,9 @@ func (uc *CreateUseCase) createExercisesFromPresets(workoutDayID, dayTypeID, act
 		} else {
 			for idx2, set := range presetEx.Sets {
 				newSet := models.Set{Index: idx2}
-				if set.Minutes > 0 {
+				if set.Meters > 0 {
+					newSet.Meters = set.Meters
+				} else if set.Minutes > 0 {
 					newSet.Minutes = set.Minutes
 				} else {
 					newSet.Reps = set.Reps

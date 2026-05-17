@@ -98,6 +98,21 @@ func TestSplitPreset(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "meters workout",
+			args: args{
+				preset: "41:[1000m,1500m]",
+			},
+			want: []Exercise{
+				{
+					ID: 41,
+					Sets: []Set{
+						{Meters: 1000},
+						{Meters: 1500},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

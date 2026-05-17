@@ -13,6 +13,12 @@ import (
 type Service interface {
 	MeHandler(w http.ResponseWriter, r *http.Request)
 
+	// ----- AI program assistant -----
+
+	GetAIProgramContext(w http.ResponseWriter, r *http.Request)
+	BuildAIProgramPrompt(w http.ResponseWriter, r *http.Request)
+	CreateProgramFromAI(w http.ResponseWriter, r *http.Request)
+
 	// ----- vapid public key for push notifications -----
 
 	GetVapidKey(w http.ResponseWriter, r *http.Request)

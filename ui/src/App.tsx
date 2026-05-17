@@ -27,6 +27,7 @@ import StatsPageGroupExercise from "./pages/StatsPageGroupExercise.tsx";
 import StatsPageSelectGroup from "./pages/StatsPageSelectGroup.tsx";
 import StatsPageMeasurement from "./pages/StatsPageMeasurement.tsx";
 import PublicLayout from "./components/PublicLayout.tsx";
+import AIAssistantPage from "./pages/AIAssistantPage.tsx";
 
 const App = () => {
     return (
@@ -114,6 +115,14 @@ const App = () => {
                                 element={
                                     <RequireAuth>
                                         <MainLayout><ProgramsPage/></MainLayout>
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path="/ai-assistant"
+                                element={
+                                    <RequireAuth>
+                                        <MainLayout><AIAssistantPage/></MainLayout>
                                     </RequireAuth>
                                 }
                             />

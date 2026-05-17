@@ -281,3 +281,124 @@ interface PreviewCaloriesResponse {
     duration_min: number | null;
     weight_note: "actual" | "current" | "missing";
 }
+
+interface AIProgramPromptRequest {
+    mode: "create_program" | "improve_existing_program";
+    program_id?: number | null;
+    goal: string;
+    level: string;
+    days_per_week: number;
+    session_duration_min: number;
+    location: string;
+    limitations: string[];
+    focus: string[];
+    notes: string;
+}
+
+interface AIProgramPromptResponse {
+    context: AIProgramContext;
+    system_prompt: string;
+    user_prompt: string;
+    output_schema: unknown;
+}
+
+interface AIProgramContext {
+    generated_for: string;
+    request: AIProgramPromptRequest;
+    user_profile: {
+        user_id: number;
+        first_name?: string;
+        age?: number;
+        gender?: string;
+        height_cm?: number;
+        weight_kg?: number;
+    };
+    current_program?: {
+        id: number;
+        name: string;
+        is_active: boolean;
+        days: Array<{
+            id: number;
+            name: string;
+            preset?: string;
+            exercises: Array<{
+                exercise_type_id: number;
+                name: string;
+                group_code?: string;
+                group_name?: string;
+                units: string;
+                rest_in_seconds: number;
+                sets: Array<{reps?: number; weight?: number; minutes?: number; meters?: number}>;
+            }>;
+        }>;
+    };
+    training_summary: {
+        period_days: number;
+        loaded_workouts: number;
+        completed_workouts: number;
+        avg_workouts_per_week: number;
+        first_workout_date?: string;
+        last_workout_date?: string;
+        has_history: boolean;
+        consistency: string;
+        exercise_progress: Array<{
+            exercise_type_id: number;
+            name: string;
+            sessions_count: number;
+            recent_completion_rate: number;
+            trend: string;
+            recommendation_signal: string;
+        }>;
+    };
+    measurement_summary: {
+        has_measurements: boolean;
+        last_date?: string;
+        last_weight_kg?: number;
+        weight_change_kg?: number;
+        loaded_measurements: number;
+    };
+    provided_exercise_catalog: Array<{id: number; name: string; group_code: string; group_name: string; units: string}>;
+    available_group_codes: string[];
+    compatibility_notes: string[];
+}
+
+
+interface AIApplyProgramRequest {
+    program: AIGeneratedProgram;
+    warnings?: string[];
+    validation_notes?: string[];
+    activate: boolean;
+}
+
+interface AIApplyProgramResponse {
+    program_id: number;
+    name: string;
+    days_count: number;
+    rules_count: number;
+}
+
+interface AIGeneratedProgram {
+    name: string;
+    days: AIGeneratedProgramDay[];
+}
+
+interface AIGeneratedProgramDay {
+    name: string;
+    focus?: string[];
+    exercises: AIGeneratedProgramExercise[];
+}
+
+interface AIGeneratedProgramExercise {
+    exercise_type_id: number;
+    sets: AIGeneratedProgramSet[];
+    rest_in_seconds?: number;
+    reason: string;
+    progression_rule: string;
+}
+
+interface AIGeneratedProgramSet {
+    reps?: number;
+    weight?: number;
+    minutes?: number;
+    meters?: number;
+}

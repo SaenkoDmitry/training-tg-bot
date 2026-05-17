@@ -3,7 +3,7 @@ import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useAuth} from '../context/AuthContext';
 import Button from "./Button.tsx";
 
-import {BookOpen, Dumbbell, FolderKanban, Moon, Ruler, Sun, User} from "lucide-react";
+import {BookOpen, Bot, Dumbbell, FolderKanban, Moon, Ruler, Sun, User} from "lucide-react";
 import FloatingRestTimer from "./FloatingRestTimer.tsx";
 import Toast from "./Toast.tsx";
 import {ICONS} from "./IconPicker.tsx";
@@ -12,6 +12,7 @@ import {useUserIcon} from "../hooks/useUserIcons.ts";
 const tabs = [
     {name: 'Тренировки', path: '/', icon: Dumbbell},
     {name: 'Программы', path: '/programs', icon: FolderKanban},
+    {name: 'AI', path: '/ai-assistant', icon: Bot},
     {name: 'Замеры', path: '/measurements', icon: Ruler},
     {name: 'Упражнения', path: '/library', icon: BookOpen},
     {name: 'Профиль', path: '/profile', icon: User},
@@ -81,7 +82,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
                     }}
                 >
                     <div style={{display: 'flex', gap: 12}}>
-                        {tabs.slice(0, 4).map((tab) => (
+                        {tabs.slice(0, 5).map((tab) => (
                             <Link
                                 key={tab.path}
                                 to={tab.path}

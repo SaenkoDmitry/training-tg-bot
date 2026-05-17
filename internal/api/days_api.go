@@ -99,7 +99,7 @@ func (s *serviceImpl) UpdateProgramDay(w http.ResponseWriter, r *http.Request) {
 			case set.Minutes > 0:
 				arrayOfSets = append(arrayOfSets, fmt.Sprintf("%d", set.Minutes))
 			case set.Meters > 0:
-				arrayOfSets = append(arrayOfSets, fmt.Sprintf("%d", set.Meters))
+				arrayOfSets = append(arrayOfSets, fmt.Sprintf("%dm", set.Meters))
 			}
 		}
 		return strings.Join(arrayOfSets, ";")

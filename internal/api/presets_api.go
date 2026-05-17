@@ -54,6 +54,7 @@ func (s *serviceImpl) ParsePreset(w http.ResponseWriter, r *http.Request) {
 				Reps:    set.Reps,
 				Weight:  set.Weight,
 				Minutes: set.Minutes,
+				Meters:  set.Meters,
 			})
 		}
 		result.Exercises = append(result.Exercises, &dto.ExerciseDTO{
