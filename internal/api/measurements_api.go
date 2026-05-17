@@ -8,6 +8,7 @@ import (
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/api/helpers"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/api/validator"
+	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/middlewares"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 )
@@ -103,6 +104,16 @@ func (s *serviceImpl) CreateMeasurement(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
+	}
+
+	if input.Weight > 0 {
+		err = s.container.UpdateProfileUC.Execute(claims.UserID, dto.UpdateProfileRequest{
+			WeightKg: new(float64(input.Weight)),
+		})
+		if err != nil {
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
