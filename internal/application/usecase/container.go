@@ -7,6 +7,7 @@ import (
 	"github.com/SaenkoDmitry/training-tg-bot/internal/service/timer"
 	"gorm.io/gorm"
 
+	aiusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/ai"
 	daytypeusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/daytypes"
 	exerciseusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/exercises"
 	exportusecases "github.com/SaenkoDmitry/training-tg-bot/internal/application/usecase/exports"
@@ -35,6 +36,9 @@ import (
 )
 
 type Container struct {
+
+	// ai
+	BuildProgramPromptUC *aiusecases.BuildProgramPromptUseCase
 
 	// workouts
 	ConfirmDeleteWorkoutUC     *workoutusecases.ConfirmDeleteUseCase
@@ -152,6 +156,9 @@ func NewContainer(db *gorm.DB) *Container {
 	docGeneratorService := docgenerator.NewService(summaryService)
 
 	return &Container{
+
+		// ai
+		BuildProgramPromptUC: aiusecases.NewBuildProgramPromptUseCase(usersRepo, programsRepo, workoutsRepo, measurementsRepo, exerciseTypesRepo, exerciseGroupTypesRepo),
 
 		// workouts
 		DeleteWorkoutUC:            workoutusecases.NewDeleteUseCase(workoutsRepo, setsRepo, exercisesRepo),
