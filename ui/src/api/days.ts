@@ -11,3 +11,9 @@ export const createDay = (programId: number, name: string) =>
 
 export const deleteDay = (programId: number, dayId: number) =>
     api(`/api/programs/${programId}/days/${dayId}`, {method: "DELETE"});
+
+export const renameProgramDay = (programId: number, dayId: number, name: string) =>
+    api(`/api/programs/${programId}/days/${dayId}/rename`, {
+        method: "POST",
+        body: JSON.stringify({name}),
+    });

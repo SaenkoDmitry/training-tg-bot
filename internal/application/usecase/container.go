@@ -100,6 +100,7 @@ type Container struct {
 	AddExPresetUC    *daytypeusecases.AddExPresetUseCase
 	UpdatePresetUC   *daytypeusecases.UpdatePresetUseCase
 	DeleteDayTypeUC  *daytypeusecases.DeleteUseCase
+	RenameDayTypeUC  *daytypeusecases.RenameUseCase
 	GetDayTypeUC     *daytypeusecases.GetUseCase
 
 	// groups
@@ -227,6 +228,7 @@ func NewContainer(db *gorm.DB) *Container {
 		UpdatePresetUC:   daytypeusecases.NewUpdatePresetUseCase(dayTypesRepo),
 		GetDayTypeUC:     daytypeusecases.NewGetUseCase(dayTypesRepo, exerciseTypesRepo),
 		DeleteDayTypeUC:  daytypeusecases.NewDeleteUseCase(dayTypesRepo),
+		RenameDayTypeUC:  daytypeusecases.NewRenameUseCase(dayTypesRepo),
 
 		// sessions
 		ShowCurrentExerciseSessionUC: sessionusecases.NewShowCurrentExerciseUseCase(

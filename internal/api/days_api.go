@@ -186,3 +186,46 @@ func (s *serviceImpl) DeleteProgramDay(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("{}"))
 }
+
+func (s *serviceImpl) RenameProgramDay(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middlewares.FromContext(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	programID, err := helpers.ParseInt64Param("program_id", w, r)
+	if err != nil {
+		return
+	}
+
+	if err = validator.ValidateAccessToProgram(s.container, claims.UserID, programID); err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+
+	dayTypeID, err := helpers.ParseInt64Param("day_type_id", w, r)
+	if err != nil {
+		return
+	}
+
+	// Разбираем JSON из тела запроса
+	var input struct {
+		Name string `json:"name"`
+	}
+
+	if err = json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	err = s.container.RenameDayTypeUC.Execute(dayTypeID, input.Name)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("{}"))
+}

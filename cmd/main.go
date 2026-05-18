@@ -264,6 +264,7 @@ func initServer(container *usecase.Container, db *gorm.DB, registry *prometheus.
 
 		r.Post("/{program_id}/days", s.CreateProgramDay)
 		r.Delete("/{program_id}/days/{day_type_id}", s.DeleteProgramDay)
+		r.Post("/{program_id}/days/{day_type_id}/rename", s.RenameProgramDay)
 		r.Post("/{program_id}/days/{day_type_id}", s.UpdateProgramDay)
 		r.Get("/{program_id}/days/{day_type_id}", s.GetProgramDay)
 	})

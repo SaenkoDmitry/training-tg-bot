@@ -1,11 +1,12 @@
 import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
-import {createDay, deleteDay, getProgram} from "../api/days";
+import {createDay, deleteDay, getProgram, renameProgramDay} from "../api/days";
 import Button from "../components/Button";
 import DayCard from "../components/DayCard";
 import "../styles/ProgramBase.css";
 import {useAuth} from "../context/AuthContext.tsx";
 import {Plus} from "lucide-react";
+import {renameProgram} from "../api/programs.ts";
 
 export default function ProgramDetailsPage() {
     const {user, loading: authLoading} = useAuth();
@@ -50,6 +51,19 @@ export default function ProgramDetailsPage() {
         }
     };
 
+    const renameDay = async (programId: number, dayId: number, oldName: string) => {
+        const name = prompt("Новое название", oldName);
+        if (!name) return;
+
+        try {
+            await renameProgramDay(programId, dayId, name);
+            showToast("✅ День переименован");
+            await load();
+        } catch {
+            showToast("❌ Ошибка при переименовании дня");
+        }
+    };
+
     const showToast = (text: string) => {
         setToast(text);
         setTimeout(() => setToast(null), 3000);
@@ -68,6 +82,7 @@ export default function ProgramDetailsPage() {
                     key={day.id}
                     day={day}
                     programId={program.id}
+                    onRename={() => renameDay(program?.id, day.id, day.name)}
                     onDelete={removeDay}
                 />
             ))

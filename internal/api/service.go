@@ -74,6 +74,7 @@ type Service interface {
 	GetProgram(w http.ResponseWriter, r *http.Request)
 	CreateProgramDay(w http.ResponseWriter, r *http.Request)
 	DeleteProgramDay(w http.ResponseWriter, r *http.Request)
+	RenameProgramDay(w http.ResponseWriter, r *http.Request)
 	UpdateProgramDay(w http.ResponseWriter, r *http.Request)
 	GetProgramDay(w http.ResponseWriter, r *http.Request)
 
