@@ -20,9 +20,9 @@ import (
 )
 
 const (
-	defaultHistoryLimit      = 15
+	defaultHistoryLimit      = 10
 	defaultMeasurementLimit  = 10
-	defaultHistoryPeriodDays = 90
+	defaultHistoryPeriodDays = 30
 )
 
 type BuildProgramPromptUseCase struct {
@@ -515,7 +515,7 @@ func buildUserPrompt(req dto.AIProgramPromptRequest, contextJSON string) string 
 JSON-контекст приложения:
 %s
 
-Верни JSON с программой/изменениями. Если истории тренировок или текущей программы нет, используй безопасные предположения и явно укажи это в validation_notes.`), modeDescription, emptyFallback(req.Notes, "пользователь не оставил отдельный комментарий"), contextJSON)
+Верни JSON с программой/изменениями. Если истории тренировок или текущей программы нет, используй безопасные предложения и явно укажи это в validation_notes.`), modeDescription, emptyFallback(req.Notes, "пользователь не оставил отдельный комментарий"), contextJSON)
 }
 
 func buildOutputSchema() any {
