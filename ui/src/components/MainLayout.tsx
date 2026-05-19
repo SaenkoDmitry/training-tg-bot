@@ -14,7 +14,7 @@ const tabs = [
     {name: 'Программы', path: '/programs', icon: FolderKanban},
     {name: 'AI', path: '/ai-assistant', icon: Bot},
     {name: 'Замеры', path: '/measurements', icon: Ruler},
-    {name: 'Упражнения', path: '/library', icon: BookOpen},
+    {name: 'Техника', path: '/library', icon: BookOpen},
     {name: 'Профиль', path: '/profile', icon: User},
 ];
 

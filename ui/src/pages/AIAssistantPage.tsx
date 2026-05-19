@@ -119,17 +119,17 @@ export default function AIAssistantPage() {
     }, [focusInputValue, exerciseGroups, request.focus]);
 
     const addFocusItem = (group: ExerciseGroup) => {
-        // Добавляем name в массив focus
         if (!request.focus.includes(group.name)) {
             update("focus", [...request.focus, group.name]);
         }
         setFocusInputValue("");
-        // Не закрываем список сразу, чтобы можно было выбрать еще
-        // setShowFocusSuggestions(false);
     };
 
     const removeFocusItem = (item: string) => {
-        update("focus", request.focus.filter(i => i !== item));
+        setRequest(prev => ({
+            ...prev,
+            focus: prev.focus.filter(i => i !== item)
+        }));
     };
 
     const splitText = (value: string) => value
@@ -267,11 +267,19 @@ export default function AIAssistantPage() {
                         Фокусные группы
                         <div className="ai-tags-input-container">
                             <div className="ai-tags-wrapper">
-                                {request.focus.map((item) => (
-                                    <span key={item} className="ai-tag">
+                                {request.focus.map((item, index) => (
+                                    <span key={`${item}-${index}`} className="ai-tag">
                                         {item}
-                                        <button type="button" onClick={() => removeFocusItem(item)} className="ai-tag-remove">
-                                            <X size={12} />
+                                        <button
+                                            type="button"
+                                            onPointerDown={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                removeFocusItem(item);
+                                            }}
+                                            className="ai-tag-remove"
+                                        >
+                                            <X size={14} />
                                         </button>
                                     </span>
                                 ))}

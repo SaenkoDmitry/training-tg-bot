@@ -41,7 +41,7 @@ const LibraryPage: React.FC = () => {
     }, [selectedGroup]);
 
     return <div className={"page stack"}>
-        <h1 style={{textAlign: "center"}}><BookOpen size={24}/> Упражнения</h1>
+        <h1 style={{textAlign: "center"}}><BookOpen size={24}/> Техника выполнения</h1>
 
         {/* ---------- GROUP TABS ---------- */}
         <div
