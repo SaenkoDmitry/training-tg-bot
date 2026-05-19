@@ -176,6 +176,7 @@ export default function AIAssistantPage() {
                 warnings: parsed.warnings || [],
                 validation_notes: parsed.validation_notes || [],
                 activate: activateCreated,
+                summary: parsed.summary || '',
             });
             showToast(`✅ Создана программа «${response.name}» (${response.days_count} дн.)`);
         } catch (e) {

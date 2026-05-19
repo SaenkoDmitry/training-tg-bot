@@ -226,6 +226,9 @@ interface ProgramDTO {
     id: number;
     user_id: number;
     name: string;
+    summary: string;
+    warnings: string[];
+    notes: string[];
     created_at: string;
     day_types: WorkoutDayTypeDTO[];
 }

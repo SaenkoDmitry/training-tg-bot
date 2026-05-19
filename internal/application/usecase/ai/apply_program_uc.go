@@ -46,9 +46,12 @@ func (uc *ApplyProgramUseCase) Execute(userID int64, req dto.AIApplyProgramReque
 	result := &dto.AIApplyProgramResponse{Name: programName, DaysCount: len(req.Program.Days)}
 	err = uc.db.Transaction(func(tx *gorm.DB) error {
 		program := models.WorkoutProgram{
-			UserID:    userID,
-			Name:      programName,
-			CreatedAt: time.Now(),
+			UserID:          userID,
+			Name:            programName,
+			CreatedAt:       time.Now(),
+			Summary:         new(req.Summary),
+			Warnings:        req.Warnings,
+			ValidationNotes: req.Notes,
 		}
 		if err := tx.Create(&program).Error; err != nil {
 			return err

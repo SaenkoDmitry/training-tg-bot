@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"time"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 )
 
 type DeleteProgramResult struct {
@@ -25,6 +26,9 @@ type ProgramDTO struct {
 	CreatedAt string               `json:"created_at"`
 	DayTypes  []*WorkoutDayTypeDTO `json:"day_types"`
 	IsActive  bool                 `json:"is_active"`
+	Summary   *string              `json:"summary"`
+	Notes     []string             `json:"notes"`
+	Warnings  []string             `json:"warnings"`
 }
 
 func MapDayTypeDTO(obj models.WorkoutDayType) *WorkoutDayTypeDTO {

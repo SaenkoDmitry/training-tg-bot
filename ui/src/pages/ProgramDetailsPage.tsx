@@ -1,18 +1,19 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {createDay, deleteDay, getProgram, renameProgramDay} from "../api/days";
 import Button from "../components/Button";
 import DayCard from "../components/DayCard";
 import "../styles/ProgramBase.css";
 import {useAuth} from "../context/AuthContext.tsx";
-import {Plus} from "lucide-react";
-import {renameProgram} from "../api/programs.ts";
+import {ChevronDown, Plus} from "lucide-react";
 
 export default function ProgramDetailsPage() {
     const {user, loading: authLoading} = useAuth();
     const {id} = useParams();
     const [program, setProgram] = useState<ProgramDTO | null>(null);
     const [toast, setToast] = useState<string | null>(null);
+
+    const [isOpen, setIsOpen] = useState<boolean | null>(null);
 
     const load = async () => {
         const data = await getProgram(Number(id));
@@ -71,6 +72,35 @@ export default function ProgramDetailsPage() {
 
     return <div className="page stack">
         <h2 className="title">{program.name}</h2>
+
+
+        {program.summary && <div className={"card"} onClick={() => setIsOpen(!isOpen)} style={{paddingTop: 0, paddingBottom: 0}}>
+            <div className={"row"}>
+                <h3>Описание от AI</h3>
+
+                <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
+                <span style={{
+                    display: 'inline-block',
+                    transition: 'transform 0.3s ease',
+                    transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}>
+                    <ChevronDown size={20}/>
+                </span>
+                </div>
+            </div>
+            {isOpen && program.summary}
+
+            {isOpen && <>
+                <h3>Заметки</h3>
+                {program.notes.map(i => <div className={"card-body"}>
+                    - {i}
+                    <br/>
+                    <br/>
+                </div>)}
+            </>}
+        </div>}
+
+        {/*{program.warnings && <div>Предупреждения: {program.warnings}</div>}*/}
 
         <Button variant="active" onClick={addDay}>
             <Plus size={14}/>Добавить день

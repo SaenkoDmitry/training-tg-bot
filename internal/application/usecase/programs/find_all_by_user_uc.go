@@ -2,8 +2,9 @@ package programs
 
 import (
 	"errors"
-	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 	"time"
+
+	"github.com/SaenkoDmitry/training-tg-bot/internal/models"
 
 	"github.com/SaenkoDmitry/training-tg-bot/internal/application/dto"
 	"github.com/SaenkoDmitry/training-tg-bot/internal/repository/programs"
@@ -85,5 +86,8 @@ func mapProgramDTO(obj models.WorkoutProgram, user *models.User) *dto.ProgramDTO
 		CreatedAt: obj.CreatedAt.Add(time.Hour * 3).Format("02.01.2006 15:04"),
 		DayTypes:  dayTypes,
 		IsActive:  isActive,
+		Summary:   obj.Summary,
+		Notes:     obj.ValidationNotes,
+		Warnings:  obj.Warnings,
 	}
 }

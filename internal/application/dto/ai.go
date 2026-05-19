@@ -138,6 +138,7 @@ type AIExerciseCatalogItem struct {
 
 type AIApplyProgramRequest struct {
 	Program  AIGeneratedProgram `json:"program"`
+	Summary  string             `json:"summary"`
 	Warnings []string           `json:"warnings"`
 	Notes    []string           `json:"validation_notes"`
 	Activate bool               `json:"activate"`
