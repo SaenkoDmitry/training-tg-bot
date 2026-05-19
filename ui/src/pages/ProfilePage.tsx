@@ -222,7 +222,7 @@ const ProfilePage: React.FC = () => {
                     {/* Карточка профиля */}
                     <div className="card" style={{position: "relative", textAlign: "center"}}>
                         <div onClick={() => setIconModalOpen(true)} style={{
-                            position: "absolute", top: 12, right: 12, cursor: "pointer", opacity: 0.5
+                            position: "absolute", top: 'var(--card-gap)', right: 'var(--card-gap)', cursor: "pointer", opacity: 0.5
                         }}>
                             <Button variant="ghost" size="sm">
                                 <Pencil size={14}/>
