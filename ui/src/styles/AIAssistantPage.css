@@ -7,8 +7,8 @@
 .ai-hero,
 .ai-card {
     background: var(--color-card);
-    border-radius: 18px;
-    padding: 16px;
+    border-radius: var(--radius);
+    padding: var(--card-padding);
     box-shadow: var(--shadow-md);
 }
 
@@ -19,12 +19,12 @@
 }
 
 .ai-card h2 {
-    margin-top: 0;
+    margin-top: var(--card-gap);
 }
 
 .ai-grid {
     display: grid;
-    gap: 12px;
+    gap: var(--card-gap);
 }
 
 .ai-grid.two {
@@ -34,7 +34,7 @@
 .ai-card label {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--card-gap);
     margin-bottom: 12px;
     font-weight: 700;
 }
@@ -43,11 +43,14 @@
 .ai-card select,
 .ai-card textarea {
     border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 10px 12px;
+    border-radius: var(--radius);
+    padding: var(--card-padding);
     background: var(--color-bg);
     color: var(--color-text);
-    font: inherit;
+}
+
+.ai-card select {
+    width: 100%;
 }
 
 .ai-metrics {
@@ -57,7 +60,7 @@
 }
 
 .ai-metrics div {
-    border-radius: 14px;
+    border-radius: var(--radius);
     padding: 12px;
     background: var(--color-bg);
     display: flex;
@@ -85,8 +88,8 @@
     overflow: auto;
     white-space: pre-wrap;
     background: var(--color-bg);
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: var(--radius);
+    padding: var(--card-padding);
     max-height: 420px;
 }
 

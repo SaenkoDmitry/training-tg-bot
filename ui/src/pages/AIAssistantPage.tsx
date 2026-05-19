@@ -133,12 +133,21 @@ export default function AIAssistantPage() {
     };
 
     return (
-        <div className="page stack ai-page">
+        <div className="page stack">
+            <h1 style={{textAlign: "center"}}><Bot size={24}/> AI-помощник</h1>
+
             <div className="ai-hero">
                 <div>
-                    <h1><Bot/> AI-помощник</h1>
+                    <p style={{
+                        backgroundColor: "var(--color-card-alt)",
+                        fontWeight: 600,
+                        padding: "var(--card-padding)",
+                        borderRadius: "var(--radius)"
+                    }}>
+                        Помогает собрать промпт для создания индивидуальной программы тренировок.
+                    </p>
                     <p>
-                        Собирает профиль, историю тренировок, замеры, текущую программу и пожелания в компактный JSON-контекст и prompt для нейросети.
+                        Использует профиль, историю тренировок, замеры, текущую программу и пожелания в компактный JSON-контекст и prompt для нейросети.
                     </p>
                 </div>
             </div>
@@ -205,7 +214,7 @@ export default function AIAssistantPage() {
                                onChange={(e) => {
                                    setFocusRaw(e.target.value);
                                    update("focus", splitText(e.target.value));
-                               }} placeholder="chest, back, legs, biceps, triceps, deltas, press, cardio, buttocks"
+                               }} placeholder="chest,back,legs,biceps,triceps,deltas,press,cardio,buttocks"
                         />
                     </label>
                 </div>
@@ -222,9 +231,6 @@ export default function AIAssistantPage() {
                     Пожелания свободным текстом
                     <textarea rows={4} placeholder="Хочу уложиться в час, подтянуть грудь и спину, без тяжелой становой" value={request.notes} onChange={(e) => update("notes", e.target.value)}/>
                 </label>
-                <Button variant="active" onClick={buildPrompt} disabled={loading}>
-                    {loading ? <Loader size={14}/> : <Sparkles size={14}/>} Собрать prompt
-                </Button>
             </section>
 
             <section className="ai-card ai-summary">
@@ -239,6 +245,10 @@ export default function AIAssistantPage() {
                     Текущая программа: <b>{selectedProgram?.name || previewContext?.current_program?.name || "не выбрана / отсутствует"}</b>
                 </p>
             </section>
+
+            <Button variant="active" onClick={buildPrompt} disabled={loading} style={{width: "100%"}}>
+                {loading ? <Loader size={14}/> : <Sparkles size={14}/>} Собрать prompt
+            </Button>
 
             {result && (
                 <section className="ai-card">

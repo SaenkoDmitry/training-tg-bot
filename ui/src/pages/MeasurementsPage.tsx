@@ -3,7 +3,7 @@ import '../styles/MeasurementsPage.css';
 import Button from "../components/Button.tsx";
 import {createMeasurement, deleteMeasurement as apiDeleteMeasurement, getMeasurements} from "../api/measurements.ts";
 import {useAuth} from "../context/AuthContext.tsx";
-import {Loader, Plus, Trash2} from "lucide-react";
+import {Loader, Plus, Ruler, Trash2} from "lucide-react";
 
 const LIMIT = 10;
 
@@ -139,7 +139,7 @@ const MeasurementsPage: React.FC = () => {
 
     return <div className="page page-wide stack">
 
-        <h1>Замеры</h1>
+        <h1 style={{textAlign: "center"}}><Ruler size={24}/> Измерения тела</h1>
 
         {!adding && (
             <Button variant="active" onClick={() => setAdding(true)}>

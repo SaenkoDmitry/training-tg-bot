@@ -3,7 +3,7 @@ import {useAuth} from '../context/AuthContext';
 import SafeTextRenderer from "../components/SafeTextRenderer.tsx";
 import {getExerciseGroups, getExerciseTypesByGroup} from "../api/exercises.ts";
 import Button from "../components/Button.tsx";
-import {ChevronDown, Loader} from "lucide-react";
+import {BookOpen, ChevronDown, Loader} from "lucide-react";
 import VideoPlayer from "../components/VideoPlayer.tsx";
 
 const LibraryPage: React.FC = () => {
@@ -41,7 +41,7 @@ const LibraryPage: React.FC = () => {
     }, [selectedGroup]);
 
     return <div className={"page stack"}>
-        <h1>Упражнения</h1>
+        <h1 style={{textAlign: "center"}}><BookOpen size={24}/> Упражнения</h1>
 
         {/* ---------- GROUP TABS ---------- */}
         <div

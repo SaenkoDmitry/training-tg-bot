@@ -5,7 +5,7 @@ import {useAuth} from '../context/AuthContext';
 import '../styles/App.css';
 import Button from "../components/Button.tsx";
 import {deleteWorkout, getWorkouts} from "../api/workouts.ts";
-import {Frown, Loader, Play, RotateCcw, Trash2} from "lucide-react";
+import {Dumbbell, Frown, Loader, Play, RotateCcw, Trash2} from "lucide-react";
 
 const LIMIT = 10;
 
@@ -99,7 +99,7 @@ const Home: React.FC = () => {
 
     return (
         <div className="page stack">
-            <h1>Мои тренировки</h1>
+            <h1 style={{textAlign: "center"}}><Dumbbell size={24}/> Тренировки</h1>
 
             <Button
                 variant="active"
