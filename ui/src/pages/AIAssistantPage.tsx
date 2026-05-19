@@ -2,8 +2,15 @@ import React, {useEffect, useMemo, useState} from "react";
 import Button from "../components/Button";
 import {buildAIProgramPrompt, createProgramFromAI, getAIProgramContext} from "../api/ai";
 import {getPrograms} from "../api/programs";
-import {Bot, Clipboard, Loader, Save, Sparkles} from "lucide-react";
+import {getExerciseGroups} from "../api/exercises";
+import {Bot, Clipboard, Loader, Save, Sparkles, X} from "lucide-react";
 import "../styles/AIAssistantPage.css";
+
+// Тип для группы мышц
+type ExerciseGroup = {
+    code: string;
+    name: string;
+};
 
 const defaultRequest: AIProgramPromptRequest = {
     mode: "create_program",
@@ -50,13 +57,29 @@ export default function AIAssistantPage() {
     const [activateCreated, setActivateCreated] = useState(true);
     const [toast, setToast] = useState<string | null>(null);
 
-    const [focusRaw, setFocusRaw] = useState("");
     const [limitationsRaw, setLimitationsRaw] = useState("");
+
+    // --- Состояния для автокомплита фокусных групп ---
+    // Храним массив объектов Group
+    const [exerciseGroups, setExerciseGroups] = useState<ExerciseGroup[]>([]);
+    const [focusInputValue, setFocusInputValue] = useState("");
+    const [showFocusSuggestions, setShowFocusSuggestions] = useState(false);
+    // -------------------------------------------------
 
     const selectedProgramID = request.program_id || undefined;
 
     useEffect(() => {
         getPrograms().then(setPrograms).catch(() => setPrograms([]));
+    }, []);
+
+    // Загрузка групп мышц
+    useEffect(() => {
+        getExerciseGroups()
+            .then(data => {
+                // API возвращает массив объектов [{code: "chest", name: "Грудь"}, ...]
+                setExerciseGroups(data || []);
+            })
+            .catch(() => setExerciseGroups([]));
     }, []);
 
     useEffect(() => {
@@ -77,6 +100,36 @@ export default function AIAssistantPage() {
 
     const update = <K extends keyof AIProgramPromptRequest>(key: K, value: AIProgramPromptRequest[K]) => {
         setRequest(prev => ({...prev, [key]: value}));
+    };
+
+    // Логика фильтрации подсказок
+    const filteredSuggestions = useMemo(() => {
+        const search = focusInputValue.toLowerCase().trim();
+
+        return exerciseGroups
+            .filter(group => {
+                // Фильтруем по совпадению названия или кода
+                const matchesSearch = !search ||
+                    group.name.toLowerCase().includes(search) ||
+                    group.code.toLowerCase().includes(search);
+                // Исключаем уже выбранные (сравниваем по name, так как в focus храним name)
+                const notSelected = !request.focus.includes(group.name);
+                return matchesSearch && notSelected;
+            });
+    }, [focusInputValue, exerciseGroups, request.focus]);
+
+    const addFocusItem = (group: ExerciseGroup) => {
+        // Добавляем name в массив focus
+        if (!request.focus.includes(group.name)) {
+            update("focus", [...request.focus, group.name]);
+        }
+        setFocusInputValue("");
+        // Не закрываем список сразу, чтобы можно было выбрать еще
+        // setShowFocusSuggestions(false);
+    };
+
+    const removeFocusItem = (item: string) => {
+        update("focus", request.focus.filter(i => i !== item));
     };
 
     const splitText = (value: string) => value
@@ -208,15 +261,51 @@ export default function AIAssistantPage() {
                             {locations.map(location => <option key={location.value} value={location.value}>{location.label}</option>)}
                         </select>
                     </label>
-                    <label>
-                        Фокусные группы через запятую
-                        <input value={focusRaw}
-                               onChange={(e) => {
-                                   setFocusRaw(e.target.value);
-                                   update("focus", splitText(e.target.value));
-                               }} placeholder="chest,back,legs,biceps,triceps,deltas,press,cardio,buttocks"
-                        />
+
+                    {/* --- Поле Фокусные группы с автокомплитом --- */}
+                    <label className="ai-autocomplete-label">
+                        Фокусные группы
+                        <div className="ai-tags-input-container">
+                            <div className="ai-tags-wrapper">
+                                {request.focus.map((item) => (
+                                    <span key={item} className="ai-tag">
+                                        {item}
+                                        <button type="button" onClick={() => removeFocusItem(item)} className="ai-tag-remove">
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                                <input
+                                    type="text"
+                                    value={focusInputValue}
+                                    onChange={(e) => {
+                                        setFocusInputValue(e.target.value);
+                                        setShowFocusSuggestions(true);
+                                    }}
+                                    onFocus={() => setShowFocusSuggestions(true)}
+                                    onBlur={() => setTimeout(() => setShowFocusSuggestions(false), 200)}
+                                    placeholder={request.focus.length ? "Добавить..." : "Выберите группы мышц"}
+                                    className="ai-tags-input"
+                                />
+                            </div>
+                            {/* Показываем список, если есть фокус и есть варианты (даже если строка поиска пуста) */}
+                            {showFocusSuggestions && filteredSuggestions.length > 0 && (
+                                <ul className="ai-suggestions-list">
+                                    {filteredSuggestions.map((group) => (
+                                        <li
+                                            key={group.code}
+                                            onMouseDown={() => addFocusItem(group)}
+                                            className="ai-suggestion-item"
+                                        >
+                                            {group.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
                     </label>
+                    {/* ------------------------------------------- */}
+
                 </div>
                 <label>
                     Ограничения / травмы / запреты через запятую или с новой строки
@@ -224,7 +313,7 @@ export default function AIAssistantPage() {
                               value={limitationsRaw}
                               onChange={(e) => {
                                   setLimitationsRaw(e.target.value);
-                                  update("focus", splitText(e.target.value));
+                                  update("limitations", splitText(e.target.value));
                               }}/>
                 </label>
                 <label>
@@ -233,6 +322,7 @@ export default function AIAssistantPage() {
                 </label>
             </section>
 
+            {/* Остальной код без изменений */}
             <section className="ai-card ai-summary">
                 <h2>3. Контекст, который уйдет в prompt</h2>
                 <div className="ai-metrics">
@@ -254,8 +344,9 @@ export default function AIAssistantPage() {
                 <section className="ai-card">
                     <div className="ai-result-title">
                         <h2>4. Итоговый prompt</h2>
-                        <Button onClick={copyPrompt}><Clipboard size={14}/> Копировать</Button>
                     </div>
+                    <Button onClick={copyPrompt} style={{width: "100%"}}><Clipboard size={14}/> Копировать все</Button>
+
                     <h3>System prompt</h3>
                     <pre>{result.system_prompt}</pre>
                     <h3>User prompt</h3>
@@ -293,7 +384,12 @@ export default function AIAssistantPage() {
                         value={aiJson}
                         onChange={(e) => setAIJson(e.target.value)}
                     />
-                    <Button variant="active" onClick={applyProgram} disabled={applying || !aiJson.trim()}>
+                    <Button
+                        variant="active"
+                        onClick={applyProgram}
+                        disabled={applying || !aiJson.trim()}
+                        style={{width: "100%", marginTop: "var(--card-gap)"}}
+                    >
                         {applying ? <Loader size={14}/> : <Save size={14}/>} Создать программу
                     </Button>
                 </section>
