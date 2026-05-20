@@ -48,6 +48,7 @@
     background: var(--color-bg);
     color: var(--color-text);
     width: 100%;
+    font-size: 16px;
 }
 
 .ai-card select {
@@ -66,7 +67,6 @@
     background: var(--color-bg);
     display: flex;
     flex-direction: column;
-    gap: 4px;
 }
 
 .ai-metrics b {
@@ -75,7 +75,7 @@
 
 .ai-metrics span {
     color: var(--color-text-muted);
-    font-size: 13px;
+    font-size: 16px;
 }
 
 .ai-result-title {
@@ -160,10 +160,10 @@
     color: var(--color-primary, #007bff);
     padding: 2px 8px;
     border-radius: var(--radius);
-    font-size: 0.85em;
     font-weight: 500; /* Полужирный для тегов ок */
     line-height: 1.4;
     white-space: nowrap;
+    font-size: 16px;
 }
 
 .ai-tag-remove {

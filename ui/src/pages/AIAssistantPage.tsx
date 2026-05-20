@@ -369,7 +369,7 @@ export default function AIAssistantPage() {
                 <section className="ai-card">
                     <h2>5. Создать программу из JSON ответа AI</h2>
                     <p className="ai-help">
-                        Вставьте сюда полный JSON-ответ нейросети. Можно вставить как весь объект с полем <code>program</code>, так и сам объект программы.
+                        Вставьте сюда полный JSON-ответ вашей нейросети (z.ai, kimi.com, deepseek.com, chatgpt.com или др.)
                     </p>
                     <label className="ai-checkbox">
                         <input

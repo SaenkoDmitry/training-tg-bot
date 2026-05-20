@@ -74,7 +74,7 @@ export default function ProgramDetailsPage() {
         <h2 className="title">{program.name}</h2>
 
 
-        {program.summary && <div className={"card"} onClick={() => setIsOpen(!isOpen)} style={{paddingTop: 0, paddingBottom: 0}}>
+        {program.summary && <div className={"card"} onClick={() => setIsOpen(!isOpen)} style={{paddingTop: 0, paddingBottom: 0, backgroundColor: "var(--color-card-alt)", color: "var(--color-text-muted)"}}>
             <div className={"row"}>
                 <h3>Описание от AI</h3>
 
